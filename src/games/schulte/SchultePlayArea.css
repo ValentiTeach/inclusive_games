@@ -1,0 +1,60 @@
+.schulte {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.schulte__status {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 420px;
+  font-family: var(--font-display);
+  font-size: 17px;
+}
+
+.schulte__timer {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.schulte__grid {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
+}
+
+.schulte__cell {
+  font-family: var(--font-mono);
+  font-size: clamp(16px, 4vw, 22px);
+  font-weight: 700;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.1s ease, border-color 0.1s ease;
+}
+
+.schulte__cell:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.schulte__cell--found {
+  opacity: 0.32;
+  cursor: default;
+}
+
+.schulte__cell--right {
+  background: var(--cat-attention-bg);
+  border-color: var(--cat-attention);
+}
+
+.schulte__cell--wrong {
+  background: var(--cat-reaction-bg);
+  border-color: var(--cat-reaction);
+}

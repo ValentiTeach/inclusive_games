@@ -1,0 +1,145 @@
+.game-shell {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.game-shell__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.game-shell__head h1 {
+  margin: 0;
+}
+
+/* Intro screen */
+
+.game-shell__instructions {
+  margin: 0 0 var(--space-5);
+  padding-left: 20px;
+}
+
+.game-shell__instructions li {
+  margin-bottom: var(--space-2);
+  color: var(--text-muted);
+}
+
+.game-shell__levels {
+  margin-bottom: var(--space-5);
+}
+
+.game-shell__levels-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.game-shell__levels-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.game-shell__level-btn {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.game-shell__level-btn.is-active {
+  border-color: var(--accent);
+  background: var(--surface-muted);
+  color: var(--accent-strong);
+}
+
+.game-shell__history {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.game-shell__history ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.game-shell__history li {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-1) 0;
+  font-size: 14.5px;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.game-shell__history-date {
+  color: var(--text-muted);
+}
+
+/* Countdown screen */
+
+.game-shell__countdown {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 320px;
+  font-family: var(--font-display);
+  font-size: 72px;
+  font-weight: 800;
+  color: var(--accent-strong);
+}
+
+/* Results screen */
+
+.game-shell__results {
+  text-align: center;
+}
+
+.game-shell__results-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-5) 0 var(--space-6);
+  padding: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.game-shell__results-item {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.game-shell__results-item dt {
+  color: var(--text-muted);
+}
+
+.game-shell__results-item dd {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.game-shell__results-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}

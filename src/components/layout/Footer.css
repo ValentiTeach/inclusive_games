@@ -1,0 +1,21 @@
+.site-footer {
+  border-top: 1px solid var(--border);
+  margin-top: var(--space-8);
+}
+
+.site-footer__inner {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.site-footer__inner p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}

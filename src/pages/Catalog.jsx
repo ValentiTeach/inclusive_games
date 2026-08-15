@@ -14,9 +14,11 @@ function Catalog() {
         {GAMES.map((game) => (
           <GameCard
             key={game.id}
+            id={game.id}
             title={game.title}
             category={game.category}
             description={game.description}
+            status={game.status}
           />
         ))}
       </div>

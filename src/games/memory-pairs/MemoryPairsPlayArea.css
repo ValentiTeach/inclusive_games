@@ -1,0 +1,44 @@
+.memory-pairs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.memory-pairs__status {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.memory-pairs__grid {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.memory-pairs__card {
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  cursor: pointer;
+  padding: 0;
+}
+
+.memory-pairs__card:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.memory-pairs__card.is-flipped {
+  background: var(--surface);
+}
+
+.memory-pairs__card.is-matched {
+  opacity: 0.4;
+  cursor: default;
+}

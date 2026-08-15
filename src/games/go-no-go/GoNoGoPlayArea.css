@@ -1,0 +1,51 @@
+.go-no-go {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.go-no-go__progress {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.go-no-go__stage {
+  width: 160px;
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.go-no-go__shape {
+  width: 120px;
+  height: 120px;
+}
+
+.go-no-go__shape--go {
+  border-radius: 50%;
+  background: var(--cat-attention);
+}
+
+.go-no-go__shape--stop {
+  border-radius: var(--radius-md);
+  background: var(--cat-reaction);
+}
+
+.go-no-go__button {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  padding: 14px 40px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.go-no-go__button:hover {
+  border-color: var(--accent);
+}

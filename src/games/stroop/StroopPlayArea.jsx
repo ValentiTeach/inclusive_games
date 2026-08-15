@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { COLORS, generateTrial, checkAnswer, scoring } from './stroop.config'
 import { now } from '../engine/time'
+import { playCorrect, playWrong } from '../../lib/sound'
 import './StroopPlayArea.css'
 
 function StroopPlayArea({ level, onFinish }) {
@@ -21,6 +22,8 @@ function StroopPlayArea({ level, onFinish }) {
     const { correct } = checkAnswer(trial, colorId)
     resultsRef.current.push({ correct, reactionTimeMs })
     setFeedback(correct ? 'right' : 'wrong')
+    if (correct) playCorrect()
+    else playWrong()
 
     setTimeout(() => {
       setFeedback(null)

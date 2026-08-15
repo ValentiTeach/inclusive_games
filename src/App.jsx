@@ -1,19 +1,19 @@
-import { useState } from 'react'
+import { Routes, Route } from 'react-router-dom'
+import Layout from './components/layout/Layout'
+import Home from './pages/Home'
+import Catalog from './pages/Catalog'
+import NotFound from './pages/NotFound'
 
 function App() {
-  const [count, setCount] = useState(0)
-  const gameName = "Інклюзивні ігри"
-  const year = 2027
-
   return (
-    <div>
-      <h1> Лічильник кліків  номер 15 </h1>
-      <p> Ти натиснув {count} разів </p>
-      <button onClick={() => setCount (count + 1)}>
-        Натисни на мене
-      </button>
-    </div>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/games" element={<Catalog />} />
+        <Route path="*" element={<NotFound />} />
+      </Route>
+    </Routes>
   )
 }
 
-export default App 
+export default App

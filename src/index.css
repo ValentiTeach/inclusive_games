@@ -1,111 +1,158 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
   color-scheme: light dark;
-  color: var(--text);
+
+  /* Типографіка */
+  --font-display: -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Consolas, monospace;
+
+  /* Відступи */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  /* Радіуси */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* Базова палітра (світла тема) */
+  --bg: #fbfaf6;
+  --surface: #ffffff;
+  --surface-muted: #f2efe7;
+  --text: #1c2b2e;
+  --text-muted: #57696c;
+  --border: #e3ddd0;
+
+  --accent: #dd7a34;
+  --accent-strong: #b8611f;
+  --accent-contrast: #fffaf4;
+
+  --shadow-sm: 0 1px 2px rgba(28, 43, 46, 0.06);
+  --shadow-md: 0 10px 24px -12px rgba(28, 43, 46, 0.22);
+
+  /* Кольори категорій ігор */
+  --cat-attention: #2f8fae;
+  --cat-attention-bg: rgba(47, 143, 174, 0.13);
+  --cat-memory: #7c5cd9;
+  --cat-memory-bg: rgba(124, 92, 217, 0.13);
+  --cat-thinking: #c8862b;
+  --cat-thinking-bg: rgba(200, 134, 43, 0.15);
+  --cat-reaction: #d24b64;
+  --cat-reaction-bg: rgba(210, 75, 100, 0.13);
+
+  font: 17px/1.6 var(--font-body);
   background: var(--bg);
+  color: var(--text);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+    --bg: #101a1c;
+    --surface: #172427;
+    --surface-muted: #1c2c2f;
+    --text: #e8efed;
+    --text-muted: #a9bcbc;
+    --border: #2a3b3e;
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+    --accent: #e8a05a;
+    --accent-strong: #f0b47a;
+    --accent-contrast: #201203;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 24px -12px rgba(0, 0, 0, 0.55);
+
+    --cat-attention: #5fb7d6;
+    --cat-attention-bg: rgba(95, 183, 214, 0.16);
+    --cat-memory: #a892f0;
+    --cat-memory-bg: rgba(168, 146, 240, 0.16);
+    --cat-thinking: #e0ac52;
+    --cat-thinking-bg: rgba(224, 172, 82, 0.18);
+    --cat-reaction: #e88096;
+    --cat-reaction-bg: rgba(232, 128, 150, 0.16);
   }
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
 h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  color: var(--text);
+  text-wrap: balance;
+  margin: 0 0 var(--space-3);
 }
 
 h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.01em;
 }
+
 h2 {
   font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+  font-weight: 700;
+}
+
+p {
+  margin: 0 0 var(--space-4);
+  color: var(--text-muted);
+}
+
+a {
+  color: var(--accent-strong);
+}
+
+/* Видимий фокус для клавіатурної навігації — критично для доступності */
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
-p {
-  margin: 0;
+
+.skip-link {
+  position: absolute;
+  left: var(--space-3);
+  top: -100px;
+  z-index: 100;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-weight: 600;
+  transition: top 0.15s ease;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+.skip-link:focus {
+  top: var(--space-3);
 }

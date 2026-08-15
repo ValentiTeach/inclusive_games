@@ -1,0 +1,20 @@
+.home-hero {
+  max-width: 640px;
+}
+
+.home-hero__lede {
+  font-size: 18px;
+}
+
+.home-hero__actions {
+  margin-bottom: var(--space-6);
+}
+
+.home-hero__categories {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

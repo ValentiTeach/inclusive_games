@@ -1,6 +1,12 @@
 import Button from '../../components/ui/Button'
+import { playClick } from '../../lib/sound'
 
 function IntroScreen({ config, levelId, onLevelChange, onStart, history }) {
+  function handleLevelChange(id) {
+    playClick()
+    onLevelChange(id)
+  }
+
   return (
     <div className="game-shell__intro">
       <p>{config.description}</p>
@@ -23,7 +29,7 @@ function IntroScreen({ config, levelId, onLevelChange, onStart, history }) {
                   ? 'game-shell__level-btn is-active'
                   : 'game-shell__level-btn'
               }
-              onClick={() => onLevelChange(level.id)}
+              onClick={() => handleLevelChange(level.id)}
               aria-pressed={level.id === levelId}
             >
               {level.label}

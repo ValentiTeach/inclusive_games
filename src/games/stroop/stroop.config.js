@@ -1,3 +1,5 @@
+import { pickRandom } from '../engine/random'
+
 export const COLORS = [
   { id: 'red', label: 'Червоний', hex: '#c0392b' },
   { id: 'blue', label: 'Синій', hex: '#2d6bd6' },
@@ -20,10 +22,6 @@ export const config = {
     { id: 'classic', label: '20 слів', trialCount: 20 },
     { id: 'long', label: '30 слів', trialCount: 30 },
   ],
-}
-
-function pickRandom(array) {
-  return array[Math.floor(Math.random() * array.length)]
 }
 
 export function generateTrial() {

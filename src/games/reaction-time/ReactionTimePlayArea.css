@@ -1,0 +1,39 @@
+.reaction {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.reaction__progress {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.reaction__pad {
+  width: 100%;
+  max-width: 360px;
+  height: 220px;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--text);
+  background: var(--surface-muted);
+  transition: background 0.1s ease, border-color 0.1s ease;
+}
+
+.reaction__pad--ready {
+  background: var(--cat-attention);
+  border-color: var(--cat-attention);
+  color: var(--accent-contrast);
+}
+
+.reaction__pad--too-soon {
+  background: var(--cat-reaction-bg);
+  border-color: var(--cat-reaction);
+  color: var(--cat-reaction);
+}

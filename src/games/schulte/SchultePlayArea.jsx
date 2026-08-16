@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { generateTrial, checkAnswer, scoring } from './schulte.config'
 import { now } from '../engine/time'
+import { playClick, playCorrect, playWrong } from '../../lib/sound'
 import './SchultePlayArea.css'
 
 function SchultePlayArea({ level, onFinish }) {
@@ -24,6 +25,7 @@ function SchultePlayArea({ level, onFinish }) {
     const { correct } = checkAnswer(trial, { clicked: number, expected: target })
 
     if (!correct) {
+      playWrong()
       setMistakes((m) => m + 1)
       setFlash({ number, kind: 'wrong' })
       setTimeout(() => setFlash(null), 200)
@@ -34,11 +36,13 @@ function SchultePlayArea({ level, onFinish }) {
     setTimeout(() => setFlash(null), 150)
 
     if (target === total) {
+      playCorrect()
       const finalElapsed = now() - startRef.current
       onFinish(scoring({ elapsedMs: finalElapsed, mistakes, size: level.size }))
       return
     }
 
+    playClick()
     setTarget((t) => t + 1)
   }
 

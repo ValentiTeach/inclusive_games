@@ -3,7 +3,6 @@ import { generateTrial, checkAnswer, scoring } from './memoryPairs.config'
 import { now } from '../engine/time'
 import { playClick, playCorrect, playWrong } from '../../lib/sound'
 import Shape from './Shape'
-import './Shape.css'
 import './MemoryPairsPlayArea.css'
 
 const MISMATCH_DELAY_MS = 700

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Badge from '../../components/ui/Badge'
 import { CATEGORIES } from '../../data/games'
 import { getResults, saveResult } from './storage'
+import { suggestLevel } from './suggestLevel'
 import IntroScreen from './IntroScreen'
 import CountdownScreen from './CountdownScreen'
 import ResultsScreen from './ResultsScreen'
@@ -12,12 +13,12 @@ const COUNTDOWN_STEP_MS = 700
 
 function GameShell({ config, renderPlay }) {
   const [phase, setPhase] = useState('intro')
-  const [levelId, setLevelId] = useState(config.levels[0].id)
-  const [countdown, setCountdown] = useState(COUNTDOWN_START)
-  const [scoreEntries, setScoreEntries] = useState(null)
   const [history, setHistory] = useState(() => getResults(config.id))
+  const [levelState, setLevelState] = useState(() => suggestLevel(config, history))
+  const [countdown, setCountdown] = useState(COUNTDOWN_START)
+  const [result, setResult] = useState(null)
 
-  const level = config.levels.find((item) => item.id === levelId)
+  const level = config.levels.find((item) => item.id === levelState.levelId)
   const categoryInfo = CATEGORIES[config.category]
 
   useEffect(() => {
@@ -36,19 +37,23 @@ function GameShell({ config, renderPlay }) {
     return () => clearTimeout(timer)
   }, [phase, countdown])
 
+  function handleLevelChange(levelId) {
+    setLevelState({ levelId, isAutoSuggested: false })
+  }
+
   function handleStart() {
     setCountdown(COUNTDOWN_START)
     setPhase('countdown')
   }
 
-  function handleFinish(entries) {
-    setScoreEntries(entries)
-    setHistory(saveResult(config.id, entries))
+  function handleFinish(finishResult) {
+    setResult(finishResult)
+    setHistory(saveResult(config.id, { ...finishResult, levelId: levelState.levelId }))
     setPhase('results')
   }
 
   function handleRestart() {
-    setScoreEntries(null)
+    setResult(null)
     setPhase('intro')
   }
 
@@ -62,8 +67,9 @@ function GameShell({ config, renderPlay }) {
       {phase === 'intro' && (
         <IntroScreen
           config={config}
-          levelId={levelId}
-          onLevelChange={setLevelId}
+          levelId={levelState.levelId}
+          isAutoSuggested={levelState.isAutoSuggested}
+          onLevelChange={handleLevelChange}
           onStart={handleStart}
           history={history}
         />
@@ -73,8 +79,8 @@ function GameShell({ config, renderPlay }) {
 
       {phase === 'playing' && renderPlay(level, handleFinish)}
 
-      {phase === 'results' && scoreEntries && (
-        <ResultsScreen entries={scoreEntries} onRestart={handleRestart} />
+      {phase === 'results' && result && (
+        <ResultsScreen entries={result.entries} onRestart={handleRestart} />
       )}
     </div>
   )

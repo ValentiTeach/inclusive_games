@@ -1,3 +1,5 @@
+import { clampScore } from '../engine/score'
+
 export const config = {
   id: 'reaction-time',
   title: 'Швидкість реакції',
@@ -19,14 +21,23 @@ export function randomDelayMs() {
   return 1000 + Math.random() * 2000
 }
 
+const GOOD_MS = 250
+const POOR_MS = 900
+
 export function scoring(reactionTimes) {
   const total = reactionTimes.length
   const avg = total ? Math.round(reactionTimes.reduce((sum, t) => sum + t, 0) / total) : 0
   const best = total ? Math.min(...reactionTimes) : 0
+  const score = total
+    ? clampScore(100 - ((avg - GOOD_MS) / (POOR_MS - GOOD_MS)) * 100)
+    : 0
 
-  return [
-    { label: 'Середній час', value: `${avg} мс` },
-    { label: 'Найкращий час', value: `${best} мс` },
-    { label: 'Раундів зіграно', value: String(total) },
-  ]
+  return {
+    score,
+    entries: [
+      { label: 'Середній час', value: `${avg} мс` },
+      { label: 'Найкращий час', value: `${best} мс` },
+      { label: 'Раундів зіграно', value: String(total) },
+    ],
+  }
 }

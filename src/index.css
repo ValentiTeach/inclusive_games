@@ -139,6 +139,21 @@ a {
   }
 }
 
+/* Ручний перемикач у Налаштуваннях — діє незалежно від системної теми */
+.force-reduced-motion,
+.force-reduced-motion *,
+.force-reduced-motion *::before,
+.force-reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+:root[data-text-size='large'] {
+  font-size: 19px;
+}
+
 .skip-link {
   position: absolute;
   left: var(--space-3);

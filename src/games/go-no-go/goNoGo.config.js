@@ -36,9 +36,12 @@ export function scoring(results) {
   const misses = results.filter((r) => r.outcome === 'miss').length
   const accuracy = total ? Math.round((correct / total) * 100) : 0
 
-  return [
-    { label: 'Точність', value: `${accuracy}%` },
-    { label: 'Хибні натискання', value: String(falseAlarms) },
-    { label: 'Пропущені сигнали', value: String(misses) },
-  ]
+  return {
+    score: accuracy,
+    entries: [
+      { label: 'Точність', value: `${accuracy}%` },
+      { label: 'Хибні натискання', value: String(falseAlarms) },
+      { label: 'Пропущені сигнали', value: String(misses) },
+    ],
+  }
 }

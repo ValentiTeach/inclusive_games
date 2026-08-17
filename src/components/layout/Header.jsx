@@ -1,6 +1,13 @@
 import { NavLink } from 'react-router-dom'
 import './Header.css'
 
+const NAV_LINKS = [
+  { to: '/', label: 'Головна', end: true },
+  { to: '/games', label: 'Каталог ігор' },
+  { to: '/progress', label: 'Мій прогрес' },
+  { to: '/settings', label: 'Налаштування' },
+]
+
 function Header() {
   return (
     <header className="site-header">
@@ -9,23 +16,18 @@ function Header() {
           Inclusive Games
         </NavLink>
         <nav className="site-header__nav" aria-label="Основна навігація">
-          <NavLink
-            to="/"
-            end
-            className={({ isActive }) =>
-              isActive ? 'site-header__link is-active' : 'site-header__link'
-            }
-          >
-            Головна
-          </NavLink>
-          <NavLink
-            to="/games"
-            className={({ isActive }) =>
-              isActive ? 'site-header__link is-active' : 'site-header__link'
-            }
-          >
-            Каталог ігор
-          </NavLink>
+          {NAV_LINKS.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.end}
+              className={({ isActive }) =>
+                isActive ? 'site-header__link is-active' : 'site-header__link'
+              }
+            >
+              {link.label}
+            </NavLink>
+          ))}
         </nav>
       </div>
     </header>

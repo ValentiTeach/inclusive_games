@@ -42,9 +42,12 @@ export function scoring(results) {
     ? Math.round(results.reduce((sum, r) => sum + r.reactionTimeMs, 0) / total)
     : 0
 
-  return [
-    { label: 'Правильно', value: `${correct} / ${total}` },
-    { label: 'Точність', value: `${accuracy}%` },
-    { label: 'Середній час реакції', value: `${avgReaction} мс` },
-  ]
+  return {
+    score: accuracy,
+    entries: [
+      { label: 'Правильно', value: `${correct} / ${total}` },
+      { label: 'Точність', value: `${accuracy}%` },
+      { label: 'Середній час реакції', value: `${avgReaction} мс` },
+    ],
+  }
 }

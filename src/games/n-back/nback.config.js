@@ -61,9 +61,12 @@ export function scoring(results) {
   const falseAlarms = results.filter((r) => r.outcome === 'false-alarm').length
   const accuracy = total ? Math.round((correct / total) * 100) : 0
 
-  return [
-    { label: 'Точність', value: `${accuracy}%` },
-    { label: 'Знайдено збігів', value: `${hits} / ${targets}` },
-    { label: 'Хибні натискання', value: String(falseAlarms) },
-  ]
+  return {
+    score: accuracy,
+    entries: [
+      { label: 'Точність', value: `${accuracy}%` },
+      { label: 'Знайдено збігів', value: `${hits} / ${targets}` },
+      { label: 'Хибні натискання', value: String(falseAlarms) },
+    ],
+  }
 }

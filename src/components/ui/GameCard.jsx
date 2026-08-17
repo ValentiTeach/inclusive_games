@@ -3,14 +3,17 @@ import Badge from './Badge'
 import { CATEGORIES } from '../../data/games'
 import './GameCard.css'
 
-function GameCard({ id, title, category, description, status }) {
+function GameCard({ id, title, category, description, status, beta }) {
   const categoryInfo = CATEGORIES[category]
   const isAvailable = status === 'available'
 
   const content = (
     <>
       <div className="game-card__top">
-        <Badge tone={categoryInfo.color}>{categoryInfo.label}</Badge>
+        <div className="game-card__badges">
+          <Badge tone={categoryInfo.color}>{categoryInfo.label}</Badge>
+          {beta && <Badge tone="muted">Бета</Badge>}
+        </div>
         <Badge tone={isAvailable ? 'thinking' : 'muted'}>
           {isAvailable ? 'Грати' : 'Скоро'}
         </Badge>

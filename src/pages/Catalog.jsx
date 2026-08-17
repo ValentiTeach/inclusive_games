@@ -19,6 +19,7 @@ function Catalog() {
             category={game.category}
             description={game.description}
             status={game.status}
+            beta={game.beta}
           />
         ))}
       </div>

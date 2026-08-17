@@ -1,0 +1,59 @@
+.mental-rotation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.mental-rotation__progress {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.mental-rotation__pair {
+  display: flex;
+  gap: var(--space-6);
+  align-items: center;
+}
+
+.mental-rotation__shape {
+  width: 110px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.mental-rotation__svg {
+  width: 70px;
+  height: 70px;
+}
+
+.mental-rotation__svg polygon {
+  fill: var(--cat-thinking);
+}
+
+.mental-rotation__options {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.mental-rotation__option {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  padding: 12px 28px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.mental-rotation__option:hover:not(:disabled) {
+  border-color: var(--accent);
+}

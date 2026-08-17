@@ -1,27 +1,26 @@
-.shape {
+.shape-icon {
   display: inline-block;
-  width: 55%;
-  height: 55%;
+  flex: none;
   background: var(--shape-color);
 }
 
-.shape--circle {
+.shape-icon--circle {
   border-radius: 50%;
 }
 
-.shape--square {
+.shape-icon--square {
   border-radius: 4px;
 }
 
-.shape--triangle {
+.shape-icon--triangle {
   clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
 }
 
-.shape--diamond {
+.shape-icon--diamond {
   clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
 }
 
-.shape--star {
+.shape-icon--star {
   clip-path: polygon(
     50% 0%,
     61% 35%,
@@ -36,11 +35,11 @@
   );
 }
 
-.shape--hexagon {
+.shape-icon--hexagon {
   clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
 }
 
-.shape--cross {
+.shape-icon--cross {
   clip-path: polygon(
     35% 0%,
     65% 0%,
@@ -57,6 +56,6 @@
   );
 }
 
-.shape--pentagon {
+.shape-icon--pentagon {
   clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
 }

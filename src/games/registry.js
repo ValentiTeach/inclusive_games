@@ -14,6 +14,14 @@ import { config as subitizingConfig } from './subitizing/subitizing.config'
 import SubitizingPlayArea from './subitizing/SubitizingPlayArea'
 import { config as goNoGoConfig } from './go-no-go/goNoGo.config'
 import GoNoGoPlayArea from './go-no-go/GoNoGoPlayArea'
+import { config as nbackConfig } from './n-back/nback.config'
+import NBackPlayArea from './n-back/NBackPlayArea'
+import { config as targetSearchConfig } from './target-search/targetSearch.config'
+import TargetSearchPlayArea from './target-search/TargetSearchPlayArea'
+import { config as matricesConfig } from './matrices/matrices.config'
+import MatricesPlayArea from './matrices/MatricesPlayArea'
+import { config as mentalRotationConfig } from './mental-rotation/mentalRotation.config'
+import MentalRotationPlayArea from './mental-rotation/MentalRotationPlayArea'
 
 export const GAME_REGISTRY = {
   schulte: { config: schulteConfig, PlayArea: SchultePlayArea },
@@ -24,4 +32,8 @@ export const GAME_REGISTRY = {
   'quick-math': { config: quickMathConfig, PlayArea: QuickMathPlayArea },
   subitizing: { config: subitizingConfig, PlayArea: SubitizingPlayArea },
   'go-no-go': { config: goNoGoConfig, PlayArea: GoNoGoPlayArea },
+  'n-back': { config: nbackConfig, PlayArea: NBackPlayArea },
+  'target-search': { config: targetSearchConfig, PlayArea: TargetSearchPlayArea },
+  matrices: { config: matricesConfig, PlayArea: MatricesPlayArea },
+  'mental-rotation': { config: mentalRotationConfig, PlayArea: MentalRotationPlayArea },
 }

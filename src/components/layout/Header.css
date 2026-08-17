@@ -25,7 +25,8 @@
 
 .site-header__nav {
   display: flex;
-  gap: var(--space-5);
+  flex-wrap: wrap;
+  gap: var(--space-4);
 }
 
 .site-header__link {

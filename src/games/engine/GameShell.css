@@ -90,6 +90,17 @@
   color: var(--text-muted);
 }
 
+.game-shell__history-score {
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+.game-shell__auto-note {
+  margin: var(--space-2) 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 /* Countdown screen */
 
 .game-shell__countdown {

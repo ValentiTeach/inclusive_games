@@ -1,9 +1,15 @@
+import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
+import { getSettings, applySettings } from '../../lib/settings'
 import Header from './Header'
 import Footer from './Footer'
 import './Layout.css'
 
 function Layout() {
+  useEffect(() => {
+    applySettings(getSettings())
+  }, [])
+
   return (
     <div className="app-shell">
       <a className="skip-link" href="#main-content">

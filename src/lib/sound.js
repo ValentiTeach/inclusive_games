@@ -1,3 +1,5 @@
+import { getSettings } from './settings'
+
 let audioContext = null
 
 function getContext() {
@@ -34,6 +36,8 @@ function playTone({ frequency, duration = 0.09, type = 'sine', volume = 0.07 }) 
 // Web Audio can throw in unsupported/locked-down environments (e.g. no user
 // gesture yet). Sound is a non-essential enhancement, so failures are ignored.
 function safePlay(tone) {
+  if (!getSettings().soundEnabled) return
+
   try {
     playTone(tone)
   } catch {

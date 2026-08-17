@@ -1,7 +1,7 @@
 import Button from '../../components/ui/Button'
 import { playClick } from '../../lib/sound'
 
-function IntroScreen({ config, levelId, onLevelChange, onStart, history }) {
+function IntroScreen({ config, levelId, isAutoSuggested, onLevelChange, onStart, history }) {
   function handleLevelChange(id) {
     playClick()
     onLevelChange(id)
@@ -36,6 +36,11 @@ function IntroScreen({ config, levelId, onLevelChange, onStart, history }) {
             </button>
           ))}
         </div>
+        {isAutoSuggested && (
+          <p className="game-shell__auto-note">
+            Рівень підібрано автоматично за твоїм попереднім результатом.
+          </p>
+        )}
       </div>
 
       <Button onClick={onStart}>Почати</Button>
@@ -50,6 +55,7 @@ function IntroScreen({ config, levelId, onLevelChange, onStart, history }) {
                   {new Date(attempt.date).toLocaleDateString('uk-UA')}
                 </span>
                 <span>{attempt.entries[0]?.value}</span>
+                <span className="game-shell__history-score">{attempt.score}%</span>
               </li>
             ))}
           </ul>

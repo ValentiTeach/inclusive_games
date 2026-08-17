@@ -1,4 +1,5 @@
 import { shuffle } from '../engine/random'
+import { clampScore } from '../engine/score'
 
 export const SYMBOLS = [
   { id: 'circle-blue', shape: 'circle', color: '#2d6bd6' },
@@ -49,9 +50,14 @@ export function checkAnswer(cardA, cardB) {
 
 export function scoring({ moves, elapsedMs, pairs }) {
   const seconds = elapsedMs / 1000
-  return [
-    { label: 'Ходи', value: String(moves) },
-    { label: 'Час', value: `${seconds.toFixed(1)} с` },
-    { label: 'Пар знайдено', value: `${pairs} / ${pairs}` },
-  ]
+  const score = clampScore(100 - (moves - pairs) * 5)
+
+  return {
+    score,
+    entries: [
+      { label: 'Ходи', value: String(moves) },
+      { label: 'Час', value: `${seconds.toFixed(1)} с` },
+      { label: 'Пар знайдено', value: `${pairs} / ${pairs}` },
+    ],
+  }
 }

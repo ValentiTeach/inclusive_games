@@ -1,4 +1,5 @@
 import { shuffle } from '../engine/random'
+import { clampScore } from '../engine/score'
 
 export const config = {
   id: 'schulte',
@@ -30,9 +31,15 @@ export function checkAnswer(trial, response) {
 
 export function scoring({ elapsedMs, mistakes, size }) {
   const seconds = elapsedMs / 1000
-  return [
-    { label: 'Час', value: `${seconds.toFixed(1)} с` },
-    { label: 'Розмір таблиці', value: `${size} × ${size}` },
-    { label: 'Помилкові натискання', value: String(mistakes) },
-  ]
+  const idealSeconds = size * size * 1.3
+  const score = clampScore(100 - Math.max(0, seconds - idealSeconds) * 3 - mistakes * 8)
+
+  return {
+    score,
+    entries: [
+      { label: 'Час', value: `${seconds.toFixed(1)} с` },
+      { label: 'Розмір таблиці', value: `${size} × ${size}` },
+      { label: 'Помилкові натискання', value: String(mistakes) },
+    ],
+  }
 }

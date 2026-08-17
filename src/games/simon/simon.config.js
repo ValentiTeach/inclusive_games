@@ -1,4 +1,5 @@
 import { pickRandom } from '../engine/random'
+import { clampScore } from '../engine/score'
 
 export const PADS = [
   { id: 'red', label: 'Червона', hex: '#c0392b' },
@@ -34,12 +35,17 @@ export function checkAnswer(sequence, inputIndex, padId) {
 
 export function scoring({ roundsCompleted, targetLength }) {
   const success = roundsCompleted >= targetLength
-  return [
-    { label: 'Пройдено раундів', value: String(roundsCompleted) },
-    { label: 'Ціль рівня', value: String(targetLength) },
-    {
-      label: 'Результат',
-      value: success ? 'Ціль досягнута' : `Помилка на кроці ${roundsCompleted + 1}`,
-    },
-  ]
+  const score = clampScore((roundsCompleted / targetLength) * 100)
+
+  return {
+    score,
+    entries: [
+      { label: 'Пройдено раундів', value: String(roundsCompleted) },
+      { label: 'Ціль рівня', value: String(targetLength) },
+      {
+        label: 'Результат',
+        value: success ? 'Ціль досягнута' : `Помилка на кроці ${roundsCompleted + 1}`,
+      },
+    ],
+  }
 }

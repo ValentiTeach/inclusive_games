@@ -16,11 +16,36 @@ export function AuthProvider({ children }) {
 
     const { data } = await supabase
       .from('profiles')
-      .select('display_name, group_id')
+      .select('display_name, group_id, role')
       .eq('id', currentUser.id)
       .maybeSingle()
 
-    setProfile(data)
+    if (data) {
+      setProfile(data)
+      return
+    }
+
+    // Every account needs a profile row for its role to mean anything.
+    // Anonymous users get one via join_group when they join a group;
+    // email accounts have no such step, so they're provisioned here as
+    // teachers/psychologists (email sign-up has always been the
+    // teacher-facing path — students join by code instead).
+    if (!currentUser.is_anonymous) {
+      const { data: created } = await supabase
+        .from('profiles')
+        .insert({
+          id: currentUser.id,
+          display_name: currentUser.email?.split('@')[0] ?? 'Вчитель',
+          role: 'teacher',
+        })
+        .select('display_name, group_id, role')
+        .single()
+
+      setProfile(created ?? null)
+      return
+    }
+
+    setProfile(null)
   }, [])
 
   useEffect(() => {

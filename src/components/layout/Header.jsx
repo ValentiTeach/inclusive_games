@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../lib/authContext'
+import RoleBadge from '../ui/RoleBadge'
 import './Header.css'
 
 const NAV_LINKS = [
@@ -33,12 +34,13 @@ function Header() {
             </NavLink>
           ))}
           <NavLink
-            to="/account"
+            to={user ? '/account' : '/login'}
             className={({ isActive }) =>
-              isActive ? 'site-header__link is-active' : 'site-header__link'
+              isActive ? 'site-header__link site-header__account is-active' : 'site-header__link site-header__account'
             }
           >
             {accountLabel}
+            {profile?.role && <RoleBadge role={profile.role} />}
           </NavLink>
         </nav>
       </div>

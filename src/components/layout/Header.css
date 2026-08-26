@@ -47,3 +47,9 @@
   color: var(--accent-strong);
   border-bottom-color: var(--accent);
 }
+
+.site-header__account {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

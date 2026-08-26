@@ -1,0 +1,200 @@
+.login {
+  --login-bg-1: #0b1120;
+  --login-bg-2: #142033;
+  --login-surface: #16233a;
+  --login-border: #253552;
+  --login-text: #eef2f8;
+  --login-text-muted: #9fb0c9;
+  --login-accent: #21c0a3;
+  --login-accent-2: #3f8cff;
+
+  padding: var(--space-8) var(--space-5) var(--space-7);
+  border-radius: var(--radius-lg);
+  background: radial-gradient(1200px 600px at 15% -10%, rgba(63, 140, 255, 0.25), transparent),
+    radial-gradient(900px 500px at 100% 0%, rgba(33, 192, 163, 0.2), transparent),
+    linear-gradient(180deg, var(--login-bg-1), var(--login-bg-2));
+  color: var(--login-text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-7);
+}
+
+.login--plain {
+  padding: var(--space-6) var(--space-5);
+  align-items: flex-start;
+}
+
+.login h1,
+.login p {
+  color: var(--login-text);
+}
+
+.login__hero {
+  text-align: center;
+  max-width: 520px;
+}
+
+.login__eyebrow {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--login-accent);
+  margin: 0 0 var(--space-3);
+}
+
+.login__title {
+  color: var(--login-text);
+  margin: 0 0 var(--space-3);
+}
+
+.login__subtitle {
+  color: var(--login-text-muted);
+  margin: 0;
+}
+
+.login__cards {
+  display: flex;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  max-width: 720px;
+}
+
+.login__card {
+  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  text-align: left;
+  padding: var(--space-6);
+  background: var(--login-surface);
+  border: 1px solid var(--login-border);
+  border-radius: var(--radius-lg);
+  color: var(--login-text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.login__card:hover {
+  transform: translateY(-3px);
+  border-color: var(--login-accent-2);
+  box-shadow: 0 20px 40px -20px rgba(63, 140, 255, 0.35);
+}
+
+.login__card-icon {
+  font-size: 32px;
+}
+
+.login__card-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.login__card-text {
+  color: var(--login-text-muted);
+  font-size: 14.5px;
+}
+
+.login__panel {
+  width: 100%;
+  max-width: 420px;
+  background: var(--login-surface);
+  border: 1px solid var(--login-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.login__back {
+  background: none;
+  border: none;
+  color: var(--login-text-muted);
+  font-family: var(--font-body);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 0 var(--space-4);
+}
+
+.login__back:hover {
+  color: var(--login-text);
+}
+
+.login__panel-title {
+  color: var(--login-text);
+  margin: 0 0 var(--space-4);
+  font-size: 20px;
+}
+
+.login__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: stretch;
+}
+
+.login__label {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--login-text-muted);
+}
+
+.login__input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--login-border);
+  background: var(--login-bg-1);
+  color: var(--login-text);
+}
+
+.login__input::placeholder {
+  color: var(--login-text-muted);
+}
+
+.login__input:focus-visible {
+  outline: 2px solid var(--login-accent-2);
+  outline-offset: 1px;
+}
+
+.login__input--code {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.login__error {
+  color: #ff8a8a;
+  font-size: 14px;
+  margin: 0;
+}
+
+.login__sent {
+  color: var(--login-text-muted);
+}
+
+.login__submit {
+  margin-top: var(--space-1);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  border: none;
+  color: #04231c;
+  background: linear-gradient(135deg, var(--login-accent), var(--login-accent-2));
+  cursor: pointer;
+}
+
+.login__submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

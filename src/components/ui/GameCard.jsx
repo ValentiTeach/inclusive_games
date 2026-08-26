@@ -3,7 +3,7 @@ import Badge from './Badge'
 import { CATEGORIES } from '../../data/games'
 import './GameCard.css'
 
-function GameCard({ id, title, category, description, status, beta }) {
+function GameCard({ id, title, category, description, status, beta, locked }) {
   const categoryInfo = CATEGORIES[category]
   const isAvailable = status === 'available'
 
@@ -14,14 +14,22 @@ function GameCard({ id, title, category, description, status, beta }) {
           <Badge tone={categoryInfo.color}>{categoryInfo.label}</Badge>
           {beta && <Badge tone="muted">Бета</Badge>}
         </div>
-        <Badge tone={isAvailable ? 'thinking' : 'muted'}>
-          {isAvailable ? 'Грати' : 'Скоро'}
+        <Badge tone={locked ? 'muted' : isAvailable ? 'thinking' : 'muted'}>
+          {locked ? '🔒 Потрібен вхід' : isAvailable ? 'Грати' : 'Скоро'}
         </Badge>
       </div>
       <h3 className="game-card__title">{title}</h3>
       <p className="game-card__description">{description}</p>
     </>
   )
+
+  if (locked) {
+    return (
+      <Link to="/login" className="game-card game-card--available game-card--locked">
+        {content}
+      </Link>
+    )
+  }
 
   if (isAvailable) {
     return (

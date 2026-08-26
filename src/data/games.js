@@ -12,6 +12,7 @@ export const GAMES = [
     category: 'attention',
     description: 'Знайди числа від 1 до 25 по порядку якнайшвидше.',
     status: 'available',
+    freeForGuests: true,
   },
   {
     id: 'stroop',
@@ -47,6 +48,7 @@ export const GAMES = [
     category: 'memory',
     description: 'Класична гра на запам’ятовування карток.',
     status: 'available',
+    freeForGuests: true,
   },
   {
     id: 'quick-math',
@@ -61,6 +63,7 @@ export const GAMES = [
     category: 'reaction',
     description: 'Натисни, щойно на екрані з’явиться сигнал.',
     status: 'available',
+    freeForGuests: true,
   },
   {
     id: 'n-back',

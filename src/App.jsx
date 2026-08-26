@@ -9,6 +9,7 @@ import Settings from './pages/Settings'
 import Account from './pages/Account'
 import Groups from './pages/Groups'
 import Join from './pages/Join'
+import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
           <Route path="/progress" element={<Progress />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/groups" element={<Groups />} />
           <Route path="/join" element={<Join />} />
           <Route path="*" element={<NotFound />} />

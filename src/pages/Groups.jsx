@@ -20,10 +20,10 @@ function Groups() {
       .then((data) => {
         if (!cancelled) setGroups(data)
       })
-      .catch((error) => {
+      .catch(() => {
         if (!cancelled) {
           setGroups([])
-          setErrorMessage(`Не вдалося завантажити групи: ${error.message ?? error}`)
+          setErrorMessage('Не вдалося завантажити групи. Спробуй оновити сторінку.')
         }
       })
     return () => {
@@ -55,9 +55,9 @@ function Groups() {
         <h1>Групи</h1>
         <p>
           Керувати групами можуть лише зареєстровані вчителі. Спершу увійди поштою на
-          сторінці «Акаунт».
+          сторінці входу.
         </p>
-        <Button to="/account" variant="secondary">
+        <Button to="/login" variant="secondary">
           До входу
         </Button>
       </section>
@@ -74,9 +74,9 @@ function Groups() {
       setGroups((prev) => [group, ...(prev ?? [])])
       setName('')
       setStatus('idle')
-    } catch (error) {
+    } catch {
       setStatus('idle')
-      setErrorMessage(`Не вдалося створити групу: ${error.message ?? error}`)
+      setErrorMessage('Не вдалося створити групу. Спробуй ще раз.')
     }
   }
 

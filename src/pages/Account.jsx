@@ -5,7 +5,7 @@ import Button from '../components/ui/Button'
 import './Account.css'
 
 function Account() {
-  const { user, loading } = useAuth()
+  const { user, profile, loading } = useAuth()
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState('idle')
   const [errorMessage, setErrorMessage] = useState(null)
@@ -52,16 +52,36 @@ function Account() {
   }
 
   if (user) {
+    const isAnonymous = user.is_anonymous
+
     return (
       <section className="account">
         <h1>Акаунт</h1>
-        <p>
-          Ти увійшов як <strong>{user.email}</strong>. Прогрес зберігається в хмарі й буде
-          доступний з будь-якого пристрою після входу з тією самою поштою.
-        </p>
-        <Button onClick={handleSignOut} variant="secondary">
-          Вийти
-        </Button>
+        {isAnonymous ? (
+          <>
+            <p>
+              Ти зайшов як <strong>{profile?.display_name ?? 'учень'}</strong> за кодом групи.
+            </p>
+            <p className="account__note">
+              Це працює лише в цьому браузері на цьому пристрої — прогрес не перенесеться
+              на інший телефон чи комп'ютер. Щоб зберігати прогрес між пристроями, попроси
+              вчителя або дорослого зареєструватися поштою.
+            </p>
+          </>
+        ) : (
+          <p>
+            Ти увійшов як <strong>{user.email}</strong>. Прогрес зберігається в хмарі й буде
+            доступний з будь-якого пристрою після входу з тією самою поштою.
+          </p>
+        )}
+        <div className="account__actions">
+          <Button to="/groups" variant="secondary">
+            Мої групи
+          </Button>
+          <Button onClick={handleSignOut} variant="secondary">
+            Вийти
+          </Button>
+        </div>
       </section>
     )
   }
@@ -98,6 +118,11 @@ function Account() {
           </Button>
         </form>
       )}
+
+      <p className="account__alt">
+        Ти учень і вчитель дав тобі код групи? <a href="/join">Приєднайся за кодом</a> —
+        пошта не потрібна.
+      </p>
     </section>
   )
 }

@@ -7,6 +7,8 @@ import GamePage from './pages/GamePage'
 import Progress from './pages/Progress'
 import Settings from './pages/Settings'
 import Account from './pages/Account'
+import Groups from './pages/Groups'
+import Join from './pages/Join'
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -20,6 +22,8 @@ function App() {
           <Route path="/progress" element={<Progress />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/groups" element={<Groups />} />
+          <Route path="/join" element={<Join />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

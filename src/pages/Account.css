@@ -44,3 +44,22 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
 }
+
+.account__note {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.account__actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.account__alt {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  font-size: 14px;
+  color: var(--text-muted);
+}

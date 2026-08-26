@@ -3,6 +3,7 @@ import Badge from '../../components/ui/Badge'
 import { CATEGORIES } from '../../data/games'
 import { getResults, saveResult } from './storage'
 import { suggestLevel } from './suggestLevel'
+import { pushResult } from '../../lib/cloudSync'
 import IntroScreen from './IntroScreen'
 import CountdownScreen from './CountdownScreen'
 import ResultsScreen from './ResultsScreen'
@@ -48,8 +49,10 @@ function GameShell({ config, renderPlay }) {
 
   function handleFinish(finishResult) {
     setResult(finishResult)
-    setHistory(saveResult(config.id, { ...finishResult, levelId: levelState.levelId }))
+    const updated = saveResult(config.id, { ...finishResult, levelId: levelState.levelId })
+    setHistory(updated)
     setPhase('results')
+    pushResult(config.id, updated[0])
   }
 
   function handleRestart() {

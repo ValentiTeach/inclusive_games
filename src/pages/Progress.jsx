@@ -1,6 +1,9 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { GAMES, CATEGORIES } from '../data/games'
 import { getResults } from '../games/engine/storage'
+import { fetchCloudHistory } from '../lib/cloudSync'
+import { useAuth } from '../lib/authContext'
 import { computeStreak } from '../lib/streak'
 import Badge from '../components/ui/Badge'
 import Sparkline from '../components/ui/Sparkline'
@@ -12,9 +15,32 @@ function average(numbers) {
 }
 
 function Progress() {
-  const gamesWithHistory = GAMES.map((game) => ({ game, history: getResults(game.id) })).filter(
-    ({ history }) => history.length > 0,
-  )
+  const { user } = useAuth()
+  const [cloudHistory, setCloudHistory] = useState(null)
+
+  useEffect(() => {
+    if (!user) return undefined
+
+    fetchCloudHistory().then((data) => {
+      setCloudHistory(data)
+    })
+  }, [user])
+
+  const isLoadingCloud = Boolean(user) && cloudHistory === null
+
+  if (isLoadingCloud) {
+    return (
+      <section className="progress-page">
+        <h1>Мій прогрес</h1>
+        <p>Завантажуємо дані з хмари…</p>
+      </section>
+    )
+  }
+
+  const gamesWithHistory = GAMES.map((game) => ({
+    game,
+    history: user ? cloudHistory?.[game.id] || [] : getResults(game.id),
+  })).filter(({ history }) => history.length > 0)
 
   if (gamesWithHistory.length === 0) {
     return (

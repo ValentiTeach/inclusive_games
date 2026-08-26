@@ -40,7 +40,7 @@ function Account() {
 
     if (error) {
       setStatus('idle')
-      setErrorMessage('Не вдалося надіслати посилання. Перевір адресу і спробуй ще раз.')
+      setErrorMessage(`Не вдалося надіслати посилання: ${error.message} (код: ${error.status ?? '?'})`)
       return
     }
 

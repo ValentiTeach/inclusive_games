@@ -10,7 +10,8 @@ const NAV_LINKS = [
 ]
 
 function Header() {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
+  const accountLabel = user ? (user.email ?? profile?.display_name ?? 'Акаунт') : 'Увійти'
 
   return (
     <header className="site-header">
@@ -37,7 +38,7 @@ function Header() {
               isActive ? 'site-header__link is-active' : 'site-header__link'
             }
           >
-            {user ? user.email : 'Увійти'}
+            {accountLabel}
           </NavLink>
         </nav>
       </div>

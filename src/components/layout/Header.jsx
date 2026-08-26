@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../../lib/authContext'
 import './Header.css'
 
 const NAV_LINKS = [
@@ -9,6 +10,8 @@ const NAV_LINKS = [
 ]
 
 function Header() {
+  const { user } = useAuth()
+
   return (
     <header className="site-header">
       <div className="site-header__inner">
@@ -28,6 +31,14 @@ function Header() {
               {link.label}
             </NavLink>
           ))}
+          <NavLink
+            to="/account"
+            className={({ isActive }) =>
+              isActive ? 'site-header__link is-active' : 'site-header__link'
+            }
+          >
+            {user ? user.email : 'Увійти'}
+          </NavLink>
         </nav>
       </div>
     </header>

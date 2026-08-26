@@ -16,9 +16,16 @@ function Groups() {
     if (!user) return undefined
 
     let cancelled = false
-    getMyGroups().then((data) => {
-      if (!cancelled) setGroups(data)
-    })
+    getMyGroups()
+      .then((data) => {
+        if (!cancelled) setGroups(data)
+      })
+      .catch((error) => {
+        if (!cancelled) {
+          setGroups([])
+          setErrorMessage(`Не вдалося завантажити групи: ${error.message ?? error}`)
+        }
+      })
     return () => {
       cancelled = true
     }
@@ -67,9 +74,9 @@ function Groups() {
       setGroups((prev) => [group, ...(prev ?? [])])
       setName('')
       setStatus('idle')
-    } catch {
+    } catch (error) {
       setStatus('idle')
-      setErrorMessage('Не вдалося створити групу. Спробуй ще раз.')
+      setErrorMessage(`Не вдалося створити групу: ${error.message ?? error}`)
     }
   }
 

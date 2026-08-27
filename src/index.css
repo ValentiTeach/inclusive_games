@@ -22,20 +22,20 @@
   --radius-lg: 22px;
   --radius-pill: 999px;
 
-  /* Базова палітра (світла тема) */
-  --bg: #fbfaf6;
+  /* Базова палітра (світла тема) — навігаційно-морська синя з логотипу */
+  --bg: #f7f9fc;
   --surface: #ffffff;
-  --surface-muted: #f2efe7;
-  --text: #1c2b2e;
-  --text-muted: #57696c;
-  --border: #e3ddd0;
+  --surface-muted: #eef1f6;
+  --text: #101a2b;
+  --text-muted: #5b6b84;
+  --border: #e1e6ee;
 
-  --accent: #dd7a34;
-  --accent-strong: #b8611f;
-  --accent-contrast: #fffaf4;
+  --accent: #0b4da3;
+  --accent-strong: #00306e;
+  --accent-contrast: #ffffff;
 
-  --shadow-sm: 0 1px 2px rgba(28, 43, 46, 0.06);
-  --shadow-md: 0 10px 24px -12px rgba(28, 43, 46, 0.22);
+  --shadow-sm: 0 1px 2px rgba(16, 26, 43, 0.06);
+  --shadow-md: 0 10px 24px -12px rgba(16, 26, 43, 0.18);
 
   /* Кольори категорій ігор */
   --cat-attention: #2f8fae;
@@ -58,16 +58,16 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #101a1c;
-    --surface: #172427;
-    --surface-muted: #1c2c2f;
-    --text: #e8efed;
-    --text-muted: #a9bcbc;
-    --border: #2a3b3e;
+    --bg: #0b1220;
+    --surface: #121b2e;
+    --surface-muted: #16213a;
+    --text: #eef2f8;
+    --text-muted: #93a3bd;
+    --border: #223252;
 
-    --accent: #e8a05a;
-    --accent-strong: #f0b47a;
-    --accent-contrast: #201203;
+    --accent: #4f8ce0;
+    --accent-strong: #7db0ee;
+    --accent-contrast: #04101f;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 10px 24px -12px rgba(0, 0, 0, 0.55);

@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { Trophy, Medal, Award } from 'lucide-react'
 import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
 import { getGroupDetails } from '../lib/groups'
 import './GroupDetail.css'
+
+const RANK_ICONS = [Trophy, Medal, Award]
 
 function formatDate(iso) {
   if (!iso) return '—'
@@ -94,7 +97,41 @@ function GroupDetail() {
       {data.students.length === 0 ? (
         <p>До цієї групи ще ніхто не приєднався.</p>
       ) : (
-        <div className="group-detail__table-wrap">
+        <>
+          {(() => {
+            const ranked = data.students
+              .filter((student) => student.attempts > 0)
+              .sort((a, b) => b.avgScore - a.avgScore)
+              .slice(0, 5)
+
+            if (ranked.length === 0) return null
+
+            return (
+              <div className="group-detail__leaderboard">
+                <h2>Рейтинг групи</h2>
+                <ol className="group-detail__leaderboard-list">
+                  {ranked.map((student, index) => {
+                    const RankIcon = RANK_ICONS[index]
+                    return (
+                      <li key={student.id} className="group-detail__leaderboard-item">
+                        <span className="group-detail__leaderboard-rank">
+                          {RankIcon ? (
+                            <RankIcon size={18} aria-hidden="true" />
+                          ) : (
+                            <span className="group-detail__leaderboard-rank-num">{index + 1}</span>
+                          )}
+                        </span>
+                        <span className="group-detail__leaderboard-name">{student.displayName}</span>
+                        <span className="group-detail__leaderboard-score">{student.avgScore}%</span>
+                      </li>
+                    )
+                  })}
+                </ol>
+              </div>
+            )
+          })()}
+
+          <div className="group-detail__table-wrap">
           <table className="group-detail__table">
             <thead>
               <tr>
@@ -117,7 +154,8 @@ function GroupDetail() {
               ))}
             </tbody>
           </table>
-        </div>
+          </div>
+        </>
       )}
     </section>
   )

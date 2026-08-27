@@ -7,6 +7,7 @@ import { computeStreak } from '../../lib/streak'
 import { getResults, saveResult } from './storage'
 import { suggestLevel } from './suggestLevel'
 import { pushResult } from '../../lib/cloudSync'
+import { playVictory } from '../../lib/sound'
 import IntroScreen from './IntroScreen'
 import CountdownScreen from './CountdownScreen'
 import ResultsScreen from './ResultsScreen'
@@ -77,10 +78,15 @@ function GameShell({ config, renderPlay }) {
       (achievement) => !achievement.check(statsBefore) && achievement.check(statsAfter),
     )
 
-    setIsNewBest(previousBest !== null && finishResult.score > previousBest)
+    const isBest = previousBest !== null && finishResult.score > previousBest
+    setIsNewBest(isBest)
     setNewAchievements(unlocked)
     setPhase('results')
     pushResult(config.id, updated[0])
+
+    if (isBest || unlocked.length > 0) {
+      playVictory()
+    }
   }
 
   function handleRestart() {

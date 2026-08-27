@@ -120,6 +120,58 @@
   text-align: center;
 }
 
+.game-shell__score {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: var(--space-5) 0;
+}
+
+.game-shell__score-value {
+  font-family: var(--font-display);
+  font-size: 64px;
+  font-weight: 800;
+  color: var(--accent-strong);
+  line-height: 1;
+}
+
+.game-shell__score-unit {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-top: -4px;
+}
+
+.game-shell__score-best {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: var(--space-3) 0 0;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.game-shell__achievements {
+  margin: 0 0 var(--space-6);
+}
+
+.game-shell__achievements-title {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.game-shell__achievements-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
 .game-shell__results-list {
   display: flex;
   flex-direction: column;

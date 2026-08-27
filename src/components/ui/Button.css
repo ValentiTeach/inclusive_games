@@ -18,6 +18,10 @@
   transform: translateY(-1px);
 }
 
+.button:active {
+  transform: translateY(0) scale(0.97);
+}
+
 .button--primary {
   background: var(--accent);
   color: var(--accent-contrast);

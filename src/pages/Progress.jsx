@@ -8,10 +8,12 @@ import { getResults } from '../games/engine/storage'
 import { fetchCloudHistory } from '../lib/cloudSync'
 import { useAuth } from '../lib/authContext'
 import { computeStreak } from '../lib/streak'
+import { computeAchievementStats } from '../lib/achievementStats'
 import Badge from '../components/ui/Badge'
 import Sparkline from '../components/ui/Sparkline'
 import Button from '../components/ui/Button'
 import AchievementBadge from '../components/ui/AchievementBadge'
+import CountUpNumber from '../components/ui/CountUpNumber'
 import './Progress.css'
 
 function average(numbers) {
@@ -21,6 +23,7 @@ function average(numbers) {
 function Progress() {
   const { user } = useAuth()
   const [cloudHistory, setCloudHistory] = useState(null)
+  const [barsVisible, setBarsVisible] = useState(false)
 
   useEffect(() => {
     if (!user) return undefined
@@ -29,6 +32,11 @@ function Progress() {
       setCloudHistory(data)
     })
   }, [user])
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setBarsVisible(true))
+    return () => cancelAnimationFrame(frame)
+  }, [])
 
   const isLoadingCloud = Boolean(user) && cloudHistory === null
 
@@ -59,29 +67,17 @@ function Progress() {
   }
 
   const categoryScores = {}
-  const allDates = []
-  let perfectCount = 0
 
   gamesWithHistory.forEach(({ game, history }) => {
     if (!categoryScores[game.category]) categoryScores[game.category] = []
     history.forEach((attempt) => {
       categoryScores[game.category].push(attempt.score)
-      allDates.push(attempt.date.slice(0, 10))
-      if (attempt.score >= 100) perfectCount += 1
     })
   })
 
-  const { current, longest } = computeStreak(allDates)
-
-  const achievementStats = {
-    totalAttempts: allDates.length,
-    longestStreak: longest,
-    perfectCount,
-    distinctGamesPlayed: gamesWithHistory.length,
-    categoryCounts: Object.fromEntries(
-      Object.entries(categoryScores).map(([category, scores]) => [category, scores.length]),
-    ),
-  }
+  const baseStats = computeAchievementStats(gamesWithHistory)
+  const { current, longest } = computeStreak(baseStats.dates)
+  const achievementStats = { ...baseStats, longestStreak: longest }
 
   return (
     <section className="progress-page">
@@ -90,14 +86,14 @@ function Progress() {
       <div className="progress-summary">
         <div className="progress-summary__stat">
           <Flame className="progress-summary__icon" aria-hidden="true" />
-          <span className="progress-summary__value">{current}</span>
+          <CountUpNumber value={current} className="progress-summary__value" />
           <span className="progress-summary__label">
             {current === 1 ? 'день поспіль' : 'днів поспіль'}
           </span>
         </div>
         <div className="progress-summary__stat">
           <Trophy className="progress-summary__icon" aria-hidden="true" />
-          <span className="progress-summary__value">{longest}</span>
+          <CountUpNumber value={longest} className="progress-summary__value" />
           <span className="progress-summary__label">найдовша серія</span>
         </div>
       </div>
@@ -129,7 +125,7 @@ function Progress() {
               <div className="progress-category__bar">
                 <div
                   className="progress-category__fill"
-                  style={{ width: `${avg ?? 0}%` }}
+                  style={{ width: barsVisible ? `${avg ?? 0}%` : '0%' }}
                   data-tone={info.color}
                 />
               </div>

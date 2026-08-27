@@ -23,3 +23,7 @@ export function applySettings(settings) {
   document.documentElement.dataset.textSize = settings.textSize
   document.documentElement.classList.toggle('force-reduced-motion', settings.reducedMotion)
 }
+
+export function prefersReducedMotion() {
+  return getSettings().reducedMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}

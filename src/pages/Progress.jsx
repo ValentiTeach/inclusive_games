@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { Flame, Trophy } from 'lucide-react'
 import { GAMES, CATEGORIES } from '../data/games'
 import { CATEGORY_ICONS } from '../data/categoryIcons'
+import { ACHIEVEMENTS } from '../data/achievements'
 import { getResults } from '../games/engine/storage'
 import { fetchCloudHistory } from '../lib/cloudSync'
 import { useAuth } from '../lib/authContext'
@@ -10,6 +11,7 @@ import { computeStreak } from '../lib/streak'
 import Badge from '../components/ui/Badge'
 import Sparkline from '../components/ui/Sparkline'
 import Button from '../components/ui/Button'
+import AchievementBadge from '../components/ui/AchievementBadge'
 import './Progress.css'
 
 function average(numbers) {
@@ -58,16 +60,28 @@ function Progress() {
 
   const categoryScores = {}
   const allDates = []
+  let perfectCount = 0
 
   gamesWithHistory.forEach(({ game, history }) => {
     if (!categoryScores[game.category]) categoryScores[game.category] = []
     history.forEach((attempt) => {
       categoryScores[game.category].push(attempt.score)
       allDates.push(attempt.date.slice(0, 10))
+      if (attempt.score >= 100) perfectCount += 1
     })
   })
 
   const { current, longest } = computeStreak(allDates)
+
+  const achievementStats = {
+    totalAttempts: allDates.length,
+    longestStreak: longest,
+    perfectCount,
+    distinctGamesPlayed: gamesWithHistory.length,
+    categoryCounts: Object.fromEntries(
+      Object.entries(categoryScores).map(([category, scores]) => [category, scores.length]),
+    ),
+  }
 
   return (
     <section className="progress-page">
@@ -86,6 +100,17 @@ function Progress() {
           <span className="progress-summary__value">{longest}</span>
           <span className="progress-summary__label">найдовша серія</span>
         </div>
+      </div>
+
+      <h2>Досягнення</h2>
+      <div className="progress-achievements">
+        {ACHIEVEMENTS.map((achievement) => (
+          <AchievementBadge
+            key={achievement.id}
+            achievement={achievement}
+            unlocked={achievement.check(achievementStats)}
+          />
+        ))}
       </div>
 
       <h2>За категоріями</h2>

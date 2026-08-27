@@ -69,6 +69,7 @@
   height: 100%;
   border-radius: var(--radius-pill);
   background: var(--accent);
+  transition: width 0.8s ease;
 }
 
 .progress-category__fill[data-tone='attention'] {

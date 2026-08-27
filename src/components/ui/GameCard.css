@@ -21,6 +21,10 @@ a.game-card--available:hover {
   border-color: var(--accent);
 }
 
+a.game-card--available:active {
+  transform: translateY(0) scale(0.98);
+}
+
 .game-card__top {
   display: flex;
   align-items: center;

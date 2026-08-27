@@ -18,7 +18,10 @@ function Header() {
     <header className="site-header">
       <div className="site-header__inner">
         <NavLink to="/" className="site-header__logo">
-          Inclusive Games
+          <img src="/logo.png" alt="" className="site-header__logo-mark" />
+          <span className="site-header__logo-text">
+            Inclusive Games <span className="site-header__logo-edition">| Historic_up's edition</span>
+          </span>
         </NavLink>
         <nav className="site-header__nav" aria-label="Основна навігація">
           {NAV_LINKS.map((link) => (

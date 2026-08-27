@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Flame, Trophy } from 'lucide-react'
 import { GAMES, CATEGORIES } from '../data/games'
+import { CATEGORY_ICONS } from '../data/categoryIcons'
 import { getResults } from '../games/engine/storage'
 import { fetchCloudHistory } from '../lib/cloudSync'
 import { useAuth } from '../lib/authContext'
@@ -73,12 +75,14 @@ function Progress() {
 
       <div className="progress-summary">
         <div className="progress-summary__stat">
+          <Flame className="progress-summary__icon" aria-hidden="true" />
           <span className="progress-summary__value">{current}</span>
           <span className="progress-summary__label">
             {current === 1 ? 'день поспіль' : 'днів поспіль'}
           </span>
         </div>
         <div className="progress-summary__stat">
+          <Trophy className="progress-summary__icon" aria-hidden="true" />
           <span className="progress-summary__value">{longest}</span>
           <span className="progress-summary__label">найдовша серія</span>
         </div>
@@ -89,10 +93,14 @@ function Progress() {
         {Object.entries(CATEGORIES).map(([key, info]) => {
           const scores = categoryScores[key]
           const avg = scores ? average(scores) : null
+          const CategoryIcon = CATEGORY_ICONS[key]
 
           return (
             <div key={key} className="progress-category">
-              <Badge tone={info.color}>{info.label}</Badge>
+              <Badge tone={info.color}>
+                <CategoryIcon size={13} aria-hidden="true" />
+                {info.label}
+              </Badge>
               <div className="progress-category__bar">
                 <div
                   className="progress-category__fill"
@@ -111,12 +119,14 @@ function Progress() {
         {gamesWithHistory.map(({ game, history }) => {
           const scores = [...history].reverse().map((attempt) => attempt.score)
           const best = Math.max(...history.map((attempt) => attempt.score))
+          const CategoryIcon = CATEGORY_ICONS[game.category]
 
           return (
             <Link key={game.id} to={`/games/${game.id}`} className="progress-game">
               <div className="progress-game__head">
                 <span className="progress-game__title">{game.title}</span>
                 <Badge tone={CATEGORIES[game.category].color}>
+                  <CategoryIcon size={13} aria-hidden="true" />
                   {CATEGORIES[game.category].label}
                 </Badge>
               </div>

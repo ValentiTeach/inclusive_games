@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { Backpack, GraduationCap } from 'lucide-react'
 import { useAuth } from '../lib/authContext'
 import { supabase, isCloudConfigured } from '../lib/supabaseClient'
 import { joinGroup } from '../lib/groups'
@@ -86,16 +87,12 @@ function Login() {
       {mode === 'choose' && (
         <div className="login__cards">
           <button type="button" className="login__card" onClick={() => setMode('student')}>
-            <span className="login__card-icon" aria-hidden="true">
-              🎒
-            </span>
+            <Backpack className="login__card-icon" aria-hidden="true" />
             <span className="login__card-title">Я учень</span>
             <span className="login__card-text">Код групи від вчителя + твоє ім'я. Пошта не потрібна.</span>
           </button>
           <button type="button" className="login__card" onClick={() => setMode('teacher')}>
-            <span className="login__card-icon" aria-hidden="true">
-              🧑‍🏫
-            </span>
+            <GraduationCap className="login__card-icon" aria-hidden="true" />
             <span className="login__card-title">Я вчитель / психолог</span>
             <span className="login__card-text">Вхід поштою — без пароля, посиланням.</span>
           </button>

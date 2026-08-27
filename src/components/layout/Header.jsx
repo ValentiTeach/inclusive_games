@@ -1,13 +1,14 @@
 import { NavLink } from 'react-router-dom'
+import { Home, Gamepad2, TrendingUp, Settings, LogIn } from 'lucide-react'
 import { useAuth } from '../../lib/authContext'
 import RoleBadge from '../ui/RoleBadge'
 import './Header.css'
 
 const NAV_LINKS = [
-  { to: '/', label: 'Головна', end: true },
-  { to: '/games', label: 'Каталог ігор' },
-  { to: '/progress', label: 'Мій прогрес' },
-  { to: '/settings', label: 'Налаштування' },
+  { to: '/', label: 'Головна', end: true, icon: Home },
+  { to: '/games', label: 'Каталог ігор', icon: Gamepad2 },
+  { to: '/progress', label: 'Мій прогрес', icon: TrendingUp },
+  { to: '/settings', label: 'Налаштування', icon: Settings },
 ]
 
 function Header() {
@@ -33,6 +34,7 @@ function Header() {
                 isActive ? 'site-header__link is-active' : 'site-header__link'
               }
             >
+              <link.icon size={16} aria-hidden="true" />
               {link.label}
             </NavLink>
           ))}
@@ -42,6 +44,7 @@ function Header() {
               isActive ? 'site-header__link site-header__account is-active' : 'site-header__link site-header__account'
             }
           >
+            {!user && <LogIn size={16} aria-hidden="true" />}
             {accountLabel}
             {profile?.role && <RoleBadge role={profile.role} />}
           </NavLink>

@@ -37,6 +37,13 @@
   color: var(--text-muted);
 }
 
+.progress-achievements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-7);
+}
+
 .progress-categories {
   display: flex;
   flex-direction: column;

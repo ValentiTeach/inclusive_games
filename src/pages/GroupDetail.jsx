@@ -1,0 +1,126 @@
+import { useEffect, useState } from 'react'
+import { useParams, Link } from 'react-router-dom'
+import { useAuth } from '../lib/authContext'
+import { isCloudConfigured } from '../lib/supabaseClient'
+import { getGroupDetails } from '../lib/groups'
+import './GroupDetail.css'
+
+function formatDate(iso) {
+  if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' })
+}
+
+function GroupDetail() {
+  const { groupId } = useParams()
+  const { user, loading } = useAuth()
+  const [data, setData] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
+
+  useEffect(() => {
+    if (!user) return undefined
+
+    let cancelled = false
+    getGroupDetails(groupId)
+      .then((result) => {
+        if (!cancelled) setData(result)
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setErrorMessage('Групу не знайдено або в тебе немає до неї доступу.')
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user, groupId])
+
+  if (!isCloudConfigured) {
+    return (
+      <section className="group-detail">
+        <h1>Група</h1>
+        <p>Ця можливість ще не підключена на цьому сайті.</p>
+      </section>
+    )
+  }
+
+  if (loading) {
+    return (
+      <section className="group-detail">
+        <h1>Група</h1>
+        <p>Завантаження…</p>
+      </section>
+    )
+  }
+
+  if (!user) {
+    return (
+      <section className="group-detail">
+        <h1>Група</h1>
+        <p>Спершу увійди на сторінці входу.</p>
+        <Link to="/login">До входу</Link>
+      </section>
+    )
+  }
+
+  if (errorMessage) {
+    return (
+      <section className="group-detail">
+        <h1>Група</h1>
+        <p className="group-detail__error">{errorMessage}</p>
+        <Link to="/groups">← До моїх груп</Link>
+      </section>
+    )
+  }
+
+  if (!data) {
+    return (
+      <section className="group-detail">
+        <h1>Група</h1>
+        <p>Завантаження…</p>
+      </section>
+    )
+  }
+
+  return (
+    <section className="group-detail">
+      <Link to="/groups" className="group-detail__back">
+        ← До моїх груп
+      </Link>
+      <h1>{data.group.name}</h1>
+      <p>
+        Код для приєднання: <span className="group-detail__code">{data.group.join_code}</span>
+      </p>
+
+      {data.students.length === 0 ? (
+        <p>До цієї групи ще ніхто не приєднався.</p>
+      ) : (
+        <div className="group-detail__table-wrap">
+          <table className="group-detail__table">
+            <thead>
+              <tr>
+                <th>Учень</th>
+                <th>Приєднався</th>
+                <th>Спроб</th>
+                <th>Середній бал</th>
+                <th>Остання гра</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.students.map((student) => (
+                <tr key={student.id}>
+                  <td>{student.displayName}</td>
+                  <td>{formatDate(student.joinedAt)}</td>
+                  <td>{student.attempts}</td>
+                  <td>{student.avgScore ?? '—'}</td>
+                  <td>{formatDate(student.lastPlayed)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
+  )
+}
+
+export default GroupDetail

@@ -43,6 +43,64 @@ export async function getMyGroups() {
   return data
 }
 
+export async function getGroupDetails(groupId) {
+  const { data: group, error: groupError } = await supabase
+    .from('groups')
+    .select('id, name, join_code')
+    .eq('id', groupId)
+    .single()
+
+  if (groupError) throw groupError
+
+  const { data: students, error: studentsError } = await supabase
+    .from('profiles')
+    .select('id, display_name, created_at')
+    .eq('group_id', groupId)
+    .order('created_at', { ascending: true })
+
+  if (studentsError) throw studentsError
+
+  const studentIds = students.map((student) => student.id)
+  let results = []
+
+  if (studentIds.length > 0) {
+    const { data, error: resultsError } = await supabase
+      .from('results')
+      .select('user_id, score, played_at')
+      .in('user_id', studentIds)
+
+    if (resultsError) throw resultsError
+    results = data
+  }
+
+  const students_ = students.map((student) => {
+    const studentResults = results.filter((result) => result.user_id === student.id)
+    const attempts = studentResults.length
+    const avgScore =
+      attempts > 0
+        ? Math.round(studentResults.reduce((sum, result) => sum + result.score, 0) / attempts)
+        : null
+    const lastPlayed =
+      attempts > 0
+        ? studentResults.reduce(
+            (latest, result) => (result.played_at > latest ? result.played_at : latest),
+            studentResults[0].played_at,
+          )
+        : null
+
+    return {
+      id: student.id,
+      displayName: student.display_name ?? 'Учень',
+      joinedAt: student.created_at,
+      attempts,
+      avgScore,
+      lastPlayed,
+    }
+  })
+
+  return { group, students: students_ }
+}
+
 export async function joinGroup(code, displayName) {
   const {
     data: { session },

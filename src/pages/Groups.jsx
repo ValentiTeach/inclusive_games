@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
 import { createGroup, getMyGroups } from '../lib/groups'
@@ -112,7 +113,9 @@ function Groups() {
         <ul className="groups__list">
           {groups.map((group) => (
             <li key={group.id} className="groups__item">
-              <span className="groups__name">{group.name}</span>
+              <Link to={`/groups/${group.id}`} className="groups__name">
+                {group.name}
+              </Link>
               <span className="groups__code">{group.join_code}</span>
             </li>
           ))}

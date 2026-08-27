@@ -36,6 +36,7 @@ function Account() {
 
   const isAnonymous = user.is_anonymous
   const isTeacher = profile?.role === 'teacher' || profile?.role === 'moderator'
+  const isModerator = profile?.role === 'moderator'
 
   return (
     <section className="account">
@@ -63,6 +64,11 @@ function Account() {
         {isTeacher && (
           <Button to="/groups" variant="secondary">
             Мої групи
+          </Button>
+        )}
+        {isModerator && (
+          <Button to="/admin" variant="secondary">
+            Адмін-панель
           </Button>
         )}
         <Button onClick={handleSignOut} variant="secondary">

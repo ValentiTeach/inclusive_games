@@ -1,0 +1,108 @@
+.decor {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.decor__photo {
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('/bg.webp');
+  background-repeat: no-repeat;
+  background-position: right top;
+  background-size: min(1500px, 105vw) auto;
+}
+
+@media (max-width: 900px) {
+  .decor__photo {
+    display: none;
+  }
+}
+
+/*
+ * Soft-edged via radial-gradient (fading to transparent) rather than
+ * `filter: blur()` — combining `filter` with `position: fixed` triggers a
+ * Chromium compositing bug where the blurred layer bleeds through opaque
+ * siblings (e.g. white game cards) instead of being occluded by them.
+ */
+.decor__blob {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.decor__blob--attention {
+  width: 460px;
+  height: 460px;
+  top: -140px;
+  left: -160px;
+  background: radial-gradient(circle, var(--cat-attention) 0%, transparent 70%);
+  animation: decor-float-a 22s ease-in-out infinite;
+}
+
+.decor__blob--memory {
+  width: 380px;
+  height: 380px;
+  bottom: -120px;
+  left: 4%;
+  background: radial-gradient(circle, var(--cat-memory) 0%, transparent 70%);
+  animation: decor-float-b 26s ease-in-out infinite;
+}
+
+.decor__blob--thinking {
+  width: 420px;
+  height: 420px;
+  top: 25%;
+  right: -180px;
+  background: radial-gradient(circle, var(--cat-thinking) 0%, transparent 70%);
+  animation: decor-float-a 30s ease-in-out infinite reverse;
+}
+
+.decor__blob--reaction {
+  width: 340px;
+  height: 340px;
+  bottom: 4%;
+  right: 2%;
+  background: radial-gradient(circle, var(--cat-reaction) 0%, transparent 70%);
+  animation: decor-float-b 20s ease-in-out infinite reverse;
+}
+
+.decor__blob--accent-a {
+  width: 360px;
+  height: 360px;
+  top: 52%;
+  left: 38%;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+  animation: decor-float-a 34s ease-in-out infinite;
+}
+
+.decor__blob--accent-b {
+  width: 300px;
+  height: 300px;
+  top: 4%;
+  right: 26%;
+  background: radial-gradient(circle, var(--cat-memory) 0%, transparent 70%);
+  animation: decor-float-b 24s ease-in-out infinite;
+}
+
+@keyframes decor-float-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(40px, 30px) scale(1.08);
+  }
+}
+
+@keyframes decor-float-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-30px, -40px) scale(1.1);
+  }
+}

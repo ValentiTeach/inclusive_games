@@ -37,6 +37,8 @@
   --shadow-sm: 0 1px 2px rgba(16, 26, 43, 0.06);
   --shadow-md: 0 10px 24px -12px rgba(16, 26, 43, 0.18);
 
+  --bg-overlay: rgba(247, 249, 252, 0.88);
+
   /* Кольори категорій ігор */
   --cat-attention: #2f8fae;
   --cat-attention-bg: rgba(47, 143, 174, 0.13);
@@ -72,6 +74,8 @@
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 10px 24px -12px rgba(0, 0, 0, 0.55);
 
+    --bg-overlay: rgba(11, 18, 32, 0.88);
+
     --cat-attention: #5fb7d6;
     --cat-attention-bg: rgba(95, 183, 214, 0.16);
     --cat-memory: #a892f0;
@@ -89,6 +93,18 @@
 
 body {
   margin: 0;
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('/bg.webp');
+  background-repeat: no-repeat;
+  background-position: right top;
+  background-size: min(900px, 70vw) auto;
+  background-attachment: fixed;
+}
+
+@media (max-width: 720px) {
+  body {
+    background-image: none;
+  }
 }
 
 h1,

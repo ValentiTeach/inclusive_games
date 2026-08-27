@@ -8,6 +8,7 @@ import Progress from './pages/Progress'
 import Settings from './pages/Settings'
 import Account from './pages/Account'
 import Groups from './pages/Groups'
+import GroupDetail from './pages/GroupDetail'
 import Join from './pages/Join'
 import Login from './pages/Login'
 import NotFound from './pages/NotFound'
@@ -25,6 +26,7 @@ function App() {
           <Route path="/account" element={<Account />} />
           <Route path="/login" element={<Login />} />
           <Route path="/groups" element={<Groups />} />
+          <Route path="/groups/:groupId" element={<GroupDetail />} />
           <Route path="/join" element={<Join />} />
           <Route path="*" element={<NotFound />} />
         </Route>

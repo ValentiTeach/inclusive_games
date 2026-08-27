@@ -52,6 +52,13 @@
 .groups__name {
   font-family: var(--font-display);
   font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.groups__name:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
 }
 
 .groups__code {

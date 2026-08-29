@@ -4,6 +4,7 @@ import { getSettings, applySettings } from '../../lib/settings'
 import Header from './Header'
 import Footer from './Footer'
 import DecorativeBackground from './DecorativeBackground'
+import MotionDebugBanner from './MotionDebugBanner'
 import './Layout.css'
 
 function Layout() {
@@ -13,6 +14,7 @@ function Layout() {
 
   return (
     <div className="app-shell">
+      <MotionDebugBanner />
       <DecorativeBackground />
       <div className="app-content">
         <a className="skip-link" href="#main-content">

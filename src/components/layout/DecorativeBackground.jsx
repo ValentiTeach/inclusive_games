@@ -9,14 +9,14 @@ import './DecorativeBackground.css'
 // - burst: spawns a handful of tiny sparks flying outward, for Sparkles
 // - wiggle: rapid side-to-side shake, for Target ("шукає ціль")
 const FLOATING_ICONS = [
-  { id: 'brain', Icon: Brain, top: '14%', left: '6%', size: 34, duration: 26, drift: 1, interactive: true, effect: 'pop' },
-  { id: 'heart', Icon: HeartHandshake, top: '68%', left: '10%', size: 30, duration: 22, drift: 2, interactive: true, effect: 'pulse' },
-  { id: 'puzzle', Icon: Puzzle, top: '30%', left: '88%', size: 32, duration: 30, drift: 3, interactive: true, effect: 'pop' },
-  { id: 'sparkles', Icon: Sparkles, top: '78%', left: '82%', size: 26, duration: 18, drift: 4, interactive: true, effect: 'burst' },
-  { id: 'smile', Icon: Smile, top: '48%', left: '4%', size: 28, duration: 24, drift: 5, interactive: false },
-  { id: 'shield', Icon: ShieldCheck, top: '10%', left: '70%', size: 28, duration: 28, drift: 2, interactive: false },
-  { id: 'target', Icon: Target, top: '58%', left: '92%', size: 26, duration: 20, drift: 1, interactive: true, effect: 'wiggle' },
-  { id: 'zap', Icon: Zap, top: '86%', left: '46%', size: 24, duration: 16, drift: 3, interactive: false },
+  { id: 'brain', Icon: Brain, top: '14%', left: '6%', size: 34, duration: 9, drift: 1, interactive: true, effect: 'pop' },
+  { id: 'heart', Icon: HeartHandshake, top: '68%', left: '10%', size: 30, duration: 7, drift: 2, interactive: true, effect: 'pulse' },
+  { id: 'puzzle', Icon: Puzzle, top: '30%', left: '88%', size: 32, duration: 10, drift: 3, interactive: true, effect: 'pop' },
+  { id: 'sparkles', Icon: Sparkles, top: '78%', left: '82%', size: 26, duration: 6, drift: 4, interactive: true, effect: 'burst' },
+  { id: 'smile', Icon: Smile, top: '48%', left: '4%', size: 28, duration: 8, drift: 5, interactive: false },
+  { id: 'shield', Icon: ShieldCheck, top: '10%', left: '70%', size: 28, duration: 9.5, drift: 2, interactive: false },
+  { id: 'target', Icon: Target, top: '58%', left: '92%', size: 26, duration: 7.5, drift: 1, interactive: true, effect: 'wiggle' },
+  { id: 'zap', Icon: Zap, top: '86%', left: '46%', size: 24, duration: 5.5, drift: 3, interactive: false },
 ]
 
 const SPARK_COUNT = 6

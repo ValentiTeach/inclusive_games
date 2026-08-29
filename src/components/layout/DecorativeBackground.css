@@ -104,8 +104,8 @@
   display: block;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
-  color: var(--accent);
-  opacity: 0.3;
+  color: var(--accent-strong);
+  opacity: 0.55;
 }
 
 /* Five distinct, irregular left-right-dominant paths so icons don't
@@ -137,7 +137,7 @@
 }
 
 .decor__icon-wrap--interactive:hover {
-  opacity: 0.6;
+  opacity: 0.9;
 }
 
 .decor__icon {
@@ -175,13 +175,13 @@
     transform: translate(0, 0);
   }
   25% {
-    transform: translate(60px, 10px);
+    transform: translate(130px, 20px);
   }
   55% {
-    transform: translate(20px, -30px);
+    transform: translate(45px, -60px);
   }
   80% {
-    transform: translate(-40px, -10px);
+    transform: translate(-90px, -20px);
   }
   100% {
     transform: translate(0, 0);
@@ -193,13 +193,13 @@
     transform: translate(0, 0);
   }
   30% {
-    transform: translate(-70px, -15px);
+    transform: translate(-150px, -30px);
   }
   60% {
-    transform: translate(-25px, 20px);
+    transform: translate(-55px, 45px);
   }
   85% {
-    transform: translate(30px, 8px);
+    transform: translate(65px, 15px);
   }
   100% {
     transform: translate(0, 0);
@@ -211,13 +211,13 @@
     transform: translate(0, 0);
   }
   20% {
-    transform: translate(35px, -20px);
+    transform: translate(75px, -45px);
   }
   50% {
-    transform: translate(-50px, -5px);
+    transform: translate(-110px, -10px);
   }
   75% {
-    transform: translate(-15px, 25px);
+    transform: translate(-30px, 55px);
   }
   100% {
     transform: translate(0, 0);
@@ -229,13 +229,13 @@
     transform: translate(0, 0);
   }
   35% {
-    transform: translate(-30px, 25px);
+    transform: translate(-65px, 55px);
   }
   65% {
-    transform: translate(45px, 15px);
+    transform: translate(100px, 30px);
   }
   90% {
-    transform: translate(10px, -20px);
+    transform: translate(20px, -45px);
   }
   100% {
     transform: translate(0, 0);
@@ -247,13 +247,13 @@
     transform: translate(0, 0);
   }
   22% {
-    transform: translate(-45px, 5px);
+    transform: translate(-100px, 10px);
   }
   48% {
-    transform: translate(15px, 30px);
+    transform: translate(30px, 65px);
   }
   78% {
-    transform: translate(55px, -10px);
+    transform: translate(120px, -20px);
   }
   100% {
     transform: translate(0, 0);

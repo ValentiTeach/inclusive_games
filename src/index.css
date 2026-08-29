@@ -133,8 +133,15 @@ a {
   border-radius: var(--radius-sm);
 }
 
+/*
+ * The purely decorative background layer (.decor — floating icons,
+ * blobs) is intentionally exempt from both reduced-motion switches
+ * below: it carries no information and nothing depends on tracking
+ * it, unlike in-game animations (countdowns, transitions, confetti),
+ * which still fully respect the user's motion preference.
+ */
 @media (prefers-reduced-motion: reduce) {
-  *,
+  *:not(.decor):not(.decor *),
   *::before,
   *::after {
     animation-duration: 0.001ms !important;
@@ -145,8 +152,8 @@ a {
 }
 
 /* Ручний перемикач у Налаштуваннях — діє незалежно від системної теми */
-.force-reduced-motion,
-.force-reduced-motion *,
+.force-reduced-motion :not(.decor):not(.decor *),
+.force-reduced-motion:not(.decor):not(.decor *),
 .force-reduced-motion *::before,
 .force-reduced-motion *::after {
   animation-duration: 0.001ms !important;

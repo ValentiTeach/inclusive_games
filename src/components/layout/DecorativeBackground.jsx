@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Brain, HeartHandshake, Puzzle, Sparkles, Smile, ShieldCheck, Target, Zap } from 'lucide-react'
 import { playClick } from '../../lib/sound'
 import './DecorativeBackground.css'
@@ -20,8 +20,10 @@ const FLOATING_ICONS = [
 ]
 
 const SPARK_COUNT = 6
+const FLEE_RADIUS = 130
+const FLEE_STRENGTH = 46
 
-function FloatingIcon({ Icon, top, left, size, duration, drift, interactive, effect }) {
+function FloatingIcon({ Icon, top, left, size, duration, drift, interactive, effect, iconRef }) {
   const [active, setActive] = useState(false)
 
   function handleClick() {
@@ -46,7 +48,13 @@ function FloatingIcon({ Icon, top, left, size, duration, drift, interactive, eff
       style={{ top, left, animationDuration: `${duration}s` }}
       onClick={interactive ? handleClick : undefined}
     >
-      <Icon className="decor__icon" size={size} style={{ animationDuration: `${duration * 0.8}s` }} aria-hidden="true" />
+      <Icon
+        ref={iconRef}
+        className="decor__icon"
+        size={size}
+        style={{ animationDuration: `${duration * 0.8}s` }}
+        aria-hidden="true"
+      />
       {effect === 'burst' && active && (
         <span className="decor__sparks">
           {Array.from({ length: SPARK_COUNT }, (_, i) => (
@@ -58,7 +66,86 @@ function FloatingIcon({ Icon, top, left, size, duration, drift, interactive, eff
   )
 }
 
+// A small patch of dots that lights up in a "flashlight" ring following
+// the cursor. Position is driven centrally (see DecorativeBackground's
+// tick loop) rather than by mousemove/mouseleave props on this element:
+// .app-content sits in a higher stacking context (needed to fix an
+// earlier bleed-through bug) and would intercept pointer events over
+// this whole area even though nothing is visibly drawn there, so a
+// listener on the grid itself would never fire. Tracking the cursor
+// globally and computing "is it over this grid" ourselves sidesteps
+// that entirely — the same trick already used for the fleeing icons.
+function InteractiveGrid({ top, left, right, bottom, gridRef, glowRef }) {
+  return (
+    <div className="decor__grid" ref={gridRef} style={{ top, left, right, bottom }}>
+      <div className="decor__grid-dots" />
+      <div ref={glowRef} className="decor__grid-glow" />
+    </div>
+  )
+}
+
+const GRID_ZONES = [
+  { id: 'grid-a', bottom: '6%', left: '1%' },
+  { id: 'grid-b', top: '18%', right: '1%' },
+]
+
 function DecorativeBackground() {
+  const iconRefs = useRef([])
+  const gridRefs = useRef([])
+  const glowRefs = useRef([])
+  const mouseRef = useRef({ x: -9999, y: -9999 })
+
+  useEffect(() => {
+    function handleMove(event) {
+      mouseRef.current = { x: event.clientX, y: event.clientY }
+    }
+
+    let frameId
+    function tick() {
+      const { x: mx, y: my } = mouseRef.current
+
+      iconRefs.current.forEach((el) => {
+        if (!el) return
+        const rect = el.getBoundingClientRect()
+        const cx = rect.left + rect.width / 2
+        const cy = rect.top + rect.height / 2
+        const dx = cx - mx
+        const dy = cy - my
+        const dist = Math.hypot(dx, dy)
+
+        if (dist < FLEE_RADIUS && dist > 0.5) {
+          const strength = (1 - dist / FLEE_RADIUS) * FLEE_STRENGTH
+          el.style.translate = `${((dx / dist) * strength).toFixed(1)}px ${((dy / dist) * strength).toFixed(1)}px`
+        } else {
+          el.style.translate = '0px 0px'
+        }
+      })
+
+      gridRefs.current.forEach((gridEl, i) => {
+        const glowEl = glowRefs.current[i]
+        if (!gridEl || !glowEl) return
+        const rect = gridEl.getBoundingClientRect()
+        const inside = mx >= rect.left && mx <= rect.right && my >= rect.top && my <= rect.bottom
+        if (inside) {
+          glowEl.style.setProperty('--gx', `${mx - rect.left}px`)
+          glowEl.style.setProperty('--gy', `${my - rect.top}px`)
+        } else {
+          glowEl.style.setProperty('--gx', '-9999px')
+        }
+      })
+
+      frameId = requestAnimationFrame(tick)
+    }
+
+    window.addEventListener('mousemove', handleMove, { passive: true })
+    frameId = requestAnimationFrame(tick)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMove)
+      cancelAnimationFrame(frameId)
+    }
+  }, [])
+
   return (
     <div className="decor" aria-hidden="true">
       <div className="decor__photo" />
@@ -66,8 +153,29 @@ function DecorativeBackground() {
       <span className="decor__blob decor__blob--b" />
       <span className="decor__blob decor__blob--c" />
       <span className="decor__blob decor__blob--d" />
-      {FLOATING_ICONS.map((icon) => (
-        <FloatingIcon key={icon.id} {...icon} />
+      {GRID_ZONES.map((zone, index) => (
+        <InteractiveGrid
+          key={zone.id}
+          top={zone.top}
+          left={zone.left}
+          right={zone.right}
+          bottom={zone.bottom}
+          gridRef={(el) => {
+            gridRefs.current[index] = el
+          }}
+          glowRef={(el) => {
+            glowRefs.current[index] = el
+          }}
+        />
+      ))}
+      {FLOATING_ICONS.map((icon, index) => (
+        <FloatingIcon
+          key={icon.id}
+          {...icon}
+          iconRef={(el) => {
+            iconRefs.current[index] = el
+          }}
+        />
       ))}
     </div>
   )

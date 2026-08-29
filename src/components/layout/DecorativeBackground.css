@@ -319,6 +319,42 @@
   }
 }
 
+/*
+ * Interactive dot-grid patches: a dim static grid plus a brighter copy
+ * of the same grid, masked to a ring that follows the cursor — so the
+ * grid seems to "light up" wherever you move the mouse within it.
+ * `--gx`/`--gy` are written directly by JS (see InteractiveGrid), no
+ * React re-render involved.
+ */
+.decor__grid {
+  position: absolute;
+  width: 260px;
+  height: 260px;
+}
+
+.decor__grid-dots,
+.decor__grid-glow {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, currentColor 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+.decor__grid-dots {
+  color: var(--accent);
+  opacity: 0.22;
+}
+
+.decor__grid-glow {
+  --gx: -9999px;
+  --gy: -9999px;
+  color: var(--accent-strong);
+  opacity: 0.9;
+  mask-image: radial-gradient(circle 90px at var(--gx) var(--gy), black 0%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle 90px at var(--gx) var(--gy), black 0%, transparent 100%);
+  transition: opacity 0.2s ease;
+}
+
 /* Sparkles-icon click: a small ring of sparks flies outward and fades */
 .decor__sparks {
   position: absolute;

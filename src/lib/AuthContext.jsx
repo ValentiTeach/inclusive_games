@@ -31,11 +31,12 @@ export function AuthProvider({ children }) {
     // teachers/psychologists (email sign-up has always been the
     // teacher-facing path — students join by code instead).
     if (!currentUser.is_anonymous) {
+      const registeredName = currentUser.user_metadata?.display_name
       const { data: created } = await supabase
         .from('profiles')
         .insert({
           id: currentUser.id,
-          display_name: currentUser.email?.split('@')[0] ?? 'Вчитель',
+          display_name: registeredName || currentUser.email?.split('@')[0] || 'Вчитель',
           role: 'teacher',
         })
         .select('display_name, group_id, role')

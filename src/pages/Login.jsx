@@ -16,7 +16,9 @@ function Login() {
   const [joinStatus, setJoinStatus] = useState('idle')
   const [joinError, setJoinError] = useState(null)
 
+  const [teacherMode, setTeacherMode] = useState('login')
   const [email, setEmail] = useState('')
+  const [teacherName, setTeacherName] = useState('')
   const [emailStatus, setEmailStatus] = useState('idle')
   const [emailError, setEmailError] = useState(null)
 
@@ -60,14 +62,24 @@ function Login() {
     setEmailStatus('sending')
     setEmailError(null)
 
+    const isRegister = teacherMode === 'register'
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      options: {
+        emailRedirectTo: window.location.origin,
+        shouldCreateUser: isRegister,
+        ...(isRegister && teacherName.trim() ? { data: { display_name: teacherName.trim() } } : {}),
+      },
     })
 
     if (error) {
       setEmailStatus('idle')
-      setEmailError('Не вдалося надіслати посилання. Перевір адресу і спробуй ще раз.')
+      setEmailError(
+        isRegister
+          ? 'Не вдалося зареєструватися. Перевір адресу і спробуй ще раз.'
+          : 'Акаунт із такою поштою не знайдено. Якщо в тебе ще немає акаунта — перейди на «Реєстрація».',
+      )
       return
     }
 
@@ -94,7 +106,7 @@ function Login() {
           <button type="button" className="login__card" onClick={() => setMode('teacher')}>
             <GraduationCap className="login__card-icon" aria-hidden="true" />
             <span className="login__card-title">Я вчитель / психолог</span>
-            <span className="login__card-text">Вхід поштою — без пароля, посиланням.</span>
+            <span className="login__card-text">Вхід або реєстрація поштою — без пароля, посиланням.</span>
           </button>
         </div>
       )}
@@ -145,18 +157,66 @@ function Login() {
           <button type="button" className="login__back" onClick={() => setMode('choose')}>
             ← Назад
           </button>
-          <h2 className="login__panel-title">Вхід поштою</h2>
+          <h2 className="login__panel-title">
+            {teacherMode === 'register' ? 'Реєстрація' : 'Вхід поштою'}
+          </h2>
+
           {emailStatus !== 'sent' && (
-            <p className="login__hint">
-              Уводиш пошту вперше? Акаунт вчителя/психолога створиться автоматично — окремої реєстрації не потрібно.
-            </p>
+            <div className="login__tabs" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={teacherMode === 'login'}
+                className={`login__tab${teacherMode === 'login' ? ' login__tab--active' : ''}`}
+                onClick={() => {
+                  setTeacherMode('login')
+                  setEmailError(null)
+                }}
+              >
+                Вхід
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={teacherMode === 'register'}
+                className={`login__tab${teacherMode === 'register' ? ' login__tab--active' : ''}`}
+                onClick={() => {
+                  setTeacherMode('register')
+                  setEmailError(null)
+                }}
+              >
+                Реєстрація
+              </button>
+            </div>
           )}
+
+          {emailStatus !== 'sent' && teacherMode === 'register' && (
+            <p className="login__hint">Створи акаунт вчителя/психолога — посилання для входу прийде на пошту.</p>
+          )}
+
           {emailStatus === 'sent' ? (
             <p className="login__sent">
-              Перевір пошту <strong>{email}</strong> і перейди за посиланням, щоб увійти.
+              Перевір пошту <strong>{email}</strong> і перейди за посиланням, щоб{' '}
+              {teacherMode === 'register' ? 'завершити реєстрацію' : 'увійти'}.
             </p>
           ) : (
             <form className="login__form" onSubmit={handleEmail}>
+              {teacherMode === 'register' && (
+                <>
+                  <label className="login__label" htmlFor="login-teacher-name">
+                    Ім'я
+                  </label>
+                  <input
+                    id="login-teacher-name"
+                    type="text"
+                    required
+                    value={teacherName}
+                    onChange={(event) => setTeacherName(event.target.value)}
+                    className="login__input"
+                    placeholder="Ім'я"
+                  />
+                </>
+              )}
               <label className="login__label" htmlFor="login-email">
                 Електронна пошта
               </label>
@@ -171,7 +231,11 @@ function Login() {
               />
               {emailError && <p className="login__error">{emailError}</p>}
               <button type="submit" className="login__submit" disabled={emailStatus === 'sending'}>
-                {emailStatus === 'sending' ? 'Надсилаємо…' : 'Надіслати посилання для входу'}
+                {emailStatus === 'sending'
+                  ? 'Надсилаємо…'
+                  : teacherMode === 'register'
+                    ? 'Зареєструватися'
+                    : 'Надіслати посилання для входу'}
               </button>
             </form>
           )}

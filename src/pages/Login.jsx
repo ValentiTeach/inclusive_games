@@ -146,6 +146,11 @@ function Login() {
             ← Назад
           </button>
           <h2 className="login__panel-title">Вхід поштою</h2>
+          {emailStatus !== 'sent' && (
+            <p className="login__hint">
+              Уводиш пошту вперше? Акаунт вчителя/психолога створиться автоматично — окремої реєстрації не потрібно.
+            </p>
+          )}
           {emailStatus === 'sent' ? (
             <p className="login__sent">
               Перевір пошту <strong>{email}</strong> і перейди за посиланням, щоб увійти.

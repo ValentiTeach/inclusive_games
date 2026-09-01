@@ -183,6 +183,12 @@
   color: var(--login-text-muted);
 }
 
+.login__hint {
+  color: var(--login-text-muted);
+  font-size: 13.5px;
+  margin: 0 0 var(--space-4);
+}
+
 .login__submit {
   margin-top: var(--space-1);
   font-family: var(--font-display);

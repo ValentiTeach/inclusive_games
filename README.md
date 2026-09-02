@@ -56,11 +56,43 @@ Supabase показує попередження, що Gmail призначен�
 30 листів/год — окремо робити нічого не треба. Якщо колись стане мало,
 значення змінюється в `Authentication → Rate Limits`.
 
-### 3. Шаблон листа й редиректи
+### 3. Шаблон листа
 
-- `Authentication → Emails → Magic link or OTP` — тема й тіло листа українською.
-- `Authentication → URL Configuration` — `Site URL` і `Redirect URLs` мають
-  вказувати на прод-домен, інакше посилання з листа веде не туди.
+`Authentication → Emails → Magic link or OTP`. Subject: `Вхід до Inclusive Games`.
+
+Тіло листа не має починатися з тексту, що дублює Subject: Gmail показує тему,
+а поруч — сніпет із початку тіла, і повторення читається як «Вхід до Inclusive
+Games - Вхід до Inclusive Games…». Тому перший рядок тіла несе іншу інформацію,
+а назва платформи винесена в підпис унизу.
+
+```html
+<div style="font-family:-apple-system,'Segoe UI',Roboto,Arial,sans-serif;background:#f4f6fb;padding:32px 16px;">
+  <div style="max-width:480px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;border:1px solid #e3e8f0;">
+    <h1 style="font-size:22px;line-height:1.3;color:#16233a;margin:0 0 12px;">Твоє посилання для входу</h1>
+    <p style="font-size:15px;line-height:1.6;color:#4a5568;margin:0 0 24px;">Натисни кнопку нижче, щоб увійти до платформи як <strong style="color:#16233a;">{{ .Email }}</strong>. Посилання діє обмежений час і спрацює лише один раз.</p>
+    <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#0b4da3;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:13px 28px;border-radius:999px;">Увійти до платформи</a>
+    <p style="font-size:13px;line-height:1.6;color:#8a97ab;margin:28px 0 0;border-top:1px solid #e3e8f0;padding-top:20px;">Якщо вхід запитував не ти — просто проігноруй цей лист, нічого не зміниться.<br><strong style="color:#4f8ce0;">Inclusive Games</strong></p>
+  </div>
+</div>
+```
+
+Кольори (`#0b4da3`, `#4f8ce0`) — ті самі, що `--login-accent-2` / `--login-accent`
+у `src/pages/Login.css`. Стилі inline, бо поштові клієнти не тягнуть зовнішній CSS.
+
+### 4. Редиректи
+
+`Authentication → URL Configuration` — `Site URL` і `Redirect URLs` мають
+вказувати на прод-домен, інакше посилання з листа веде не туди.
+
+### Як перевірити, що все працює
+
+Конфіг SMTP і шаблонів не лежить у базі, тому перевіряти треба за фактом
+відправки — у `auth_logs`:
+
+- `POST /otp` зі `status: 200` (а не `429 over_email_send_rate_limit`);
+- відсутність запису `mail.send` з `mail_from: noreply@mail.app.supabase.io` —
+  вбудований сервіс завжди його пише, власний SMTP ні;
+- далі `GET /verify` 303 + подія `login` — користувач реально зайшов.
 
 ## Розробка
 

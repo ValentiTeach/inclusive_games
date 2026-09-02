@@ -3,6 +3,16 @@
 Когнітивні ігри для дітей. React + Vite, автентифікація і дані — Supabase,
 деплой — Vercel (inclusive-games.vercel.app).
 
+## Supabase-проєкт
+
+Ref: **`uwostumcmuxmocexpnic`** (назва `inclusive-games`).
+Дашборд: https://supabase.com/dashboard/project/uwostumcmuxmocexpnic
+
+Перевірити, що відкритий саме він, найпростіше в `Authentication → Users`:
+там має бути акаунт вчителя на Gmail, а не список `*@historic-up.local`
+(це інший проєкт в тому ж акаунті — легко переплутати, і тоді налаштування
+пошти застосовуються не туди, а прод далі шле дефолтні англійські листи).
+
 ## Налаштування пошти (Supabase Auth)
 
 Вхід і реєстрація вчителя працюють через magic-link (`signInWithOtp`), тобто

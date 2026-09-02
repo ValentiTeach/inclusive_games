@@ -67,6 +67,29 @@ test('app shell fills the viewport height', async ({ page }) => {
   }
 })
 
+// The viewport-height test above can't catch a missing fallback: it runs in a
+// browser that understands svh, so the page looks right either way. This one
+// inspects the shipped stylesheet instead — the minifier once dropped the vh
+// fallback as a "duplicate min-height", and only the built artifact shows it.
+test('shipped stylesheet keeps a viewport-height fallback for old browsers', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/')
+
+  const href = await page.locator('link[rel="stylesheet"]').first().getAttribute('href')
+  expect(href).toBeTruthy()
+
+  const css = await (await request.get(href)).text()
+
+  expect(css, 'plain vh fallback must survive minification').toMatch(
+    /\.app-shell\{[^}]*min-height:100vh/,
+  )
+  expect(css, 'svh upgrade must stay behind @supports').toMatch(
+    /@supports\s*\(height:\s*100svh\)/,
+  )
+})
+
 test('page does not scroll sideways', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto('/')

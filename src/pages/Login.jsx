@@ -75,11 +75,16 @@ function Login() {
 
     if (error) {
       setEmailStatus('idle')
-      setEmailError(
-        isRegister
-          ? 'Не вдалося зареєструватися. Перевір адресу і спробуй ще раз.'
-          : 'Акаунт із такою поштою не знайдено. Якщо в тебе ще немає акаунта — перейди на «Реєстрація».',
-      )
+
+      if (error.status === 429 || error.code === 'over_email_send_rate_limit') {
+        setEmailError('Забагато спроб за короткий час. Зачекай кілька хвилин і спробуй ще раз.')
+      } else if (!isRegister && (error.status === 400 || error.status === 422)) {
+        setEmailError('Акаунт із такою поштою не знайдено. Якщо в тебе ще немає акаунта — перейди на «Реєстрація».')
+      } else {
+        setEmailError(
+          `${isRegister ? 'Не вдалося зареєструватися' : 'Не вдалося увійти'}: ${error.message || 'невідома помилка'}`,
+        )
+      }
       return
     }
 

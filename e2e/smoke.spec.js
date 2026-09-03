@@ -114,6 +114,20 @@ test.describe('theme switch', () => {
     expect(await bodyBackground(page)).toBe(systemDark)
   })
 
+  test('the header button flips the theme from any page', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto('/')
+
+    const before = await bodyBackground(page)
+    await page.getByRole('button', { name: 'Увімкнути світлу тему' }).click()
+
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    expect(await bodyBackground(page)).not.toBe(before)
+
+    // The icon swaps to offer the opposite direction.
+    await expect(page.getByRole('button', { name: 'Увімкнути темну тему' })).toBeVisible()
+  })
+
   test('keeps the chosen theme across a reload, with no light flash on the way', async ({
     page,
   }) => {

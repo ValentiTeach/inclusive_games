@@ -90,6 +90,44 @@ test('shipped stylesheet keeps a viewport-height fallback for old browsers', asy
   )
 })
 
+// The unit tests assert the data-theme attribute, which would still pass if the
+// CSS selector behind it were misspelled. These check the colour actually
+// painted, so the whole chain — click, attribute, tokens, paint — is covered.
+test.describe('theme switch', () => {
+  const bodyBackground = (page) =>
+    page.evaluate(() => getComputedStyle(document.body).backgroundColor)
+
+  test('follows a dark system by default and can be overridden both ways', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto('/settings')
+
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+    const systemDark = await bodyBackground(page)
+
+    await page.getByRole('button', { name: 'Світла', exact: true }).click()
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    const forcedLight = await bodyBackground(page)
+    expect(forcedLight).not.toBe(systemDark)
+
+    await page.getByRole('button', { name: 'Темна', exact: true }).click()
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+    expect(await bodyBackground(page)).toBe(systemDark)
+  })
+
+  test('keeps the chosen theme across a reload, with no light flash on the way', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
+    await page.goto('/settings')
+    await page.getByRole('button', { name: 'Темна', exact: true }).click()
+
+    await page.reload()
+
+    // Set by the inline script in index.html, before the bundle even parses.
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  })
+})
+
 test('page does not scroll sideways', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto('/')

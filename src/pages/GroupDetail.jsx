@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Trophy, Medal, Award } from 'lucide-react'
+import { Trophy, Medal, Award, Download } from 'lucide-react'
 import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
 import { getGroupDetails } from '../lib/groups'
+import { buildGroupCsv, csvFileName, downloadCsv } from '../lib/csv'
+import { GAMES } from '../data/games'
 import './GroupDetail.css'
 
 const RANK_ICONS = [Trophy, Medal, Award]
+
+const GAME_TITLES = Object.fromEntries(GAMES.map((game) => [game.id, game.title]))
 
 function formatDate(iso) {
   if (!iso) return '—'
@@ -93,6 +97,26 @@ function GroupDetail() {
       <p>
         Код для приєднання: <span className="group-detail__code">{data.group.join_code}</span>
       </p>
+
+      {data.students.length > 0 && (
+        <button
+          type="button"
+          className="group-detail__export"
+          onClick={() =>
+            downloadCsv(
+              csvFileName(data.group.name),
+              buildGroupCsv({
+                students: data.students,
+                results: data.results ?? [],
+                gameTitles: GAME_TITLES,
+              }),
+            )
+          }
+        >
+          <Download size={16} aria-hidden="true" />
+          Експортувати CSV
+        </button>
+      )}
 
       {data.students.length === 0 ? (
         <p>До цієї групи ще ніхто не приєднався.</p>

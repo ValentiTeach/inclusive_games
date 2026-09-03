@@ -66,7 +66,7 @@ export async function getGroupDetails(groupId) {
   if (studentIds.length > 0) {
     const { data, error: resultsError } = await supabase
       .from('results')
-      .select('user_id, score, played_at')
+      .select('user_id, game_id, level_id, score, played_at')
       .in('user_id', studentIds)
 
     if (resultsError) throw resultsError
@@ -98,7 +98,10 @@ export async function getGroupDetails(groupId) {
     }
   })
 
-  return { group, students: students_ }
+  // Raw attempts ride along with the aggregates: the table shows averages, but
+  // the CSV export needs every attempt, and re-querying for it would mean a
+  // second round trip for data already in hand.
+  return { group, students: students_, results }
 }
 
 export async function joinGroup(code, displayName) {

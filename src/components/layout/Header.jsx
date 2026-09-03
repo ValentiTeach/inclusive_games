@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import { Home, Gamepad2, TrendingUp, Settings, LogIn } from 'lucide-react'
 import { useAuth } from '../../lib/authContext'
 import RoleBadge from '../ui/RoleBadge'
+import ThemeToggle from '../ui/ThemeToggle'
 import './Header.css'
 
 const NAV_LINKS = [
@@ -48,6 +49,7 @@ function Header() {
             {accountLabel}
             {profile?.role && <RoleBadge role={profile.role} />}
           </NavLink>
+          <ThemeToggle />
         </nav>
       </div>
     </header>

@@ -38,6 +38,12 @@
   position: absolute;
   border-radius: 50%;
   opacity: 0.5;
+}
+
+/* On a dark ground the same blobs read as haze behind the text rather than as
+   soft colour, so they are dialled back instead of being tuned for light only. */
+:root[data-theme='dark'] .decor__blob {
+  opacity: 0.28;
   filter: blur(70px);
 }
 

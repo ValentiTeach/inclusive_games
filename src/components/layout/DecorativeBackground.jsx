@@ -22,6 +22,9 @@ const FLOATING_ICONS = [
 const SPARK_COUNT = 6
 const FLEE_RADIUS = 130
 const FLEE_STRENGTH = 46
+// How much of the remaining distance to the target an icon covers each frame.
+// Low enough to glide, high enough not to lag visibly behind a quick cursor.
+const FLEE_EASE = 0.12
 
 function FloatingIcon({ Icon, top, left, size, duration, drift, interactive, effect, iconRef }) {
   const [active, setActive] = useState(false)
@@ -94,6 +97,8 @@ function DecorativeBackground() {
   const gridRefs = useRef([])
   const glowRefs = useRef([])
   const mouseRef = useRef({ x: -9999, y: -9999 })
+  // Per-icon offset currently applied, eased toward its target each frame.
+  const offsetsRef = useRef([])
 
   useEffect(() => {
     function handleMove(event) {
@@ -104,21 +109,44 @@ function DecorativeBackground() {
     function tick() {
       const { x: mx, y: my } = mouseRef.current
 
-      iconRefs.current.forEach((el) => {
+      iconRefs.current.forEach((el, i) => {
         if (!el) return
+
+        const current = offsetsRef.current[i] ?? (offsetsRef.current[i] = { x: 0, y: 0 })
+
         const rect = el.getBoundingClientRect()
-        const cx = rect.left + rect.width / 2
-        const cy = rect.top + rect.height / 2
+        // The rect already includes the offset written last frame, so subtract
+        // it to get where the icon would sit at rest. Measuring the displaced
+        // position instead would make each icon chase its own push.
+        const cx = rect.left + rect.width / 2 - current.x
+        const cy = rect.top + rect.height / 2 - current.y
         const dx = cx - mx
         const dy = cy - my
         const dist = Math.hypot(dx, dy)
 
+        let targetX = 0
+        let targetY = 0
         if (dist < FLEE_RADIUS && dist > 0.5) {
-          const strength = (1 - dist / FLEE_RADIUS) * FLEE_STRENGTH
-          el.style.translate = `${((dx / dist) * strength).toFixed(1)}px ${((dy / dist) * strength).toFixed(1)}px`
-        } else {
-          el.style.translate = '0px 0px'
+          // Squared falloff rather than linear: the push builds gently as the
+          // cursor closes in, instead of switching on at the edge of the radius.
+          const closeness = 1 - dist / FLEE_RADIUS
+          const strength = closeness * closeness * FLEE_STRENGTH
+          targetX = (dx / dist) * strength
+          targetY = (dy / dist) * strength
         }
+
+        // Ease toward the target instead of jumping to it. Without this the
+        // icon snaps to full offset the moment the cursor enters the radius and
+        // snaps back on the way out — which reads as darting, not drifting.
+        current.x += (targetX - current.x) * FLEE_EASE
+        current.y += (targetY - current.y) * FLEE_EASE
+
+        if (Math.abs(current.x) < 0.05 && Math.abs(current.y) < 0.05) {
+          current.x = 0
+          current.y = 0
+        }
+
+        el.style.translate = `${current.x.toFixed(2)}px ${current.y.toFixed(2)}px`
       })
 
       gridRefs.current.forEach((gridEl, i) => {

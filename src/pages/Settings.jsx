@@ -34,6 +34,30 @@ function Settings() {
 
       <div className="settings__row">
         <div>
+          <h2>Тема</h2>
+          <p>«Системна» повторює налаштування твого пристрою.</p>
+        </div>
+        <div className="settings__options">
+          {[
+            ['system', 'Системна'],
+            ['light', 'Світла'],
+            ['dark', 'Темна'],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={settings.theme === value ? 'settings__option is-active' : 'settings__option'}
+              onClick={() => update({ theme: value })}
+              aria-pressed={settings.theme === value}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings__row">
+        <div>
           <h2>Розмір тексту</h2>
           <p>Збільшений текст зручніше читати на екрані.</p>
         </div>

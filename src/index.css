@@ -58,33 +58,36 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0b1220;
-    --surface: #121b2e;
-    --surface-muted: #16213a;
-    --text: #eef2f8;
-    --text-muted: #93a3bd;
-    --border: #223252;
+/* The dark palette hangs off one attribute rather than a media query: JS
+ * resolves the "system" preference into an explicit light/dark value (see
+ * resolveTheme in lib/settings.js), so this list exists once and can't drift
+ * out of sync with a second copy. An inline script in index.html sets the
+ * attribute before first paint, so there's no light flash on a dark system. */
+:root[data-theme='dark'] {
+  --bg: #0b1220;
+  --surface: #121b2e;
+  --surface-muted: #16213a;
+  --text: #eef2f8;
+  --text-muted: #93a3bd;
+  --border: #223252;
 
-    --accent: #4f8ce0;
-    --accent-strong: #7db0ee;
-    --accent-contrast: #04101f;
+  --accent: #4f8ce0;
+  --accent-strong: #7db0ee;
+  --accent-contrast: #04101f;
 
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 10px 24px -12px rgba(0, 0, 0, 0.55);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 10px 24px -12px rgba(0, 0, 0, 0.55);
 
-    --bg-overlay: rgba(11, 18, 32, 0.74);
+  --bg-overlay: rgba(11, 18, 32, 0.74);
 
-    --cat-attention: #5fb7d6;
-    --cat-attention-bg: rgba(95, 183, 214, 0.16);
-    --cat-memory: #a892f0;
-    --cat-memory-bg: rgba(168, 146, 240, 0.16);
-    --cat-thinking: #e0ac52;
-    --cat-thinking-bg: rgba(224, 172, 82, 0.18);
-    --cat-reaction: #e88096;
-    --cat-reaction-bg: rgba(232, 128, 150, 0.16);
-  }
+  --cat-attention: #5fb7d6;
+  --cat-attention-bg: rgba(95, 183, 214, 0.16);
+  --cat-memory: #a892f0;
+  --cat-memory-bg: rgba(168, 146, 240, 0.16);
+  --cat-thinking: #e0ac52;
+  --cat-thinking-bg: rgba(224, 172, 82, 0.18);
+  --cat-reaction: #e88096;
+  --cat-reaction-bg: rgba(232, 128, 150, 0.16);
 }
 
 * {

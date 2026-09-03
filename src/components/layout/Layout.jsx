@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
-import { getSettings, applySettings } from '../../lib/settings'
+import { getSettings, applySettings, watchSystemTheme } from '../../lib/settings'
 import Header from './Header'
 import Footer from './Footer'
 import DecorativeBackground from './DecorativeBackground'
@@ -9,6 +9,9 @@ import './Layout.css'
 function Layout() {
   useEffect(() => {
     applySettings(getSettings())
+    // Someone on "system" who flips their OS theme mid-session should follow
+    // along without reloading.
+    return watchSystemTheme(() => applySettings(getSettings()))
   }, [])
 
   return (

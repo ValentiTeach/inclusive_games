@@ -7,6 +7,25 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inclusive Games — когнітивні ігри для дітей</title>
+    <script>
+      // Runs before first paint so a dark-theme user never sees a white flash
+      // while the bundle loads. Deliberately duplicates a few lines of
+      // lib/settings.js: React starts too late to prevent the flash, and the
+      // storage key and the shape it reads are asserted in settings.test.js.
+      (function () {
+        try {
+          var stored = JSON.parse(localStorage.getItem('inclusive-games:settings') || '{}')
+          var theme = stored.theme || 'system'
+          if (theme === 'system') {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          }
+          document.documentElement.dataset.theme = theme
+          document.documentElement.style.colorScheme = theme
+        } catch (e) {
+          document.documentElement.dataset.theme = 'light'
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

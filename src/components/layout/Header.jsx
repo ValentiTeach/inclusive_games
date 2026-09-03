@@ -46,7 +46,9 @@ function Header() {
             }
           >
             {!user && <LogIn size={16} aria-hidden="true" />}
-            {accountLabel}
+            <span className="site-header__account-label" title={accountLabel}>
+              {accountLabel}
+            </span>
             {profile?.role && <RoleBadge role={profile.role} />}
           </NavLink>
           <ThemeToggle />

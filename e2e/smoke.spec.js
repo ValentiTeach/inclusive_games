@@ -142,6 +142,53 @@ test.describe('theme switch', () => {
   })
 })
 
+// Both of these were reported as "the site looks broken" and neither showed up
+// at the 1280px the other tests use — they only appear on a wide screen with a
+// signed-in teacher's long email in the header.
+test.describe('wide screens', () => {
+  test('header stays on one row instead of dropping the nav below the logo', async ({ page }) => {
+    await page.setViewportSize({ width: 1830, height: 1000 })
+    await page.goto('/')
+
+    // Stand in for a signed-in teacher: the email is what overflows the row.
+    await page.evaluate(() => {
+      const label = document.querySelector('.site-header__account-label')
+      if (label) label.textContent = 'andrysiak.valentin@gmail.com'
+    })
+
+    const height = await page
+      .locator('.site-header__inner')
+      .evaluate((el) => el.getBoundingClientRect().height)
+    expect(height, 'a wrapped header is roughly double height').toBeLessThan(90)
+  })
+
+  test('no horizontal scrollbar at any common width', async ({ page }) => {
+    for (const width of [1830, 1440, 1280, 1024, 768]) {
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto('/')
+
+      const overflows = await page.evaluate(
+        () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+      )
+      expect(overflows, `page scrolls sideways at ${width}px`).toBe(false)
+    }
+  })
+
+  // The photo is a fixed-width rectangle pinned top-right, so without a mask it
+  // ends in hard straight edges partway across a wide page — invisible on the
+  // light ground, a stuck-on patch on the dark one.
+  test('background photo fades out instead of ending in a hard edge', async ({ page }) => {
+    await page.setViewportSize({ width: 1830, height: 1000 })
+    await page.goto('/')
+
+    const mask = await page
+      .locator('.decor__photo')
+      .evaluate((el) => getComputedStyle(el).maskImage || getComputedStyle(el).webkitMaskImage)
+
+    expect(mask).toContain('radial-gradient')
+  })
+})
+
 test('page does not scroll sideways', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto('/')

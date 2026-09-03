@@ -4,7 +4,13 @@
 }
 
 .site-header__inner {
-  max-width: 1080px;
+  /* Wider than the 1080px content column on purpose. Logo plus five nav items
+     plus a signed-in teacher's email needs more than 1080px, so capping the bar
+     at the content width dropped the nav onto a second line even on a 1830px
+     screen — the row ran out of container, not of screen. The bar has its own
+     full-width background, so it can be wider than the text column without
+     looking detached. Wrapping stays allowed for genuinely narrow windows. */
+  max-width: 1400px;
   margin: 0 auto;
   padding: var(--space-4) var(--space-5);
   display: flex;
@@ -82,4 +88,22 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  /* A signed-in teacher's label is their full email, long enough to push the
+     row past the container and drop the nav onto a second line. min-width:0
+     lets it actually shrink inside the flex row (auto is the default and
+     refuses to go below the content width), and the label below then clips
+     with an ellipsis. The full address stays on the account page and in the
+     title attribute. */
+  min-width: 0;
+  max-width: 220px;
+}
+
+.site-header__link {
+  white-space: nowrap;
+}
+
+.site-header__account-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

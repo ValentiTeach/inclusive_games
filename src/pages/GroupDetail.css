@@ -21,6 +21,27 @@
   color: var(--accent-strong);
 }
 
+.group-detail__export {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  padding: 8px 16px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.group-detail__export:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
 .group-detail__error {
   color: var(--cat-reaction);
 }

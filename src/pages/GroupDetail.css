@@ -42,6 +42,50 @@
   color: var(--accent-strong);
 }
 
+.group-detail__row-actions {
+  display: flex;
+  gap: var(--space-1);
+  justify-content: flex-end;
+}
+
+.group-detail__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.group-detail__icon-btn:hover:not(:disabled) {
+  color: var(--accent-strong);
+  border-color: var(--border);
+}
+
+.group-detail__icon-btn--danger:hover:not(:disabled) {
+  color: var(--cat-reaction);
+}
+
+.group-detail__icon-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.group-detail__name-input {
+  width: 100%;
+  min-width: 120px;
+  padding: 6px 10px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+}
+
 .group-detail__error {
   color: var(--cat-reaction);
 }

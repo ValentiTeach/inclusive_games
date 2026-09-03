@@ -104,6 +104,26 @@ export async function getGroupDetails(groupId) {
   return { group, students: students_, results }
 }
 
+/**
+ * Both of these go through RPCs rather than a plain update: "the teacher of
+ * this student's group" isn't something the profiles RLS policies can express,
+ * so the check lives in a SECURITY DEFINER function on the server side.
+ */
+export async function renameStudent(studentId, displayName) {
+  const { error } = await supabase.rpc('teacher_rename_student', {
+    p_student_id: studentId,
+    p_display_name: displayName,
+  })
+  if (error) throw error
+}
+
+export async function removeStudentFromGroup(studentId) {
+  const { error } = await supabase.rpc('teacher_remove_student', {
+    p_student_id: studentId,
+  })
+  if (error) throw error
+}
+
 export async function joinGroup(code, displayName) {
   const {
     data: { session },

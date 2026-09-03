@@ -46,13 +46,17 @@
   position: absolute;
   border-radius: 50%;
   opacity: 0.5;
+  /* The blur is what makes these read as soft colour rather than as circles.
+     It belongs to every theme — an earlier edit accidentally left it only in
+     the dark override, which turned the light theme's blobs into hard-edged
+     discs. */
+  filter: blur(70px);
 }
 
 /* On a dark ground the same blobs read as haze behind the text rather than as
-   soft colour, so they are dialled back instead of being tuned for light only. */
+   soft colour, so they are dialled back — opacity only, never the blur. */
 :root[data-theme='dark'] .decor__blob {
   opacity: 0.28;
-  filter: blur(70px);
 }
 
 .decor__blob--a {

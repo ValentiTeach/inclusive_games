@@ -1,6 +1,25 @@
 .site-footer {
-  border-top: 1px solid var(--border);
+  position: relative;
   margin-top: var(--space-8);
+}
+
+/* A plain border-top drew a hard rule edge to edge across the decorative
+   background, which cut the page in two. This is the same 1px line, but faded
+   out at both ends so it separates the footer without slicing the layout. */
+.site-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--border) 18%,
+    var(--border) 82%,
+    transparent
+  );
 }
 
 .site-footer__inner {

@@ -174,6 +174,21 @@ test.describe('wide screens', () => {
     }
   })
 
+  // The blur is what turns these into soft colour; with it applied only in the
+  // dark override the light theme showed hard-edged discs.
+  test('background blobs stay blurred in the light theme', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
+    await page.setViewportSize({ width: 1830, height: 1000 })
+    await page.goto('/')
+
+    const filter = await page
+      .locator('.decor__blob')
+      .first()
+      .evaluate((el) => getComputedStyle(el).filter)
+
+    expect(filter).toContain('blur')
+  })
+
   // The photo is a fixed-width rectangle pinned top-right, so without a mask it
   // ends in hard straight edges partway across a wide page — invisible on the
   // light ground, a stuck-on patch on the dark one.
@@ -187,6 +202,60 @@ test.describe('wide screens', () => {
 
     expect(mask).toContain('radial-gradient')
   })
+})
+
+// The icons used to jump straight to their full offset the moment the cursor
+// entered their radius, which read as darting away rather than drifting.
+//
+// Measured as the largest single-frame change relative to the total distance
+// travelled: eased motion covers a fraction of the gap per frame, a snap covers
+// all of it in one. Comparing "just after" against "settled" instead would not
+// work — the icons also drift on their own, which moves those numbers around
+// for reasons that have nothing to do with easing.
+test('background icons glide away from the cursor rather than jumping', async ({ page }) => {
+  await page.setViewportSize({ width: 1830, height: 1000 })
+  await page.goto('/')
+
+  const { maxStep, maxOffset } = await page.evaluate(async () => {
+    // The offset is written to the icon itself, not to its positioning wrapper.
+    const el = document.querySelector('.decor__icon')
+    const read = () => {
+      const t = getComputedStyle(el).translate
+      if (!t || t === 'none') return 0
+      const [x = 0, y = 0] = t.split(' ').map(parseFloat)
+      return Math.hypot(x, y || 0)
+    }
+
+    const samples = [read()]
+
+    // The move is dispatched from inside the sampling loop on purpose: driving
+    // it from the test runner would let the animation frame that reacts to it
+    // run before sampling starts, hiding the very jump this is looking for.
+    const rect = el.getBoundingClientRect()
+    window.dispatchEvent(
+      new MouseEvent('mousemove', {
+        clientX: rect.left + rect.width / 2 + 30,
+        clientY: rect.top + rect.height / 2,
+      }),
+    )
+
+    for (let i = 0; i < 30; i++) {
+      await new Promise(requestAnimationFrame)
+      samples.push(read())
+    }
+
+    let maxStep = 0
+    for (let i = 1; i < samples.length; i++) {
+      maxStep = Math.max(maxStep, Math.abs(samples[i] - samples[i - 1]))
+    }
+    return { maxStep, maxOffset: Math.max(...samples) }
+  })
+
+  expect(maxOffset, 'the icon should be pushed away at all').toBeGreaterThan(3)
+  expect(
+    maxStep,
+    'no single frame should cover most of the distance — that is a jump, not a glide',
+  ).toBeLessThan(maxOffset * 0.5)
 })
 
 test('page does not scroll sideways', async ({ page }) => {

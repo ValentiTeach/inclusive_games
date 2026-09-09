@@ -1,12 +1,14 @@
-import { Navigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/authContext'
 import { supabase, isCloudConfigured } from '../lib/supabaseClient'
+import { clearAllResults } from '../games/engine/storage'
 import Button from '../components/ui/Button'
 import RoleBadge from '../components/ui/RoleBadge'
 import './Account.css'
 
 function Account() {
   const { user, profile, loading } = useAuth()
+  const navigate = useNavigate()
 
   if (!isCloudConfigured) {
     return (
@@ -34,6 +36,18 @@ function Account() {
     await supabase.auth.signOut()
   }
 
+  /**
+   * Передача комп'ютера наступній дитині. Не те саме, що вихід учителя:
+   * анонімний акаунт неможливо відкрити знову, тож разом із сеансом треба
+   * прибрати й локальну історію ігор — вона лежить на браузері, а не на
+   * дитині, і без цього поїхала б у хмару вже під іншим іменем.
+   */
+  async function handleHandover() {
+    await supabase.auth.signOut()
+    clearAllResults()
+    navigate('/join')
+  }
+
   const isAnonymous = user.is_anonymous
   const isTeacher = profile?.role === 'teacher' || profile?.role === 'moderator'
   const isModerator = profile?.role === 'moderator'
@@ -53,6 +67,10 @@ function Account() {
             інший телефон чи комп'ютер. Щоб зберігати прогрес між пристроями, попроси вчителя
             або дорослого зареєструватися поштою.
           </p>
+          <p className="account__note">
+            Закінчив і за комп'ютер сяде хтось інший? Заверши сеанс — тоді наступна дитина
+            почне свій, і ваші результати не змішаються. Твої залишаться у вчителя в групі.
+          </p>
         </>
       ) : (
         <p>
@@ -71,9 +89,15 @@ function Account() {
             Адмін-панель
           </Button>
         )}
-        <Button onClick={handleSignOut} variant="secondary">
-          Вийти
-        </Button>
+        {isAnonymous ? (
+          <Button onClick={handleHandover} variant="secondary">
+            Завершити сеанс і передати комп'ютер
+          </Button>
+        ) : (
+          <Button onClick={handleSignOut} variant="secondary">
+            Вийти
+          </Button>
+        )}
       </div>
     </section>
   )

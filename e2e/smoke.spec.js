@@ -267,3 +267,15 @@ test('page does not scroll sideways', async ({ page }) => {
   )
   expect(overflows).toBe(false)
 })
+
+// Сторінка входу за кодом тепер рендерить форму лише після асинхронної
+// перевірки, хто вже на пристрої. У справжньому браузері й на зібраному коді
+// це має завершитися формою, а не залишити дитину перед «Перевіряємо…».
+// (Поведінку при відмові сервера перевіряє Join.test.jsx — тут getSession
+// читає localStorage і до мережі не доходить.)
+test('join page resolves its identity check and shows the form', async ({ page }) => {
+  await page.goto('/join')
+
+  await expect(page.getByLabel('Код групи')).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByLabel('Твоє ім’я')).toBeVisible()
+})

@@ -43,3 +43,49 @@
   font-size: 14px;
   margin: 0;
 }
+
+.join__whoami {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.join__whoami-line {
+  margin: 0;
+}
+
+.join__note {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* Не Button: «Це не я» стоїть поруч із головною дією і не має з нею
+   змагатися — це поворот убік, а не наступний крок. */
+.join__linkish {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.join__linkish:hover {
+  color: var(--accent-strong);
+}
+
+.join__actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}

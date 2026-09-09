@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { clearAllResults } from '../games/engine/storage'
 
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 const CODE_LENGTH = 6
@@ -124,20 +125,134 @@ export async function removeStudentFromGroup(studentId) {
   if (error) throw error
 }
 
-export async function joinGroup(code, displayName) {
+/**
+ * Why a join can fail, as a machine-readable token. The server raises exactly
+ * these strings (supabase/migrations/20260909_shared_computer_identity.sql);
+ * the Ukrainian wording lives in the UI, so both sides only have to agree on
+ * the tokens.
+ */
+export const JOIN_ERROR = {
+  NOT_SIGNED_IN: 'not_signed_in',
+  EMPTY_NAME: 'empty_name',
+  NAME_TOO_LONG: 'name_too_long',
+  INVALID_CODE: 'invalid_code',
+  NOT_A_STUDENT: 'not_a_student',
+  SESSION_BELONGS_TO_OTHER: 'session_belongs_to_other',
+  UNKNOWN: 'unknown',
+}
+
+const SERVER_REASONS = Object.values(JOIN_ERROR).filter(
+  (reason) => reason !== JOIN_ERROR.UNKNOWN,
+)
+
+export class JoinError extends Error {
+  constructor(reason, cause) {
+    super(reason)
+    this.name = 'JoinError'
+    this.reason = reason
+    this.cause = cause
+  }
+}
+
+/**
+ * PostgREST spreads one Postgres error across message/details/hint, and which
+ * field carries what has changed between its versions. The server writes the
+ * token into both MESSAGE and DETAIL, and this reads all three, so no single
+ * field is load-bearing.
+ */
+export function joinErrorReason(error) {
+  const parts = [error?.details, error?.message, error?.hint].filter(
+    (part) => typeof part === 'string',
+  )
+  return (
+    SERVER_REASONS.find((reason) => parts.some((part) => part.includes(reason))) ??
+    JOIN_ERROR.UNKNOWN
+  )
+}
+
+/**
+ * The same normalisation the server applies before comparing names, so the
+ * page never offers "continue as ..." for a name the server will then reject.
+ */
+export function normalizeStudentName(value) {
+  return (value ?? '').trim().replace(/\s+/g, ' ')
+}
+
+export function isSameStudent(a, b) {
+  const left = normalizeStudentName(a).toLocaleLowerCase('uk')
+  return left !== '' && left === normalizeStudentName(b).toLocaleLowerCase('uk')
+}
+
+/**
+ * Who this browser is signed in as, from the join page's point of view.
+ * Returns null when there is no session at all.
+ */
+export async function getSessionIdentity() {
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  if (!session) {
-    const { error: anonError } = await supabase.auth.signInAnonymously()
-    if (anonError) throw anonError
+  if (!session) return null
+
+  const { user } = session
+  const { data } = await supabase
+    .from('profiles')
+    .select('display_name, role, group_id')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  return {
+    userId: user.id,
+    isAnonymous: Boolean(user.is_anonymous),
+    email: user.email ?? null,
+    displayName: data?.display_name ?? null,
+    role: data?.role ?? null,
+    groupId: data?.group_id ?? null,
+  }
+}
+
+/**
+ * Hand the computer to the next child: end the previous child's session and
+ * start a clean one, so the two get separate accounts and separate results.
+ *
+ * The local history is cleared *between* the sign-out and the sign-in, and the
+ * order matters. Those keys are per-browser, and migrateLocalHistoryOnce fires
+ * off onAuthStateChange with a flag keyed by user id — so a brand-new account
+ * would otherwise upload the previous child's attempts to the cloud as its own.
+ */
+export async function startFreshStudentSession() {
+  await supabase.auth.signOut()
+  clearAllResults()
+  const { error } = await supabase.auth.signInAnonymously()
+  if (error) throw error
+}
+
+/**
+ * Join a group by code.
+ *
+ * With `startFresh`, the caller has established that the person at the keyboard
+ * is not whoever the current session belongs to (see startFreshStudentSession).
+ * Without it, an existing session is reused — which is correct for a child
+ * coming back to their own device, and is refused by the server otherwise.
+ */
+export async function joinGroup(code, displayName, { startFresh = false } = {}) {
+  if (startFresh) {
+    await startFreshStudentSession()
+  } else {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session) {
+      const { error: anonError } = await supabase.auth.signInAnonymously()
+      if (anonError) throw new JoinError(JOIN_ERROR.UNKNOWN, anonError)
+    }
   }
 
   const { error } = await supabase.rpc('join_group', {
     p_code: code.trim().toUpperCase(),
-    p_display_name: displayName.trim(),
+    p_display_name: normalizeStudentName(displayName),
   })
 
-  if (error) throw error
+  if (error) throw new JoinError(joinErrorReason(error), error)
 }

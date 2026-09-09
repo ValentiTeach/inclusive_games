@@ -1,4 +1,5 @@
 import { pickRandom, shuffle } from '../engine/random'
+import { trialMetrics } from '../engine/metrics'
 
 const SHAPES = ['circle', 'square', 'triangle', 'diamond', 'star', 'hexagon', 'cross', 'pentagon']
 const COLORS = ['#2d6bd6', '#2e8b57', '#c8862b', '#7c5cd9', '#c0392b', '#1c9099', '#d24b64', '#8a5a34']
@@ -120,19 +121,17 @@ export function checkAnswer(trial, optionId) {
 }
 
 export function scoring(results) {
-  const total = results.length
-  const correct = results.filter((r) => r.correct).length
-  const accuracy = total ? Math.round((correct / total) * 100) : 0
-  const avgReaction = total
-    ? Math.round(results.reduce((sum, r) => sum + r.reactionTimeMs, 0) / total)
-    : 0
+  // Рядки нижче будуються з metrics, а не рахуються вдруге: інакше екран і
+  // база могли б розійтися, і ніхто б цього не помітив.
+  const metrics = trialMetrics(results)
 
   return {
-    score: accuracy,
+    score: metrics.accuracy_pct ?? 0,
     entries: [
-      { label: 'Правильно', value: `${correct} / ${total}` },
-      { label: 'Точність', value: `${accuracy}%` },
-      { label: 'Середній час', value: `${avgReaction} мс` },
+      { label: 'Правильно', value: `${metrics.correct} / ${metrics.total}` },
+      { label: 'Точність', value: `${metrics.accuracy_pct ?? 0}%` },
+      { label: 'Середній час', value: `${metrics.avg_rt_ms ?? 0} мс` },
     ],
+    metrics,
   }
 }

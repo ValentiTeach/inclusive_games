@@ -17,6 +17,9 @@ export async function pushResult(gameId, attempt) {
     game_id: gameId,
     score: attempt.score,
     entries: attempt.entries,
+    // Спроби, зіграні до появи колонки, метрик не мають. null тут читається
+    // так само, як у старих рядках бази: «не міряли».
+    metrics: attempt.metrics ?? null,
     level_id: attempt.levelId,
     played_at: attempt.date,
   })
@@ -34,6 +37,7 @@ export async function migrateLocalHistoryOnce(userId) {
       game_id: game.id,
       score: attempt.score,
       entries: attempt.entries,
+      metrics: attempt.metrics ?? null,
       level_id: attempt.levelId,
       played_at: attempt.date,
     })),
@@ -56,7 +60,7 @@ export async function fetchCloudHistory() {
 
   const { data, error } = await supabase
     .from('results')
-    .select('game_id, score, entries, level_id, played_at')
+    .select('game_id, score, entries, metrics, level_id, played_at')
     .eq('user_id', session.user.id)
     .order('played_at', { ascending: false })
 
@@ -68,6 +72,7 @@ export async function fetchCloudHistory() {
     byGame[row.game_id].push({
       score: row.score,
       entries: row.entries,
+      metrics: row.metrics ?? undefined,
       levelId: row.level_id,
       date: row.played_at,
     })

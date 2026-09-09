@@ -1,5 +1,6 @@
 import { pickRandom } from '../engine/random'
 import { clampScore } from '../engine/score'
+import { defineMetrics } from '../engine/metrics'
 
 export const PADS = [
   { id: 'red', label: 'Червона', hex: '#c0392b' },
@@ -37,6 +38,12 @@ export function scoring({ roundsCompleted, targetLength }) {
   const success = roundsCompleted >= targetLength
   const score = clampScore((roundsCompleted / targetLength) * 100)
 
+  const metrics = defineMetrics({
+    rounds_completed: roundsCompleted,
+    target_length: targetLength,
+    reached_target: success,
+  })
+
   return {
     score,
     entries: [
@@ -47,5 +54,6 @@ export function scoring({ roundsCompleted, targetLength }) {
         value: success ? 'Ціль досягнута' : `Помилка на кроці ${roundsCompleted + 1}`,
       },
     ],
+    metrics,
   }
 }

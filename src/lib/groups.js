@@ -67,7 +67,7 @@ export async function getGroupDetails(groupId) {
   if (studentIds.length > 0) {
     const { data, error: resultsError } = await supabase
       .from('results')
-      .select('user_id, game_id, level_id, score, played_at')
+      .select('user_id, game_id, level_id, score, metrics, played_at')
       .in('user_id', studentIds)
 
     if (resultsError) throw resultsError

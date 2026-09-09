@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { generateTrial, checkAnswer, scoring } from './goNoGo.config'
 import { playClick, playCorrect, playWrong } from '../../lib/sound'
+import { now } from '../engine/time'
 import './GoNoGoPlayArea.css'
 
 const GAP_MS = 350
@@ -10,12 +11,16 @@ function GoNoGoPlayArea({ level, onFinish }) {
   const [trial, setTrial] = useState(() => generateTrial())
   const [stage, setStage] = useState('stimulus')
   const respondedRef = useRef(false)
+  // Час рахується від появи фігури, а не від початку проби: у Go/No-Go саме
+  // швидкість натискання і показує гальмування, а прогавлена проба часу не має.
+  const stimulusAtRef = useRef(0)
   const resultsRef = useRef([])
 
   useEffect(() => {
     if (stage !== 'stimulus') return undefined
 
     respondedRef.current = false
+    stimulusAtRef.current = now()
     const timer = setTimeout(() => {
       resolveTrial(respondedRef.current ? 'pressed' : 'ignored')
     }, level.windowMs)
@@ -24,9 +29,9 @@ function GoNoGoPlayArea({ level, onFinish }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, trial])
 
-  function resolveTrial(response) {
+  function resolveTrial(response, reactionTimeMs) {
     const { correct, outcome } = checkAnswer(trial, response)
-    resultsRef.current.push({ correct, outcome })
+    resultsRef.current.push({ correct, outcome, reactionTimeMs })
 
     if (outcome === 'hit') playCorrect()
     else if (outcome === 'false-alarm') playWrong()
@@ -50,7 +55,7 @@ function GoNoGoPlayArea({ level, onFinish }) {
     if (stage !== 'stimulus' || respondedRef.current) return
     respondedRef.current = true
     playClick()
-    resolveTrial('pressed')
+    resolveTrial('pressed', Math.round(now() - stimulusAtRef.current))
   }
 
   return (

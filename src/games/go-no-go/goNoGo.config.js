@@ -1,3 +1,4 @@
+import { trialMetrics } from '../engine/metrics'
 export const config = {
   id: 'go-no-go',
   title: 'Go / No-Go',
@@ -30,18 +31,31 @@ export function checkAnswer(trial, response) {
 }
 
 export function scoring(results) {
-  const total = results.length
-  const correct = results.filter((r) => r.correct).length
-  const falseAlarms = results.filter((r) => r.outcome === 'false-alarm').length
-  const misses = results.filter((r) => r.outcome === 'miss').length
-  const accuracy = total ? Math.round((correct / total) * 100) : 0
+  const count = (outcome) => results.filter((r) => r.outcome === outcome).length
+  const hits = count('hit')
+  const misses = count('miss')
+  const falseAlarms = count('false-alarm')
+  const correctRejections = count('correct-reject')
+
+  // Загальна точність тут мало що каже: пропустити сигнал і натиснути на
+  // заборонений — різні дефіцити (увага проти гальмування), і в базі вони
+  // мають лишатися розрізненими.
+  const metrics = trialMetrics(results, {
+    hits,
+    misses,
+    false_alarms: falseAlarms,
+    correct_rejections: correctRejections,
+    go_trials: hits + misses,
+    nogo_trials: falseAlarms + correctRejections,
+  })
 
   return {
-    score: accuracy,
+    score: metrics.accuracy_pct ?? 0,
     entries: [
-      { label: 'Точність', value: `${accuracy}%` },
+      { label: 'Точність', value: `${metrics.accuracy_pct ?? 0}%` },
       { label: 'Хибні натискання', value: String(falseAlarms) },
       { label: 'Пропущені сигнали', value: String(misses) },
     ],
+    metrics,
   }
 }

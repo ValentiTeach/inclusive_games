@@ -1,5 +1,6 @@
 import { shuffle } from '../engine/random'
 import { clampScore } from '../engine/score'
+import { defineMetrics } from '../engine/metrics'
 
 export const config = {
   id: 'schulte',
@@ -34,6 +35,15 @@ export function scoring({ elapsedMs, mistakes, size }) {
   const idealSeconds = size * size * 1.3
   const score = clampScore(100 - Math.max(0, seconds - idealSeconds) * 3 - mistakes * 8)
 
+  // Час у мілісекундах, а не в секундах з одним знаком, як на екрані: округлення
+  // для читання не має ставати округленням для вимірювання.
+  const metrics = defineMetrics({
+    duration_ms: Math.round(elapsedMs),
+    errors: mistakes,
+    grid_size: size,
+    total: size * size,
+  })
+
   return {
     score,
     entries: [
@@ -41,5 +51,6 @@ export function scoring({ elapsedMs, mistakes, size }) {
       { label: 'Розмір таблиці', value: `${size} × ${size}` },
       { label: 'Помилкові натискання', value: String(mistakes) },
     ],
+    metrics,
   }
 }

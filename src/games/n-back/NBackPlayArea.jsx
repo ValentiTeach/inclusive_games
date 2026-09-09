@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { generateTrial, checkAnswer, scoring } from './nback.config'
 import { playClick, playCorrect, playWrong } from '../../lib/sound'
+import { now } from '../engine/time'
 import './NBackPlayArea.css'
 
 const GAP_MS = 300
@@ -11,12 +12,20 @@ function NBackPlayArea({ level, onFinish }) {
   const [stage, setStage] = useState('stimulus')
   const [feedback, setFeedback] = useState(null)
   const pressedRef = useRef(false)
+  // Час від появи літери до натискання. У n-back він показує, наскільки легко
+  // дитина дістає елемент із робочої памʼяті, — точність сама цього не каже.
+  const stimulusAtRef = useRef(0)
+  const reactionRef = useRef(undefined)
   const resultsRef = useRef([])
 
   function resolveTrial(pressed) {
     if (index >= level.n) {
       const { correct, outcome } = checkAnswer(trialData, index, pressed)
-      resultsRef.current.push({ correct, outcome })
+      resultsRef.current.push({
+        correct,
+        outcome,
+        reactionTimeMs: pressed ? reactionRef.current : undefined,
+      })
 
       if (outcome === 'hit') {
         playCorrect()
@@ -46,6 +55,8 @@ function NBackPlayArea({ level, onFinish }) {
     if (stage !== 'stimulus') return undefined
 
     pressedRef.current = false
+    reactionRef.current = undefined
+    stimulusAtRef.current = now()
     const timer = setTimeout(() => {
       resolveTrial(pressedRef.current)
     }, level.stimulusMs)
@@ -57,6 +68,7 @@ function NBackPlayArea({ level, onFinish }) {
   function handlePress() {
     if (stage !== 'stimulus' || pressedRef.current || index < level.n) return
     pressedRef.current = true
+    reactionRef.current = Math.round(now() - stimulusAtRef.current)
     playClick()
   }
 

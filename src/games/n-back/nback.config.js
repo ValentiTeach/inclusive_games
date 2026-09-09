@@ -1,4 +1,5 @@
 import { pickRandom } from '../engine/random'
+import { trialMetrics } from '../engine/metrics'
 
 const LETTERS = ['Б', 'Г', 'Д', 'Ж', 'К', 'Л', 'П', 'Р']
 const MATCH_RATE = 0.35
@@ -54,19 +55,25 @@ export function checkAnswer(trial, index, pressed) {
 }
 
 export function scoring(results) {
-  const total = results.length
-  const correct = results.filter((r) => r.correct).length
-  const hits = results.filter((r) => r.outcome === 'hit').length
-  const targets = results.filter((r) => r.outcome === 'hit' || r.outcome === 'miss').length
-  const falseAlarms = results.filter((r) => r.outcome === 'false-alarm').length
-  const accuracy = total ? Math.round((correct / total) * 100) : 0
+  const count = (outcome) => results.filter((r) => r.outcome === outcome).length
+  const hits = count('hit')
+  const misses = count('miss')
+  const falseAlarms = count('false-alarm')
+
+  const metrics = trialMetrics(results, {
+    hits,
+    misses,
+    targets: hits + misses,
+    false_alarms: falseAlarms,
+  })
 
   return {
-    score: accuracy,
+    score: metrics.accuracy_pct ?? 0,
     entries: [
-      { label: 'Точність', value: `${accuracy}%` },
-      { label: 'Знайдено збігів', value: `${hits} / ${targets}` },
+      { label: 'Точність', value: `${metrics.accuracy_pct ?? 0}%` },
+      { label: 'Знайдено збігів', value: `${hits} / ${hits + misses}` },
       { label: 'Хибні натискання', value: String(falseAlarms) },
     ],
+    metrics,
   }
 }

@@ -1,3 +1,5 @@
+import { metricLabel, orderMetricKeys } from '../games/engine/metrics'
+
 // Excel is the target here, not a parser: teachers open these files to build a
 // report or show a parent. Two details matter for that and are easy to get
 // wrong — the separator and the byte order mark. See toCsv/downloadCsv below.
@@ -38,13 +40,51 @@ export function formatCsvDate(iso) {
 }
 
 /**
+ * Which measurement columns this particular export needs.
+ *
+ * Not a fixed list: games measure different things, and a hardcoded header
+ * would either carry columns nobody in this group played or quietly drop a
+ * game's own numbers. The union of what is actually present keeps both from
+ * happening — a group that only played Schulte gets Schulte's columns.
+ */
+function metricColumnsIn(results) {
+  const keys = new Set()
+  for (const result of results) {
+    if (result.metrics) Object.keys(result.metrics).forEach((key) => keys.add(key))
+  }
+  return orderMetricKeys([...keys])
+}
+
+function metricCell(metrics, key) {
+  const value = metrics?.[key]
+  if (value === undefined || value === null) return ''
+  if (typeof value === 'boolean') return value ? 'так' : 'ні'
+  return value
+}
+
+/**
  * One row per attempt — raw data a teacher can sort and pivot, rather than a
  * pre-chewed summary. Students with no attempts still get a row, otherwise they
  * silently vanish from the export and look like they were never in the group.
+ *
+ * Beyond the score, each measurement a game recorded gets its own column, so
+ * the questions the score cannot answer — is this child fast but careless, or
+ * slow and careful; is the reaction time coming down week to week — are a pivot
+ * table away instead of impossible. Attempts played before the metrics column
+ * existed leave those cells blank.
  */
 export function buildGroupCsv({ students, results, gameTitles = {} }) {
-  const header = ['Учень', 'Гра', 'Рівень', 'Бал', 'Дата']
+  const metricKeys = metricColumnsIn(results)
+  const header = [
+    'Учень',
+    'Гра',
+    'Рівень',
+    'Бал',
+    'Дата',
+    ...metricKeys.map(metricLabel),
+  ]
   const rows = [header]
+  const blankMetrics = metricKeys.map(() => '')
 
   const byStudent = new Map()
   for (const result of results) {
@@ -58,7 +98,7 @@ export function buildGroupCsv({ students, results, gameTitles = {} }) {
     )
 
     if (attempts.length === 0) {
-      rows.push([student.displayName, '—', '', '', ''])
+      rows.push([student.displayName, '—', '', '', '', ...blankMetrics])
       continue
     }
 
@@ -69,6 +109,7 @@ export function buildGroupCsv({ students, results, gameTitles = {} }) {
         attempt.level_id ?? '',
         attempt.score,
         formatCsvDate(attempt.played_at),
+        ...metricKeys.map((key) => metricCell(attempt.metrics, key)),
       ])
     }
   }

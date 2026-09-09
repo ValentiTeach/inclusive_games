@@ -10,8 +10,8 @@ export function getResults(gameId) {
   }
 }
 
-export function saveResult(gameId, { score, entries, levelId }) {
-  const attempt = { score, entries, levelId, date: new Date().toISOString() }
+export function saveResult(gameId, { score, entries, levelId, metrics }) {
+  const attempt = { score, entries, metrics, levelId, date: new Date().toISOString() }
   const updated = [attempt, ...getResults(gameId)].slice(0, HISTORY_LIMIT)
   localStorage.setItem(KEY_PREFIX + gameId, JSON.stringify(updated))
   return updated

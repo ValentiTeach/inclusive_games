@@ -1,5 +1,6 @@
 import { shuffle } from '../engine/random'
 import { clampScore } from '../engine/score'
+import { defineMetrics } from '../engine/metrics'
 
 export const SYMBOLS = [
   { id: 'circle-blue', shape: 'circle', color: '#2d6bd6' },
@@ -52,6 +53,15 @@ export function scoring({ moves, elapsedMs, pairs }) {
   const seconds = elapsedMs / 1000
   const score = clampScore(100 - (moves - pairs) * 5)
 
+  // extra_moves — це і є показник пам'яті: ходи понад мінімально можливі.
+  // Самі moves без pairs не порівняти між рівнями з різною кількістю пар.
+  const metrics = defineMetrics({
+    duration_ms: Math.round(elapsedMs),
+    moves,
+    pairs,
+    extra_moves: moves - pairs,
+  })
+
   return {
     score,
     entries: [
@@ -59,5 +69,6 @@ export function scoring({ moves, elapsedMs, pairs }) {
       { label: 'Час', value: `${seconds.toFixed(1)} с` },
       { label: 'Пар знайдено', value: `${pairs} / ${pairs}` },
     ],
+    metrics,
   }
 }

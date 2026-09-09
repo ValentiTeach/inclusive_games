@@ -159,3 +159,114 @@ describe('csvFileName', () => {
     expect(csvFileName('///')).toBe('grupa-2026-06-15.csv')
   })
 })
+
+describe('buildGroupCsv — колонки вимірювань', () => {
+  const marichka = { id: 'u1', displayName: 'Марічка' }
+
+  function attempt(metrics, overrides = {}) {
+    return {
+      user_id: 'u1',
+      game_id: 'stroop',
+      level_id: 'easy',
+      score: 75,
+      played_at: '2026-03-01T10:00:00',
+      metrics,
+      ...overrides,
+    }
+  }
+
+  it('gives every measurement its own column, under a Ukrainian heading', () => {
+    const csv = buildGroupCsv({
+      students: [marichka],
+      results: [attempt({ accuracy_pct: 75, avg_rt_ms: 450 })],
+    })
+    const [header, row] = csv.split('\r\n')
+
+    expect(header).toBe('Учень;Гра;Рівень;Бал;Дата;Точність, %;Сер. час, мс')
+    expect(row).toBe('Марічка;stroop;easy;75;01.03.2026 10:00;75;450')
+  })
+
+  /**
+   * Заголовок не фіксований навмисно: ігри міряють різне. Жорсткий список або
+   * ніс би колонки, в які ця група ніколи не грала, або тихо викидав би
+   * показники окремої гри.
+   */
+  it('carries the union of what the group actually played', () => {
+    const csv = buildGroupCsv({
+      students: [marichka],
+      results: [
+        attempt({ accuracy_pct: 75, avg_rt_ms: 450 }),
+        attempt({ grid_size: 5, duration_ms: 42_345 }, { game_id: 'schulte' }),
+      ],
+    })
+    const [header, stroopRow, schulteRow] = csv.split('\r\n')
+
+    expect(header).toContain('Розмір таблиці')
+    expect(header).toContain('Сер. час, мс')
+    // Кожен рядок лишає порожнім те, чого його гра не міряє.
+    expect(stroopRow.endsWith(';;')).toBe(true)
+    expect(schulteRow).toContain('42345')
+  })
+
+  it('leaves the cells blank for an attempt played before metrics existed', () => {
+    const csv = buildGroupCsv({
+      students: [marichka],
+      results: [attempt({ accuracy_pct: 75 }), attempt(undefined)],
+    })
+    const [, withMetrics, without] = csv.split('\r\n')
+
+    expect(withMetrics).toBe('Марічка;stroop;easy;75;01.03.2026 10:00;75')
+    expect(without).toBe('Марічка;stroop;easy;75;01.03.2026 10:00;')
+  })
+
+  it('keeps a measured zero, which is not the same as a blank', () => {
+    const csv = buildGroupCsv({
+      students: [marichka],
+      results: [attempt({ errors: 0 })],
+    })
+
+    expect(csv.split('\r\n')[1].endsWith(';0')).toBe(true)
+  })
+
+  it('writes a boolean as a word a teacher can filter on', () => {
+    const csv = buildGroupCsv({
+      students: [marichka],
+      results: [attempt({ reached_target: false }, { game_id: 'simon' })],
+    })
+
+    expect(csv.split('\r\n')[1].endsWith(';ні')).toBe(true)
+  })
+
+  it('pads the row of a student who never played, so columns stay aligned', () => {
+    const csv = buildGroupCsv({
+      students: [marichka, { id: 'u2', displayName: 'Іван' }],
+      results: [attempt({ accuracy_pct: 75, avg_rt_ms: 450 })],
+    })
+    const lines = csv.split('\r\n')
+    const columns = (line) => line.split(';').length
+
+    expect(columns(lines[2])).toBe(columns(lines[0]))
+  })
+
+  // Порядок колонок не має плавати від того, у якому порядку діти грали:
+  // вчитель зберігає ці файли й порівнює їх між тижнями.
+  it('orders the columns the same way regardless of attempt order', () => {
+    const shared = { students: [marichka] }
+    const a = attempt({ grid_size: 5 }, { game_id: 'schulte' })
+    const b = attempt({ accuracy_pct: 75 })
+
+    const first = buildGroupCsv({ ...shared, results: [a, b] }).split('\r\n')[0]
+    const second = buildGroupCsv({ ...shared, results: [b, a] }).split('\r\n')[0]
+
+    expect(first).toBe(second)
+  })
+
+  it('exports an unknown measurement under its raw key rather than dropping it', () => {
+    const csv = buildGroupCsv({
+      students: [marichka],
+      results: [attempt({ zebra_count: 3 })],
+    })
+
+    expect(csv.split('\r\n')[0]).toContain('zebra_count')
+  })
+})

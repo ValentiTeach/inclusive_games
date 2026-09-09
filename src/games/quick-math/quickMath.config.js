@@ -1,4 +1,5 @@
 import { pickRandom, randomInt, shuffle } from '../engine/random'
+import { trialMetrics } from '../engine/metrics'
 
 export const config = {
   id: 'quick-math',
@@ -70,19 +71,17 @@ export function checkAnswer(trial, response) {
 }
 
 export function scoring(results) {
-  const total = results.length
-  const correct = results.filter((r) => r.correct).length
-  const accuracy = total ? Math.round((correct / total) * 100) : 0
-  const avgReaction = total
-    ? Math.round(results.reduce((sum, r) => sum + r.reactionTimeMs, 0) / total)
-    : 0
+  // Рядки нижче будуються з metrics, а не рахуються вдруге: інакше екран і
+  // база могли б розійтися, і ніхто б цього не помітив.
+  const metrics = trialMetrics(results)
 
   return {
-    score: accuracy,
+    score: metrics.accuracy_pct ?? 0,
     entries: [
-      { label: 'Правильно', value: `${correct} / ${total}` },
-      { label: 'Точність', value: `${accuracy}%` },
-      { label: 'Середній час на приклад', value: `${avgReaction} мс` },
+      { label: 'Правильно', value: `${metrics.correct} / ${metrics.total}` },
+      { label: 'Точність', value: `${metrics.accuracy_pct ?? 0}%` },
+      { label: 'Середній час на приклад', value: `${metrics.avg_rt_ms ?? 0} мс` },
     ],
+    metrics,
   }
 }

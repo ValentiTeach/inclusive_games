@@ -1,4 +1,5 @@
 import { clampScore } from '../engine/score'
+import { timingMetrics } from '../engine/metrics'
 
 export const config = {
   id: 'reaction-time',
@@ -25,10 +26,9 @@ const GOOD_MS = 250
 const POOR_MS = 900
 
 export function scoring(reactionTimes) {
-  const total = reactionTimes.length
-  const avg = total ? Math.round(reactionTimes.reduce((sum, t) => sum + t, 0) / total) : 0
-  const best = total ? Math.min(...reactionTimes) : 0
-  const score = total
+  const metrics = timingMetrics(reactionTimes)
+  const avg = metrics.avg_rt_ms ?? 0
+  const score = metrics.total
     ? clampScore(100 - ((avg - GOOD_MS) / (POOR_MS - GOOD_MS)) * 100)
     : 0
 
@@ -36,8 +36,9 @@ export function scoring(reactionTimes) {
     score,
     entries: [
       { label: 'Середній час', value: `${avg} мс` },
-      { label: 'Найкращий час', value: `${best} мс` },
-      { label: 'Раундів зіграно', value: String(total) },
+      { label: 'Найкращий час', value: `${metrics.best_rt_ms ?? 0} мс` },
+      { label: 'Раундів зіграно', value: String(metrics.total) },
     ],
+    metrics,
   }
 }

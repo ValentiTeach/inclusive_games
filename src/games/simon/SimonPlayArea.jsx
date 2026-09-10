@@ -91,8 +91,8 @@ function SimonPlayArea({ level, onFinish }) {
 
   useGameKeys({
     enabled: mode === 'waiting',
-    digitCount: PADS.length,
-    onDigit: (index) => handlePadClick(PADS[index].id),
+    optionCount: PADS.length,
+    onOption: (index) => handlePadClick(PADS[index].id),
   })
 
   // Натискання має перевагу над показом. Правильне натискання, що завершує

@@ -30,7 +30,7 @@
   padding: 0;
 }
 
-.memory-pairs__card:hover:not(:disabled) {
+.memory-pairs__card:hover:not([aria-disabled='true']) {
   border-color: var(--accent);
 }
 

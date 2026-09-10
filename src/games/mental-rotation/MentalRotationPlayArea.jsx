@@ -59,8 +59,8 @@ function MentalRotationPlayArea({ level, onFinish }) {
   // як цифри — приймаємо і те, і те.
   useGameKeys({
     enabled: !feedback,
-    digitCount: ANSWERS.length,
-    onDigit: (index) => handleAnswer(ANSWERS[index]),
+    optionCount: ANSWERS.length,
+    onOption: (index) => handleAnswer(ANSWERS[index]),
     onArrow: (direction) => {
       if (direction === 'left') handleAnswer('same')
       if (direction === 'right') handleAnswer('mirrored')

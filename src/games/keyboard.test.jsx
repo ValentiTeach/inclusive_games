@@ -19,6 +19,10 @@ import GoNoGoPlayArea from './go-no-go/GoNoGoPlayArea'
 import { config as goNoGoConfig } from './go-no-go/goNoGo.config'
 import NBackPlayArea from './n-back/NBackPlayArea'
 import { config as nbackConfig } from './n-back/nback.config'
+import SchultePlayArea from './schulte/SchultePlayArea'
+import { config as schulteConfig } from './schulte/schulte.config'
+import MemoryPairsPlayArea from './memory-pairs/MemoryPairsPlayArea'
+import { config as memoryPairsConfig } from './memory-pairs/memoryPairs.config'
 
 function press(key, times = 1) {
   // Кілька натискань усередині одного act() — це і є гонка, яку треба вміти
@@ -291,9 +295,269 @@ describe('розкладку видно, а не треба вгадувати',
     ['Час реакції', reactionTimeConfig],
     ['Go/No-Go', goNoGoConfig],
     ['N-back', nbackConfig],
+    ['Таблиці Шульте', schulteConfig],
+    ['Знайди пару', memoryPairsConfig],
   ])('%s каже, якими клавішами в неї грати', (_name, config) => {
     expect(config.keyHint).toBeDefined()
     expect(config.keyHint.keys).toBeTruthy()
     expect(config.keyHint.text).toBeTruthy()
+  })
+})
+
+/**
+ * Шульте — набір числа, а не навігація стрілками. Стрілки по сітці 5×5
+ * перетворили б пробу зорового пошуку на вправу з навігації: дитина йшла б
+ * клітинками, а не шукала б число очима. Тому клавіатура тут повторює не рух
+ * миші, а сам намір — «я бачу сімнадцять».
+ */
+describe('Таблиці Шульте — набір числа', () => {
+  function cells() {
+    return [...document.querySelectorAll('.schulte__cell')]
+  }
+
+  function foundCount() {
+    return cells().filter((cell) => cell.className.includes('--found')).length
+  }
+
+  // Ціль читаємо саме зі смужки стану: getByText('1') збігся б і з нею, і з
+  // клітинкою «1» у сітці.
+  function currentTarget() {
+    return document.querySelector('.schulte__status strong').textContent
+  }
+
+  it('одна цифра зараховує однозначну ціль', () => {
+    render(<SchultePlayArea level={schulteConfig.levels[0]} onFinish={vi.fn()} />)
+
+    expect(currentTarget()).toBe('1')
+    press('1')
+
+    expect(currentTarget()).toBe('2')
+    expect(foundCount()).toBe(1)
+  })
+
+  // Ціль відома, тож довжина набраного і є ознакою завершення: шукаєш 7 —
+  // вистачить однієї цифри, шукаєш 17 — потрібні дві. Ані таймера, ані Enter.
+  it('двоцифрова ціль чекає на другу цифру, а не спрацьовує на першій', () => {
+    const level = schulteConfig.levels[0]
+    render(<SchultePlayArea level={level} onFinish={vi.fn()} />)
+
+    for (let n = 1; n <= 9; n++) press(String(n))
+    expect(foundCount()).toBe(9)
+
+    press('1')
+    // Після однієї цифри ще нічого не сталося — але це має бути видно.
+    expect(foundCount()).toBe(9)
+    expect(screen.getByText('набрано: 1')).toBeInTheDocument()
+
+    press('0')
+    expect(foundCount()).toBe(10)
+  })
+
+  it('набране можна стерти, не чекаючи на помилку', () => {
+    render(<SchultePlayArea level={schulteConfig.levels[0]} onFinish={vi.fn()} />)
+
+    for (let n = 1; n <= 9; n++) press(String(n))
+    press('9')
+    expect(screen.getByText('набрано: 9')).toBeInTheDocument()
+
+    press('Escape')
+    expect(screen.queryByText(/набрано:/)).not.toBeInTheDocument()
+
+    press('1')
+    press('0')
+    expect(foundCount()).toBe(10)
+  })
+
+  /**
+   * Клавіша робить те саме, що клік. Знайдену клітинку не натиснути — вона
+   * disabled, — тож і набране знайдене число не має ставати помилкою.
+   */
+  it('уже знайдене число не рахується помилкою', () => {
+    const onFinish = vi.fn()
+    const level = schulteConfig.levels[0]
+    render(<SchultePlayArea level={level} onFinish={onFinish} />)
+
+    press('1')
+    press('1')
+    press('1')
+
+    for (let n = 2; n <= level.size * level.size; n++) {
+      for (const digit of String(n)) press(digit)
+    }
+
+    expect(onFinish).toHaveBeenCalledTimes(1)
+    expect(onFinish.mock.calls[0][0].metrics.errors).toBe(0)
+  })
+
+  it('чуже число рахується помилкою так само, як хибний клік', () => {
+    const onFinish = vi.fn()
+    const level = schulteConfig.levels[0]
+    render(<SchultePlayArea level={level} onFinish={onFinish} />)
+
+    press('5')
+
+    for (let n = 1; n <= level.size * level.size; n++) {
+      for (const digit of String(n)) press(digit)
+    }
+
+    expect(onFinish.mock.calls[0][0].metrics.errors).toBe(1)
+  })
+
+  /**
+   * Набрати число, більше за сітку, можна лише коли ціль сама двоцифрова —
+   * інакше кожна цифра розв'язується окремо і «9» на сітці 4×4 це звичайна
+   * клітинка. Тому спершу доходимо до двоцифрової цілі.
+   */
+  it('число поза сіткою просто ігнорується', () => {
+    const onFinish = vi.fn()
+    const level = schulteConfig.levels[0]
+    const total = level.size * level.size
+    render(<SchultePlayArea level={level} onFinish={onFinish} />)
+
+    for (let n = 1; n <= 9; n++) press(String(n))
+    expect(currentTarget()).toBe('10')
+
+    // 99 на сітці 4×4 не існує — натиснути таку клітинку неможливо в принципі.
+    press('9')
+    press('9')
+    expect(currentTarget()).toBe('10')
+
+    for (let n = 10; n <= total; n++) {
+      for (const digit of String(n)) press(digit)
+    }
+
+    expect(onFinish).toHaveBeenCalledTimes(1)
+    expect(onFinish.mock.calls[0][0].metrics.errors).toBe(0)
+  })
+
+  it('усю таблицю можна пройти самими цифрами', () => {
+    const onFinish = vi.fn()
+    const level = schulteConfig.levels[1]
+    render(<SchultePlayArea level={level} onFinish={onFinish} />)
+
+    for (let n = 1; n <= level.size * level.size; n++) {
+      for (const digit of String(n)) press(digit)
+    }
+
+    expect(onFinish).toHaveBeenCalledTimes(1)
+    expect(onFinish.mock.calls[0][0].metrics.grid_size).toBe(5)
+  })
+})
+
+describe('Знайди пару — курсор по сітці', () => {
+  function cards() {
+    return [...document.querySelectorAll('.memory-pairs__card')]
+  }
+
+  function cursorIndex() {
+    return cards().findIndex((card) => card.tabIndex === 0)
+  }
+
+  const level = memoryPairsConfig.levels[0] // 6 пар, 4 колонки → 12 карток, 3 рядки
+
+  it('має один tabstop на всю сітку, а не двадцять кнопок', () => {
+    render(<MemoryPairsPlayArea level={level} onFinish={vi.fn()} />)
+
+    expect(cards()).toHaveLength(12)
+    expect(cards().filter((card) => card.tabIndex === 0)).toHaveLength(1)
+  })
+
+  it('стрілки ходять по рядках і колонках', () => {
+    render(<MemoryPairsPlayArea level={level} onFinish={vi.fn()} />)
+
+    expect(cursorIndex()).toBe(0)
+    press('ArrowRight')
+    expect(cursorIndex()).toBe(1)
+    press('ArrowDown')
+    expect(cursorIndex()).toBe(5)
+    press('ArrowLeft')
+    expect(cursorIndex()).toBe(4)
+    press('ArrowUp')
+    expect(cursorIndex()).toBe(0)
+  })
+
+  /**
+   * Курсор не перестрибує з кінця рядка на початок наступного. У грі на пам'ять
+   * значення має саме розташування, і загортання збивало б просторову картину.
+   */
+  it('на краю сітки курсор лишається на місці, а не загортається', () => {
+    render(<MemoryPairsPlayArea level={level} onFinish={vi.fn()} />)
+
+    press('ArrowLeft')
+    press('ArrowUp')
+    expect(cursorIndex()).toBe(0)
+
+    for (let i = 0; i < 10; i++) press('ArrowRight')
+    expect(cursorIndex()).toBe(3)
+
+    for (let i = 0; i < 10; i++) press('ArrowDown')
+    expect(cursorIndex()).toBe(11)
+  })
+
+  it('Enter перевертає картку під курсором', () => {
+    render(<MemoryPairsPlayArea level={level} onFinish={vi.fn()} />)
+
+    press('ArrowRight')
+    press('Enter')
+
+    expect(cards()[1].className).toContain('is-flipped')
+    expect(screen.getByText('Ходи: 0')).toBeInTheDocument()
+  })
+
+  it('Пробіл робить те саме, що Enter', () => {
+    render(<MemoryPairsPlayArea level={level} onFinish={vi.fn()} />)
+
+    press(' ')
+
+    expect(cards()[0].className).toContain('is-flipped')
+  })
+
+  /**
+   * Пастка, яку легко проґавити: якщо активувати «картку під курсором», а дитина
+   * дійшла до іншої картки Tab'ом, перевернулася б зовсім не та. Курсор іде за
+   * фокусом саме тому.
+   */
+  it('курсор іде за фокусом, тож Tab і Enter не розходяться', () => {
+    render(<MemoryPairsPlayArea level={level} onFinish={vi.fn()} />)
+
+    act(() => {
+      cards()[7].focus()
+    })
+    expect(cursorIndex()).toBe(7)
+
+    press('Enter')
+    expect(cards()[7].className).toContain('is-flipped')
+  })
+
+  /**
+   * Відкриті картки лишаються орієнтирами, повз які треба ходити, тож вони
+   * мусять приймати фокус — звідси aria-disabled замість disabled. Натискання
+   * на них усе одно нічого не робить.
+   */
+  it('відкрита картка не блокує курсор, але й не переживається вдруге', () => {
+    render(<MemoryPairsPlayArea level={level} onFinish={vi.fn()} />)
+
+    press('Enter')
+    expect(cards()[0].getAttribute('aria-disabled')).toBe('true')
+    expect(cards()[0].disabled).toBe(false)
+    expect(screen.getByText('Ходи: 0')).toBeInTheDocument()
+
+    press('Enter')
+    expect(screen.getByText('Ходи: 0')).toBeInTheDocument()
+  })
+
+  it('пару можна зібрати самою клавіатурою', () => {
+    render(<MemoryPairsPlayArea level={level} onFinish={vi.fn()} />)
+
+    // Знаходимо дві картки з однаковою фігурою, перевертаючи їх по черзі.
+    const symbols = cards().map((_, index) => index)
+    expect(symbols.length).toBe(12)
+
+    press('Enter')
+    press('ArrowRight')
+    press('Enter')
+    tick(800)
+
+    expect(screen.getByText('Ходи: 1')).toBeInTheDocument()
   })
 })

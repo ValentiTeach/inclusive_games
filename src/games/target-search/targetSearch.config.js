@@ -14,6 +14,7 @@ export const config = {
     'Натисни на фігуру в сцені, яка точно збігається з ціллю.',
     'Чим більше фігур навколо, тим складніше — уважно порівнюй форму й колір.',
   ],
+  keyHint: { keys: '← ↑ ↓ → та Enter', text: 'вибрати фігуру' },
   levels: [
     { id: 'easy', label: '8 фігур', distractors: 7, trialCount: 6 },
     { id: 'classic', label: '14 фігур', distractors: 13, trialCount: 8 },

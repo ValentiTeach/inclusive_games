@@ -23,6 +23,8 @@ import SchultePlayArea from './schulte/SchultePlayArea'
 import { config as schulteConfig } from './schulte/schulte.config'
 import MemoryPairsPlayArea from './memory-pairs/MemoryPairsPlayArea'
 import { config as memoryPairsConfig } from './memory-pairs/memoryPairs.config'
+import TargetSearchPlayArea from './target-search/TargetSearchPlayArea'
+import { config as targetSearchConfig } from './target-search/targetSearch.config'
 
 function press(key, times = 1) {
   // Кілька натискань усередині одного act() — це і є гонка, яку треба вміти
@@ -297,6 +299,7 @@ describe('розкладку видно, а не треба вгадувати',
     ['N-back', nbackConfig],
     ['Таблиці Шульте', schulteConfig],
     ['Знайди пару', memoryPairsConfig],
+    ['Пошук цілі', targetSearchConfig],
   ])('%s каже, якими клавішами в неї грати', (_name, config) => {
     expect(config.keyHint).toBeDefined()
     expect(config.keyHint.keys).toBeTruthy()
@@ -559,5 +562,133 @@ describe('Знайди пару — курсор по сітці', () => {
     tick(800)
 
     expect(screen.getByText('Ходи: 1')).toBeInTheDocument()
+  })
+})
+
+/**
+ * Пошук цілі — остання гра і найтонша. Фігури розкидані по вузлах ґратки, але
+ * не в кожному, а порядок у DOM перемішаний: «наступна за Tab» лежить у
+ * випадковому місці екрана. Стрілка мусить вести туди, куди показує.
+ */
+describe('Пошук цілі — навігація по сцені', () => {
+  const level = targetSearchConfig.levels[0] // 8 фігур
+
+  function items() {
+    return [...document.querySelectorAll('.target-search__item')]
+  }
+
+  function cursorIndex() {
+    return items().findIndex((item) => item.tabIndex === 0)
+  }
+
+  function positions() {
+    return items().map((item) => ({
+      x: Number.parseFloat(item.style.left),
+      y: Number.parseFloat(item.style.top),
+    }))
+  }
+
+  it('має один tabstop на всю сцену, а не вісім кнопок', () => {
+    render(<TargetSearchPlayArea level={level} onFinish={vi.fn()} />)
+
+    expect(items()).toHaveLength(8)
+    expect(items().filter((item) => item.tabIndex === 0)).toHaveLength(1)
+  })
+
+  // Без цього фокус лежав би на body, і перше ж натискання нічого не зробило б.
+  it('ставить фокус у сцену, щойно проба почалась', () => {
+    render(<TargetSearchPlayArea level={level} onFinish={vi.fn()} />)
+
+    expect(document.activeElement).toBe(items()[0])
+  })
+
+  /**
+   * Не «наступний у DOM», а найближчий праворуч. Перевіряємо геометрією, бо
+   * порядок у масиві тут нічого не гарантує.
+   */
+  it('стрілка веде до фігури, що справді лежить у цьому напрямку', () => {
+    render(<TargetSearchPlayArea level={level} onFinish={vi.fn()} />)
+
+    const before = positions()[cursorIndex()]
+    press('ArrowRight')
+    const after = positions()[cursorIndex()]
+
+    if (after !== before) {
+      expect(after.x).toBeGreaterThan(before.x)
+      expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(after.x - before.x)
+    }
+  })
+
+  it('на краю сцени курсор лишається на місці', () => {
+    render(<TargetSearchPlayArea level={level} onFinish={vi.fn()} />)
+
+    for (let i = 0; i < 12; i++) press('ArrowLeft')
+    const atEdge = cursorIndex()
+    press('ArrowLeft')
+
+    expect(cursorIndex()).toBe(atEdge)
+  })
+
+  it('Enter зараховує фігуру під курсором', () => {
+    render(<TargetSearchPlayArea level={level} onFinish={vi.fn()} />)
+
+    expect(screen.getByText(`1 / ${level.trialCount}`)).toBeInTheDocument()
+    press('Enter')
+    tick(500)
+
+    expect(screen.getByText(`2 / ${level.trialCount}`)).toBeInTheDocument()
+  })
+
+  /**
+   * Та сама пастка, що в Знайди пару: якби Enter активував «фігуру під
+   * курсором», а дитина дійшла до іншої Tab'ом, зарахувалася б не та.
+   */
+  it('курсор іде за фокусом, тож Tab і Enter не розходяться', () => {
+    render(<TargetSearchPlayArea level={level} onFinish={vi.fn()} />)
+
+    act(() => {
+      items()[5].focus()
+    })
+
+    expect(cursorIndex()).toBe(5)
+  })
+
+  /**
+   * Найважливіше для цієї гри: клавіатура не має німіти після першої відповіді.
+   * Кожна проба — нова сцена з новими кнопками, і без перенесення фокуса гра
+   * ставала б непрохідною вже на другій пробі.
+   */
+  it('усі проби проходяться самою клавіатурою', () => {
+    const onFinish = vi.fn()
+    render(<TargetSearchPlayArea level={level} onFinish={onFinish} />)
+
+    for (let trial = 0; trial < level.trialCount; trial++) {
+      press('Enter')
+      tick(500)
+    }
+
+    expect(onFinish).toHaveBeenCalledTimes(1)
+    expect(onFinish.mock.calls[0][0].metrics.total).toBe(level.trialCount)
+  })
+
+  /**
+   * Досяжний сценарій: дитина відповіла і за мить тисне Enter ще раз, поки на
+   * екрані ще зворотний зв'язок. Друга відповідь не має проскочити в наступну
+   * пробу. (Два натискання в одному такті сюди не годяться: у браузері вони
+   * розділені сотнями мілісекунд і React встигає змити стан між ними.)
+   */
+  it('ігнорує повторний Enter, поки показується зворотний звʼязок', () => {
+    const onFinish = vi.fn()
+    render(<TargetSearchPlayArea level={level} onFinish={onFinish} />)
+
+    for (let trial = 0; trial < level.trialCount; trial++) {
+      press('Enter')
+      tick(100)
+      press('Enter')
+      tick(500)
+    }
+
+    expect(onFinish).toHaveBeenCalledTimes(1)
+    expect(onFinish.mock.calls[0][0].metrics.total).toBe(level.trialCount)
   })
 })

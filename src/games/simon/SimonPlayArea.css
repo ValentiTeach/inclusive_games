@@ -20,6 +20,8 @@
 }
 
 .simon__pad {
+  /* Система координат для кутового номера клавіші (OptionKey). */
+  position: relative;
   border-radius: var(--radius-lg);
   border: 3px solid var(--border);
   background: color-mix(in srgb, var(--pad-color) 30%, var(--surface));

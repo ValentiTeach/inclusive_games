@@ -1,5 +1,6 @@
 import Button from '../../components/ui/Button'
 import { playClick } from '../../lib/sound'
+import KeyHint from './KeyHint'
 
 function IntroScreen({ config, levelId, isAutoSuggested, onLevelChange, onStart, history }) {
   function handleLevelChange(id) {
@@ -16,6 +17,8 @@ function IntroScreen({ config, levelId, isAutoSuggested, onLevelChange, onStart,
           <li key={line}>{line}</li>
         ))}
       </ol>
+
+      <KeyHint hint={config.keyHint} />
 
       <div className="game-shell__levels">
         <span className="game-shell__levels-label">Складність</span>

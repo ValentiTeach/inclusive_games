@@ -3,6 +3,8 @@ import { generateTrial, checkAnswer, scoring } from './matrices.config'
 import { now } from '../engine/time'
 import { playCorrect, playWrong } from '../../lib/sound'
 import ShapeIcon from '../engine/ShapeIcon'
+import { useGameKeys } from '../engine/useGameKeys'
+import OptionKey from '../engine/OptionKey'
 import './MatricesPlayArea.css'
 
 function MatricesPlayArea({ level, onFinish }) {
@@ -40,6 +42,12 @@ function MatricesPlayArea({ level, onFinish }) {
     }, 500)
   }
 
+  useGameKeys({
+    enabled: !feedback,
+    digitCount: trial.options.length,
+    onDigit: (index) => handleAnswer(trial.options[index].id),
+  })
+
   return (
     <div className="matrices">
       <p className="matrices__progress">
@@ -60,7 +68,7 @@ function MatricesPlayArea({ level, onFinish }) {
         })}
       </div>
       <div className="matrices__options">
-        {trial.options.map((option) => (
+        {trial.options.map((option, index) => (
           <button
             key={option.id}
             type="button"
@@ -73,6 +81,7 @@ function MatricesPlayArea({ level, onFinish }) {
             onClick={() => handleAnswer(option.id)}
             disabled={Boolean(feedback)}
           >
+            <OptionKey n={index + 1} />
             <ShapeIcon shape={option.shape} color={option.color} size={option.size} />
           </button>
         ))}

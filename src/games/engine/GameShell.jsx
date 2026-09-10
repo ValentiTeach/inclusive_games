@@ -11,6 +11,7 @@ import { playVictory } from '../../lib/sound'
 import IntroScreen from './IntroScreen'
 import CountdownScreen from './CountdownScreen'
 import ResultsScreen from './ResultsScreen'
+import KeyHint from './KeyHint'
 import './GameShell.css'
 
 function achievementStatsExcluding(gameId, overrideHistory) {
@@ -116,7 +117,12 @@ function GameShell({ config, renderPlay }) {
 
       {phase === 'countdown' && <CountdownScreen value={countdown} />}
 
-      {phase === 'playing' && renderPlay(level, handleFinish)}
+      {phase === 'playing' && (
+        <>
+          {renderPlay(level, handleFinish)}
+          <KeyHint hint={config.keyHint} />
+        </>
+      )}
 
       {phase === 'results' && result && (
         <ResultsScreen

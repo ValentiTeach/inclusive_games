@@ -50,6 +50,8 @@
 }
 
 .subitizing__option {
+  /* Система координат для кутового номера клавіші (OptionKey). */
+  position: relative;
   font-family: var(--font-mono);
   font-size: 18px;
   font-weight: 700;

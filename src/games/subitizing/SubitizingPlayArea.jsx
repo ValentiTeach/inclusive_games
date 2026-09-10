@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { generateTrial, checkAnswer, scoring } from './subitizing.config'
 import { now } from '../engine/time'
 import { playCorrect, playWrong } from '../../lib/sound'
+import { useGameKeys } from '../engine/useGameKeys'
+import OptionKey from '../engine/OptionKey'
 import './SubitizingPlayArea.css'
 
 function SubitizingPlayArea({ level, onFinish }) {
@@ -45,6 +47,14 @@ function SubitizingPlayArea({ level, onFinish }) {
     }, 450)
   }
 
+  // Під час спалаху крапок клавіші мовчать: відповідь до появи питання була б
+  // не швидкою реакцією, а випадковим натисканням.
+  useGameKeys({
+    enabled: phase === 'answer' && !feedback,
+    digitCount: trial.options.length,
+    onDigit: (index) => handleAnswer(trial.options[index]),
+  })
+
   return (
     <div className="subitizing">
       <p className="subitizing__progress">
@@ -62,7 +72,7 @@ function SubitizingPlayArea({ level, onFinish }) {
         {phase === 'answer' && <p className="subitizing__prompt">Скільки було крапок?</p>}
       </div>
       <div className="subitizing__options">
-        {trial.options.map((option) => (
+        {trial.options.map((option, index) => (
           <button
             key={option}
             type="button"
@@ -70,6 +80,7 @@ function SubitizingPlayArea({ level, onFinish }) {
             onClick={() => handleAnswer(option)}
             disabled={phase !== 'answer' || Boolean(feedback)}
           >
+            <OptionKey n={index + 1} />
             {option}
           </button>
         ))}

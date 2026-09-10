@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { generateTrial, checkAnswer, scoring } from './quickMath.config'
 import { now } from '../engine/time'
 import { playCorrect, playWrong } from '../../lib/sound'
+import { useGameKeys } from '../engine/useGameKeys'
+import OptionKey from '../engine/OptionKey'
 import './QuickMathPlayArea.css'
 
 function QuickMathPlayArea({ level, onFinish }) {
@@ -39,6 +41,12 @@ function QuickMathPlayArea({ level, onFinish }) {
     }, 450)
   }
 
+  useGameKeys({
+    enabled: !feedback,
+    digitCount: trial.options.length,
+    onDigit: (index) => handleAnswer(trial.options[index]),
+  })
+
   return (
     <div className="quick-math">
       <p className="quick-math__progress">
@@ -46,7 +54,7 @@ function QuickMathPlayArea({ level, onFinish }) {
       </p>
       <div className="quick-math__expression">{trial.text}</div>
       <div className="quick-math__options">
-        {trial.options.map((option) => (
+        {trial.options.map((option, index) => (
           <button
             key={option}
             type="button"
@@ -59,6 +67,7 @@ function QuickMathPlayArea({ level, onFinish }) {
             onClick={() => handleAnswer(option)}
             disabled={Boolean(feedback)}
           >
+            <OptionKey n={index + 1} />
             {option}
           </button>
         ))}

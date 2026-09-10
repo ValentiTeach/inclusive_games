@@ -45,6 +45,8 @@
 }
 
 .matrices__option {
+  /* Система координат для кутового номера клавіші (OptionKey). */
+  position: relative;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;

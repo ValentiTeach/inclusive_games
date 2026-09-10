@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { generateTrial, checkAnswer, scoring } from './mentalRotation.config'
 import { now } from '../engine/time'
 import { playCorrect, playWrong } from '../../lib/sound'
+import { useGameKeys } from '../engine/useGameKeys'
+import OptionKey from '../engine/OptionKey'
 import './MentalRotationPlayArea.css'
+
+const ANSWERS = ['same', 'mirrored']
 
 function RotatingShape({ angle = 0, mirrored = false }) {
   return (
@@ -51,6 +55,18 @@ function MentalRotationPlayArea({ level, onFinish }) {
     }, 500)
   }
 
+  // Варіантів два і вони лежать поруч, тож стрілки читаються так само природно,
+  // як цифри — приймаємо і те, і те.
+  useGameKeys({
+    enabled: !feedback,
+    digitCount: ANSWERS.length,
+    onDigit: (index) => handleAnswer(ANSWERS[index]),
+    onArrow: (direction) => {
+      if (direction === 'left') handleAnswer('same')
+      if (direction === 'right') handleAnswer('mirrored')
+    },
+  })
+
   return (
     <div className="mental-rotation">
       <p className="mental-rotation__progress">
@@ -71,6 +87,7 @@ function MentalRotationPlayArea({ level, onFinish }) {
           onClick={() => handleAnswer('same')}
           disabled={Boolean(feedback)}
         >
+          <OptionKey n={1} />
           Однакова
         </button>
         <button
@@ -79,6 +96,7 @@ function MentalRotationPlayArea({ level, onFinish }) {
           onClick={() => handleAnswer('mirrored')}
           disabled={Boolean(feedback)}
         >
+          <OptionKey n={2} />
           Дзеркальна
         </button>
       </div>

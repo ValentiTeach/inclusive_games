@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { generateTrial, checkAnswer, scoring } from './nback.config'
 import { playClick, playCorrect, playWrong } from '../../lib/sound'
 import { now } from '../engine/time'
+import { useGameKeys } from '../engine/useGameKeys'
 import './NBackPlayArea.css'
 
 const GAP_MS = 300
@@ -64,6 +65,12 @@ function NBackPlayArea({ level, onFinish }) {
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage, index])
+
+  // Перші n проб відповіді не приймають — там ще нема з чим порівнювати.
+  useGameKeys({
+    enabled: stage === 'stimulus' && index >= level.n,
+    onSpace: handlePress,
+  })
 
   function handlePress() {
     if (stage !== 'stimulus' || pressedRef.current || index < level.n) return

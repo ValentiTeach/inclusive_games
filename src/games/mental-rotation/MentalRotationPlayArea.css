@@ -43,6 +43,8 @@
 }
 
 .mental-rotation__option {
+  /* Система координат для кутового номера клавіші (OptionKey). */
+  position: relative;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 16px;

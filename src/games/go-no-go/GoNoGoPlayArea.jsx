@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { generateTrial, checkAnswer, scoring } from './goNoGo.config'
 import { playClick, playCorrect, playWrong } from '../../lib/sound'
 import { now } from '../engine/time'
+import { useGameKeys } from '../engine/useGameKeys'
 import './GoNoGoPlayArea.css'
 
 const GAP_MS = 350
@@ -50,6 +51,8 @@ function GoNoGoPlayArea({ level, onFinish }) {
       setStage('stimulus')
     }, GAP_MS)
   }
+
+  useGameKeys({ enabled: stage === 'stimulus', onSpace: handlePress })
 
   function handlePress() {
     if (stage !== 'stimulus' || respondedRef.current) return

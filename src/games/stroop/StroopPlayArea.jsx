@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { COLORS, generateTrial, checkAnswer, scoring } from './stroop.config'
 import { now } from '../engine/time'
 import { playCorrect, playWrong } from '../../lib/sound'
+import { useGameKeys } from '../engine/useGameKeys'
+import OptionKey from '../engine/OptionKey'
 import './StroopPlayArea.css'
 
 function StroopPlayArea({ level, onFinish }) {
@@ -39,6 +41,14 @@ function StroopPlayArea({ level, onFinish }) {
     }, 220)
   }
 
+  // Порядок COLORS фіксований між пробами, тож цифра завжди означає той самий
+  // колір — дитина запам'ятовує розкладку один раз, а не читає її щопроби.
+  useGameKeys({
+    enabled: !feedback,
+    digitCount: COLORS.length,
+    onDigit: (index) => handleAnswer(COLORS[index].id),
+  })
+
   const progress = `${trialIndex + 1} / ${level.trialCount}`
 
   return (
@@ -57,7 +67,7 @@ function StroopPlayArea({ level, onFinish }) {
         {trial.word.label}
       </div>
       <div className="stroop__options">
-        {COLORS.map((color) => (
+        {COLORS.map((color, index) => (
           <button
             key={color.id}
             type="button"
@@ -65,6 +75,7 @@ function StroopPlayArea({ level, onFinish }) {
             onClick={() => handleAnswer(color.id)}
             disabled={Boolean(feedback)}
           >
+            <OptionKey n={index + 1} />
             <span className="stroop__swatch" style={{ background: color.hex }} />
             {color.label}
           </button>

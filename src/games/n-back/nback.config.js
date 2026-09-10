@@ -14,6 +14,7 @@ export const config = {
     'Якщо поточна літера збігається з тією, що була N кроків тому — тисни «Збіг!».',
     'Якщо не збігається — просто чекай наступну, нічого не тискай.',
   ],
+  keyHint: { keys: 'Пробіл', text: 'позначити збіг' },
   levels: [
     { id: 'one-back', label: '1-back', n: 1, trialCount: 20, stimulusMs: 2200 },
     { id: 'two-back', label: '2-back', n: 2, trialCount: 24, stimulusMs: 2000 },

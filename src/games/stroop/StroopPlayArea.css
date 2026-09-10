@@ -36,6 +36,8 @@
 }
 
 .stroop__option {
+  /* Система координат для кутового номера клавіші (OptionKey). */
+  position: relative;
   display: flex;
   align-items: center;
   gap: var(--space-2);

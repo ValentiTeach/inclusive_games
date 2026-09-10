@@ -10,6 +10,7 @@ export const config = {
     'На мить з’являться крапки — рахувати їх не встигнеш, лише оцінити «на око».',
     'Обери правильну кількість серед варіантів відповіді.',
   ],
+  keyHint: { keys: '1–4', text: 'вибрати відповідь' },
   levels: [
     { id: 'easy', label: 'До 6, 700 мс', maxCount: 6, flashMs: 700, trialCount: 8 },
     { id: 'classic', label: 'До 9, 500 мс', maxCount: 9, flashMs: 500, trialCount: 10 },

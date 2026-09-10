@@ -9,6 +9,7 @@ export const config = {
     'Тисни на кнопку, тільки коли бачиш зелене коло.',
     'Якщо зʼявився червоний квадрат — не тисни нічого, просто дочекайся наступної фігури.',
   ],
+  keyHint: { keys: 'Пробіл', text: 'натиснути на зелене коло' },
   levels: [
     { id: 'short', label: '15 фігур', trialCount: 15, windowMs: 1000 },
     { id: 'classic', label: '25 фігур', trialCount: 25, windowMs: 850 },

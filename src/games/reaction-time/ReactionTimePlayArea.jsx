@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { randomDelayMs, scoring } from './reactionTime.config'
 import { now } from '../engine/time'
 import { playClick, playCorrect, playWrong } from '../../lib/sound'
+import { useGameKeys } from '../engine/useGameKeys'
 import './ReactionTimePlayArea.css'
 
 const TOO_SOON_RETRY_MS = 900
@@ -13,8 +14,13 @@ function ReactionTimePlayArea({ level, onFinish }) {
   const timerRef = useRef(null)
   const signalAtRef = useRef(null)
   const timesRef = useRef([])
+  // Одна відповідь на раунд. Статус — це стан, і два виклики в одному такті
+  // обидва побачили б ще 'ready' та записали б два часи на один сигнал. Мишею
+  // так швидко не клацнути, клавіатурою — цілком.
+  const answeredRef = useRef(false)
 
   useEffect(() => {
+    answeredRef.current = false
     timerRef.current = setTimeout(() => {
       signalAtRef.current = now()
       setStatus('ready')
@@ -24,7 +30,10 @@ function ReactionTimePlayArea({ level, onFinish }) {
   }, [attempt])
 
   function handleClick() {
+    if (answeredRef.current) return
+
     if (status === 'waiting') {
+      answeredRef.current = true
       clearTimeout(timerRef.current)
       playWrong()
       setStatus('too-soon')
@@ -37,6 +46,7 @@ function ReactionTimePlayArea({ level, onFinish }) {
 
     if (status !== 'ready') return
 
+    answeredRef.current = true
     const reactionTimeMs = Math.round(now() - signalAtRef.current)
     timesRef.current.push(reactionTimeMs)
 
@@ -51,6 +61,8 @@ function ReactionTimePlayArea({ level, onFinish }) {
     setRound((r) => r + 1)
     setAttempt((a) => a + 1)
   }
+
+  useGameKeys({ onSpace: handleClick })
 
   const label = {
     waiting: 'Чекай…',

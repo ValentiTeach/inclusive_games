@@ -279,3 +279,57 @@ test('join page resolves its identity check and shows the form', async ({ page }
   await expect(page.getByLabel('Код групи')).toBeVisible({ timeout: 15_000 })
   await expect(page.getByLabel('Твоє ім’я')).toBeVisible()
 })
+
+/**
+ * Проходження гри від початку до результату **лише з клавіатури**, у справжньому
+ * браузері: дитина має дійти до кінця, жодного разу не взявши мишу.
+ *
+ * Фокус навмисно ставиться на саму ігрову кнопку — це найгірший випадок для
+ * Пробілу. Перевірено мутацією: цей шлях лишається чистим і без preventDefault,
+ * бо answeredRef у грі вже робить відповідь ідемпотентною; два захисти
+ * перекриваються. Контракт самого preventDefault закріплений юнітом
+ * «cancels the key so a focused button cannot fire a second time» — там мутація
+ * падає. Тут перевіряється інше й не менш важливе: одне натискання дитини не
+ * перетворюється на фальстарт, і гра доходить до результату.
+ *
+ * «Час реакції» — єдина гра цього етапу, доступна гостю (schulte і memory-pairs
+ * теж доступні, але їхня клавіатура — наступний крок).
+ */
+test('a whole game can be played to the results screen with the keyboard alone', async ({
+  page,
+}) => {
+  await page.goto('/games/reaction-time')
+
+  // До кнопки старту доходимо теж клавіатурою — інтро частина того самого шляху.
+  const start = page.getByRole('button', { name: 'Почати' })
+  await expect(start).toBeVisible()
+  await start.focus()
+  await page.keyboard.press('Enter')
+
+  // Зворотний відлік: 3 кроки по 700 мс.
+  await expect(page.getByText('Раунд 1 / 5')).toBeVisible({ timeout: 10_000 })
+
+  // Фокус ставимо саме на ігрову кнопку: це той випадок, коли Пробіл міг би дати
+  // і рідний клік, і обробник гри — дві відповіді на один сигнал.
+  await page.getByRole('button', { name: /Чекай…|Тисни!/ }).focus()
+
+  for (let round = 1; round <= 5; round++) {
+    await expect(page.getByText(`Раунд ${round} / 5`)).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Тисни!' })).toBeVisible({ timeout: 10_000 })
+    await page.keyboard.press('Space')
+    await expect(page.getByText('Зарано! Спробуй ще раз')).toHaveCount(0)
+  }
+
+  await expect(page.getByRole('heading', { name: 'Результат' })).toBeVisible({ timeout: 10_000 })
+})
+
+// Підказка має бути там, де дитина її прочитає, — і до старту, і під час гри.
+test('the key hint is shown before the game starts and while playing', async ({ page }) => {
+  await page.goto('/games/reaction-time')
+
+  await expect(page.getByText('зреагувати на сигнал')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Почати' }).click()
+  await expect(page.getByText('Раунд 1 / 5')).toBeVisible({ timeout: 10_000 })
+  await expect(page.getByText('зреагувати на сигнал')).toBeVisible()
+})

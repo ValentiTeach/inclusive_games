@@ -58,3 +58,15 @@
   background: var(--cat-reaction-bg);
   border-color: var(--cat-reaction);
 }
+
+/* Набране число має бути видно: дитина тисне «1», шукаючи 17, і без цього
+   екран не змінюється взагалі — виглядає так, ніби клавіатура не працює. */
+.schulte__typed {
+  margin-left: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+  color: var(--accent-strong);
+}

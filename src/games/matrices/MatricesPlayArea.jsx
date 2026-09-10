@@ -44,8 +44,8 @@ function MatricesPlayArea({ level, onFinish }) {
 
   useGameKeys({
     enabled: !feedback,
-    digitCount: trial.options.length,
-    onDigit: (index) => handleAnswer(trial.options[index].id),
+    optionCount: trial.options.length,
+    onOption: (index) => handleAnswer(trial.options[index].id),
   })
 
   return (

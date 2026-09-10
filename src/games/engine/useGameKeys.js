@@ -26,6 +26,11 @@ function isTypingTarget(target) {
  * keydown для Enter, і preventDefault на keydown знімає обидві, тож лишається
  * один шлях.
  *
+ * Цифри розведені на два обробники навмисно. `onOption` — це «цифра 1..N
+ * вибирає варіант», і нуль там нічого не означає. `onDigit` — сира цифра для
+ * набору числа: у сітці Шульте 6×6 є 10, 20 і 30. Гра користується чимось
+ * одним; якщо задані обидва, цифра в межах варіантів іде в onOption.
+ *
  * Обробники читаються з ref, а не з замикання: інакше кожен рендер (а їх у грі
  * багато — таймери, фази, зворотний зв'язок) перепідписував би слухач.
  * Оновлення ref у useLayoutEffect, а не у звичайному: layout-ефект виконується
@@ -34,16 +39,18 @@ function isTypingTarget(target) {
  */
 export function useGameKeys({
   enabled = true,
-  digitCount = 9,
+  optionCount = 0,
+  onOption,
   onDigit,
   onSpace,
   onEnter,
   onArrow,
+  onCancel,
 }) {
-  const handlers = useRef({ digitCount, onDigit, onSpace, onEnter, onArrow })
+  const handlers = useRef(null)
 
   useLayoutEffect(() => {
-    handlers.current = { digitCount, onDigit, onSpace, onEnter, onArrow }
+    handlers.current = { optionCount, onOption, onDigit, onSpace, onEnter, onArrow, onCancel }
   })
 
   useEffect(() => {
@@ -56,17 +63,36 @@ export function useGameKeys({
       if (event.ctrlKey || event.altKey || event.metaKey) return
       if (isTypingTarget(event.target)) return
 
-      const { digitCount: count, onDigit: digit, onSpace: space, onEnter: enter, onArrow: arrow } =
-        handlers.current
+      const {
+        optionCount: count,
+        onOption: option,
+        onDigit: digit,
+        onSpace: space,
+        onEnter: enter,
+        onArrow: arrow,
+        onCancel: cancel,
+      } = handlers.current
 
-      if (digit && /^[1-9]$/.test(event.key)) {
-        const index = Number(event.key) - 1
+      if (/^[0-9]$/.test(event.key)) {
+        const value = Number(event.key)
+
+        // Дві різні речі, тому й два обробники. onOption — «цифра 1..N вибирає
+        // варіант», нуль там нічого не означає. onDigit — сира цифра для набору
+        // числа: у сітці Шульте 6×6 є 10, 20 і 30, і без нуля їх не набрати.
+        if (option && value >= 1 && value <= count) {
+          event.preventDefault()
+          option(value - 1)
+          return
+        }
+
+        if (digit) {
+          event.preventDefault()
+          digit(value)
+          return
+        }
+
         // Цифра поза набором варіантів не перехоплюється: хай браузер робить
         // із нею що завжди, ніж гра мовчки з'їдала б натискання.
-        if (index < count) {
-          event.preventDefault()
-          digit(index)
-        }
         return
       }
 
@@ -85,6 +111,14 @@ export function useGameKeys({
       if (arrow && ARROWS[event.key]) {
         event.preventDefault()
         arrow(ARROWS[event.key])
+        return
+      }
+
+      // Набране число треба вміти стерти, не чекаючи, поки воно розв'яжеться
+      // помилковою відповіддю.
+      if (cancel && (event.key === 'Escape' || event.key === 'Backspace')) {
+        event.preventDefault()
+        cancel()
       }
     }
 

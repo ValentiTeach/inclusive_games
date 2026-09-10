@@ -333,3 +333,52 @@ test('the key hint is shown before the game starts and while playing', async ({ 
   await expect(page.getByText('Раунд 1 / 5')).toBeVisible({ timeout: 10_000 })
   await expect(page.getByText('зреагувати на сигнал')).toBeVisible()
 })
+
+/**
+ * Уся таблиця Шульте, пройдена самими цифрами у справжньому браузері.
+ *
+ * Це найсильніший доказ для цієї гри: 16 клітинок від початку до екрана
+ * результатів, жодного кліку. Заразом видно, що набір двоцифрових чисел
+ * (10–16) розв'язується сам, без Enter.
+ */
+test('a whole Schulte grid can be typed out with the keyboard', async ({ page }) => {
+  await page.goto('/games/schulte')
+
+  const start = page.getByRole('button', { name: 'Почати' })
+  await start.focus()
+  await page.keyboard.press('Enter')
+
+  // Зворотний відлік: 3 кроки по 700 мс.
+  await expect(page.locator('.schulte__grid')).toBeVisible({ timeout: 10_000 })
+
+  for (let n = 1; n <= 16; n++) {
+    for (const digit of String(n)) {
+      await page.keyboard.press(digit)
+    }
+  }
+
+  await expect(page.getByRole('heading', { name: 'Результат' })).toBeVisible({ timeout: 10_000 })
+})
+
+// Стрілки мають рухати курсор по сітці, а Enter — перевертати саме ту картку,
+// на якій курсор стоїть.
+test('memory pairs can be navigated and flipped with arrows and Enter', async ({ page }) => {
+  await page.goto('/games/memory-pairs')
+
+  await page.getByRole('button', { name: 'Почати' }).click()
+  await expect(page.locator('.memory-pairs__grid')).toBeVisible({ timeout: 10_000 })
+
+  const cards = page.locator('.memory-pairs__card')
+  await expect(cards.first()).toHaveAttribute('tabindex', '0')
+
+  await page.keyboard.press('ArrowRight')
+  await expect(cards.nth(1)).toHaveAttribute('tabindex', '0')
+  await expect(cards.first()).toHaveAttribute('tabindex', '-1')
+
+  await page.keyboard.press('Enter')
+  await expect(cards.nth(1)).toHaveClass(/is-flipped/)
+
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
+  await expect(page.getByText('Ходи: 1')).toBeVisible()
+})

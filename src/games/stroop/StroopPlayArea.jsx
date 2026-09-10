@@ -45,8 +45,8 @@ function StroopPlayArea({ level, onFinish }) {
   // колір — дитина запам'ятовує розкладку один раз, а не читає її щопроби.
   useGameKeys({
     enabled: !feedback,
-    digitCount: COLORS.length,
-    onDigit: (index) => handleAnswer(COLORS[index].id),
+    optionCount: COLORS.length,
+    onOption: (index) => handleAnswer(COLORS[index].id),
   })
 
   const progress = `${trialIndex + 1} / ${level.trialCount}`

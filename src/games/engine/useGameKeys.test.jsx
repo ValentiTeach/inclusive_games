@@ -7,7 +7,7 @@ const calls = []
 
 function Harness({ children, ...options }) {
   useGameKeys({
-    onDigit: (index) => calls.push(`digit:${index}`),
+    onOption: (index) => calls.push(`option:${index}`),
     onSpace: () => calls.push('space'),
     onEnter: () => calls.push('enter'),
     onArrow: (direction) => calls.push(`arrow:${direction}`),
@@ -42,13 +42,13 @@ beforeEach(() => {
 })
 
 describe('useGameKeys — що ловить', () => {
-  it('reports the digit zero-based, so a caller can index its options', () => {
-    render(<Harness digitCount={4} />)
+  it('reports the option zero-based, so a caller can index its options', () => {
+    render(<Harness optionCount={4} />)
 
     press('1')
     press('4')
 
-    expect(calls).toEqual(['digit:0', 'digit:3'])
+    expect(calls).toEqual(['option:0', 'option:3'])
   })
 
   it('routes space, enter and each arrow', () => {
@@ -72,12 +72,12 @@ describe('useGameKeys — що ловить', () => {
   })
 
   it('works without focusing anything first', () => {
-    render(<Harness digitCount={4} />)
+    render(<Harness optionCount={4} />)
 
     expect(document.activeElement).toBe(document.body)
     press('2')
 
-    expect(calls).toEqual(['digit:1'])
+    expect(calls).toEqual(['option:1'])
   })
 })
 
@@ -88,7 +88,7 @@ describe('useGameKeys — чого не ловить', () => {
    * кнопки і цей обробник.
    */
   it('cancels the key so a focused button cannot fire a second time', () => {
-    render(<Harness digitCount={4} />)
+    render(<Harness optionCount={4} />)
 
     expect(press(' ').defaultPrevented).toBe(true)
     expect(press('Enter').defaultPrevented).toBe(true)
@@ -97,7 +97,7 @@ describe('useGameKeys — чого не ловить', () => {
   })
 
   it('ignores a held key instead of queueing answers', () => {
-    render(<Harness digitCount={4} />)
+    render(<Harness optionCount={4} />)
 
     press('1', { repeat: true })
 
@@ -106,7 +106,7 @@ describe('useGameKeys — чого не ловить', () => {
 
   // Ctrl+1 перемикає вкладку, Alt+← вертає назад. Гра не має їх з'їдати.
   it.each([['ctrlKey'], ['altKey'], ['metaKey']])('leaves %s combinations to the browser', (mod) => {
-    render(<Harness digitCount={4} />)
+    render(<Harness optionCount={4} />)
 
     const event = press('1', { [mod]: true })
 
@@ -116,7 +116,7 @@ describe('useGameKeys — чого не ловить', () => {
 
   it('stays out of the way while someone is typing in a field', () => {
     render(
-      <Harness digitCount={4}>
+      <Harness optionCount={4}>
         <input aria-label="поле" />
       </Harness>,
     )
@@ -131,7 +131,7 @@ describe('useGameKeys — чого не ловить', () => {
    * означає, хай браузер робить із нею що звично.
    */
   it('leaves a digit past the last option alone', () => {
-    render(<Harness digitCount={4} />)
+    render(<Harness optionCount={4} />)
 
     const event = press('7')
 
@@ -140,7 +140,7 @@ describe('useGameKeys — чого не ловить', () => {
   })
 
   it('goes silent while disabled', () => {
-    render(<Harness digitCount={4} enabled={false} />)
+    render(<Harness optionCount={4} enabled={false} />)
 
     press('1')
     press(' ')
@@ -149,7 +149,7 @@ describe('useGameKeys — чого не ловить', () => {
   })
 
   it('does not invent a handler the caller never passed', () => {
-    render(<Harness onSpace={undefined} onEnter={undefined} onArrow={undefined} digitCount={4} />)
+    render(<Harness onSpace={undefined} onEnter={undefined} onArrow={undefined} optionCount={4} />)
 
     const event = press(' ')
 
@@ -178,5 +178,63 @@ describe('useGameKeys — свіжість обробника', () => {
     press(' ')
 
     expect(screen.getByText('лічильник: 3')).toBeInTheDocument()
+  })
+})
+
+describe('useGameKeys — сирі цифри для набору числа', () => {
+  /**
+   * Інша річ, ніж onOption. У сітці Шульте 6×6 є 10, 20 і 30 — без нуля їх не
+   * набрати, а «нульового варіанта» не існує в жодній грі.
+   */
+  it('reports the digit itself, zero included', () => {
+    render(<Harness onOption={undefined} onDigit={(digit) => calls.push(`d:${digit}`)} />)
+
+    press('1')
+    press('0')
+    press('9')
+
+    expect(calls).toEqual(['d:1', 'd:0', 'd:9'])
+  })
+
+  it('cancels the key so a focused button cannot also fire', () => {
+    render(<Harness onOption={undefined} onDigit={() => {}} />)
+
+    expect(press('0').defaultPrevented).toBe(true)
+  })
+
+  // Гра користується чимось одним, але якщо задані обидва — цифра в межах
+  // варіантів іде у вибір, решта в набір.
+  it('prefers the option handler inside its range and falls through outside it', () => {
+    render(<Harness optionCount={4} onDigit={(digit) => calls.push(`d:${digit}`)} />)
+
+    press('2')
+    press('7')
+    press('0')
+
+    expect(calls).toEqual(['option:1', 'd:7', 'd:0'])
+  })
+
+  it('leaves digits alone when a game wants neither', () => {
+    render(<Harness onOption={undefined} onDigit={undefined} optionCount={0} />)
+
+    const event = press('5')
+
+    expect(calls).toEqual([])
+    expect(event.defaultPrevented).toBe(false)
+  })
+})
+
+describe('useGameKeys — скасування набору', () => {
+  it.each([['Escape'], ['Backspace']])('%s clears what was typed', (key) => {
+    render(<Harness onCancel={() => calls.push('cancel')} />)
+
+    expect(press(key).defaultPrevented).toBe(true)
+    expect(calls).toEqual(['cancel'])
+  })
+
+  it('leaves Backspace to the browser when no game is typing', () => {
+    render(<Harness onCancel={undefined} />)
+
+    expect(press('Backspace').defaultPrevented).toBe(false)
   })
 })

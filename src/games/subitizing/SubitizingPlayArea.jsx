@@ -51,8 +51,8 @@ function SubitizingPlayArea({ level, onFinish }) {
   // не швидкою реакцією, а випадковим натисканням.
   useGameKeys({
     enabled: phase === 'answer' && !feedback,
-    digitCount: trial.options.length,
-    onDigit: (index) => handleAnswer(trial.options[index]),
+    optionCount: trial.options.length,
+    onOption: (index) => handleAnswer(trial.options[index]),
   })
 
   return (

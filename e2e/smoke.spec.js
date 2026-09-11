@@ -382,3 +382,42 @@ test('memory pairs can be navigated and flipped with arrows and Enter', async ({
   await page.keyboard.press('Enter')
   await expect(page.getByText('Ходи: 1')).toBeVisible()
 })
+
+/**
+ * Марка — темно-синій корабель на прозорому тлі, а поверхня шапки в темній темі
+ * сама темно-синя. Знак на ній майже зникав. Виправлення навмисно не чіпає
+ * кольорів марки — тому тест перевіряє і те, і те: підкладка світла в обох
+ * темах, а на саме зображення не накладено жодного фільтра.
+ */
+test.describe('логотип', () => {
+  async function markStyles(page, theme) {
+    await page.addInitScript((value) => {
+      localStorage.setItem('inclusive-games:settings', JSON.stringify({ theme: value }))
+    }, theme)
+    await page.goto('/')
+
+    return page.locator('.site-header__logo-mark').evaluate((node) => {
+      const style = getComputedStyle(node)
+      const [r, g, b] = style.backgroundColor.match(/\d+/g).map(Number)
+      return {
+        luminance: (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255,
+        filter: style.filter,
+      }
+    })
+  }
+
+  for (const theme of ['light', 'dark']) {
+    test(`stays on a light plate in the ${theme} theme`, async ({ page }) => {
+      const { luminance } = await markStyles(page, theme)
+
+      expect(luminance).toBeGreaterThan(0.9)
+    })
+
+    test(`keeps its own colours in the ${theme} theme`, async ({ page }) => {
+      const { filter } = await markStyles(page, theme)
+
+      // Ані інверсії, ані перефарбування: кольори знака лишаються оригінальними.
+      expect(filter).toBe('none')
+    })
+  }
+})

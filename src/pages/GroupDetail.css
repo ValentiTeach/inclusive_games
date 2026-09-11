@@ -170,3 +170,187 @@
 .group-detail__table tr:last-child td {
   border-bottom: none;
 }
+
+/* ─────────────────────────── Код групи ─────────────────────────── */
+
+.group-detail__join {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  margin-bottom: var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.group-detail__join-code {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.group-detail__join-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Код диктують класу або показують з екрана — на відстані його має бути видно. */
+.group-detail__code {
+  font-family: var(--font-mono);
+  font-size: clamp(30px, 7vw, 40px);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.05;
+  color: var(--accent-strong);
+}
+
+.group-detail__join-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.group-detail__join-where {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.group-detail__join-where code {
+  font-family: var(--font-mono);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.group-detail__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.group-detail__copy:hover {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
+.group-detail__empty {
+  max-width: 52ch;
+}
+
+/* ─────────────────────── Телефон і планшет ───────────────────────
+   Таблиця учнів має 731 px на шість колонок: у вікні 360 px вона показувала дві
+   з них, решту доводилося догортувати вбік. Нижче цієї межі кожен рядок стає
+   карткою, а підписи колонок переїжджають у самі клітинки через data-label —
+   інакше число «3» без заголовка нічого не означає.
+
+   Межа 900, а не 700: планшет у портреті (768) — це дотик, і таблиця там
+   лишала чотирнадцять цілей по 28 px. */
+@media (max-width: 900px) {
+  .group-detail__table-wrap {
+    border: none;
+    overflow-x: visible;
+  }
+
+  .group-detail__table,
+  .group-detail__table tbody,
+  .group-detail__table tr,
+  .group-detail__table td {
+    display: block;
+    width: 100%;
+  }
+
+  .group-detail__table thead {
+    /* Заголовки не ховаємо display:none — вони лишаються для зчитувача екрана. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .group-detail__table tr {
+    margin-bottom: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+
+  .group-detail__table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding: var(--space-1) 0;
+    border-bottom: none;
+    white-space: normal;
+  }
+
+  .group-detail__table td::before {
+    content: attr(data-label);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .group-detail__cell-name {
+    font-weight: 700;
+    font-size: 17px;
+    padding-bottom: var(--space-2);
+  }
+
+  /* Ім'я тут заголовок картки — підпис «УЧЕНЬ» над ним нічого не додає.
+     У thead він лишається, тож для зчитувача екрана колонка не безіменна. */
+  .group-detail__cell-name::before {
+    content: none;
+  }
+
+  .group-detail__cell-actions {
+    justify-content: flex-end;
+    padding-top: var(--space-2);
+  }
+
+  .group-detail__icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .group-detail__export {
+    min-height: 44px;
+  }
+}
+
+/* Планшет лежачи (понад 900 px) таблицю зберігає — але це все одно дотик, а
+   кнопки дій там 28 px. Ширина екрана про спосіб вводу не каже; pointer: coarse
+   каже. */
+@media (pointer: coarse) {
+  .group-detail__icon-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .group-detail__export,
+  .group-detail__copy {
+    min-height: 44px;
+  }
+}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { Trophy, Medal, Award, Download, Pencil, UserMinus, Check, X } from 'lucide-react'
+import { Trophy, Medal, Award, Download, Pencil, UserMinus, Check, X, Copy } from 'lucide-react'
 import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
 import { getGroupDetails, renameStudent, removeStudentFromGroup } from '../lib/groups'
@@ -26,6 +26,7 @@ function GroupDetail() {
   const [draftName, setDraftName] = useState('')
   const [busyId, setBusyId] = useState(null)
   const [actionError, setActionError] = useState(null)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (!user) return undefined
@@ -133,15 +134,47 @@ function GroupDetail() {
     )
   }
 
+  const joinUrl = `${window.location.host}/join`
+
   return (
     <section className="group-detail">
       <Link to="/groups" className="group-detail__back">
         ← До моїх груп
       </Link>
       <h1>{data.group.name}</h1>
-      <p>
-        Код для приєднання: <span className="group-detail__code">{data.group.join_code}</span>
-      </p>
+
+      {/* Код — головне, що вчителю треба з цієї сторінки на уроці: його
+          диктують класу або показують з екрана. Раніше він лежав дрібним
+          рядком усередині речення. */}
+      <div className="group-detail__join">
+        <div className="group-detail__join-code">
+          <span className="group-detail__join-label">Код для приєднання</span>
+          <strong className="group-detail__code">{data.group.join_code}</strong>
+        </div>
+        <div className="group-detail__join-side">
+          <p className="group-detail__join-where">
+            Діти відкривають <code>{joinUrl}</code> і вводять цей код.
+          </p>
+          <button
+            type="button"
+            className="group-detail__copy"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(`${joinUrl} — код ${data.group.join_code}`)
+                setCopied(true)
+                setTimeout(() => setCopied(false), 2000)
+              } catch {
+                // Буфер може бути недоступний (немає дозволу, старий браузер) —
+                // код видно на екрані, тож це не привід показувати помилку.
+                setCopied(false)
+              }
+            }}
+          >
+            <Copy size={16} aria-hidden="true" />
+            {copied ? 'Скопійовано' : 'Скопіювати адресу й код'}
+          </button>
+        </div>
+      </div>
 
       {data.students.length > 0 && (
         <button
@@ -164,7 +197,10 @@ function GroupDetail() {
       )}
 
       {data.students.length === 0 ? (
-        <p>До цієї групи ще ніхто не приєднався.</p>
+        <p className="group-detail__empty">
+          До цієї групи ще ніхто не приєднався. Щойно перша дитина введе код,
+          тут зʼявиться список із балами й кнопка вивантаження в таблицю.
+        </p>
       ) : (
         <>
           {(() => {
@@ -217,7 +253,7 @@ function GroupDetail() {
             <tbody>
               {data.students.map((student) => (
                 <tr key={student.id}>
-                  <td>
+                  <td data-label="Учень" className="group-detail__cell-name">
                     {editingId === student.id ? (
                       <input
                         className="group-detail__name-input"
@@ -234,11 +270,11 @@ function GroupDetail() {
                       student.displayName
                     )}
                   </td>
-                  <td>{formatDate(student.joinedAt)}</td>
-                  <td>{student.attempts}</td>
-                  <td>{student.avgScore ?? '—'}</td>
-                  <td>{formatDate(student.lastPlayed)}</td>
-                  <td>
+                  <td data-label="Приєднався">{formatDate(student.joinedAt)}</td>
+                  <td data-label="Спроб">{student.attempts}</td>
+                  <td data-label="Середній бал">{student.avgScore ?? '—'}</td>
+                  <td data-label="Остання гра">{formatDate(student.lastPlayed)}</td>
+                  <td className="group-detail__cell-actions">
                     <div className="group-detail__row-actions">
                       {editingId === student.id ? (
                         <>

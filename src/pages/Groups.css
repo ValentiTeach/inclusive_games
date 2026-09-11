@@ -68,3 +68,56 @@
   letter-spacing: 0.1em;
   color: var(--accent-strong);
 }
+
+/* Три кроки замість фрази «У тебе ще немає жодної групи»: перший вхід учителя
+   має закінчуватись розумінням, що робити далі, а не констатацією. */
+.groups__steps {
+  margin: var(--space-5) 0 0;
+  padding-left: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  color: var(--text-muted);
+  max-width: 52ch;
+}
+
+.groups__steps strong {
+  color: var(--text);
+}
+
+.groups__steps code {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--accent-strong);
+  white-space: nowrap;
+}
+
+/* Довга назва групи впритул стикалася з кодом: space-between не лишає між ними
+   нічого, коли рядок заповнений. */
+.groups__item {
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.groups__name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.groups__code {
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .groups__form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .groups__input {
+    min-height: 44px;
+  }
+}

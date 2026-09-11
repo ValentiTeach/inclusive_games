@@ -22,6 +22,8 @@ import { config as matricesConfig } from './matrices/matrices.config'
 import MatricesPlayArea from './matrices/MatricesPlayArea'
 import { config as mentalRotationConfig } from './mental-rotation/mentalRotation.config'
 import MentalRotationPlayArea from './mental-rotation/MentalRotationPlayArea'
+import { config as keyboardTrainerConfig } from './keyboard-trainer/keyboardTrainer.config'
+import KeyboardTrainerPlayArea from './keyboard-trainer/KeyboardTrainerPlayArea'
 
 export const GAME_REGISTRY = {
   schulte: { config: schulteConfig, PlayArea: SchultePlayArea },
@@ -36,4 +38,5 @@ export const GAME_REGISTRY = {
   'target-search': { config: targetSearchConfig, PlayArea: TargetSearchPlayArea },
   matrices: { config: matricesConfig, PlayArea: MatricesPlayArea },
   'mental-rotation': { config: mentalRotationConfig, PlayArea: MentalRotationPlayArea },
+  'keyboard-trainer': { config: keyboardTrainerConfig, PlayArea: KeyboardTrainerPlayArea },
 }

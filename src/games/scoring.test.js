@@ -11,6 +11,7 @@ import { scoring as simon } from './simon/simon.config'
 import { scoring as stroop } from './stroop/stroop.config'
 import { scoring as subitizing } from './subitizing/subitizing.config'
 import { scoring as targetSearch } from './target-search/targetSearch.config'
+import { scoring as keyboardTrainer } from './keyboard-trainer/keyboardTrainer.config'
 import { GAME_REGISTRY } from './registry'
 
 // 3 правильні з 4, часи 400/600/500/300 — точність 75%, середнє 450, найкраще 300.
@@ -56,6 +57,16 @@ const SCENARIOS = [
     run: () => memoryPairs({ moves: 20, elapsedMs: 61_500, pairs: 8 }),
   },
   { id: 'simon', run: () => simon({ roundsCompleted: 5, targetLength: 8 }) },
+  {
+    id: 'keyboard-trainer',
+    run: () =>
+      keyboardTrainer([
+        { correct: true, reactionTimeMs: 500 },
+        { correct: true, reactionTimeMs: 700 },
+        { correct: false, reactionTimeMs: 900 },
+        { correct: true, reactionTimeMs: 500 },
+      ]),
+  },
 ]
 
 describe('кожна гра пише сирі числа, а не лише рядки', () => {

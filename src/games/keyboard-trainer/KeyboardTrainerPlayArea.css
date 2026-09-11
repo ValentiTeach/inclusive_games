@@ -1,0 +1,116 @@
+.keyboard-trainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.keyboard-trainer__progress {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.keyboard-trainer__target {
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(36px, 9vw, 56px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.keyboard-trainer__target.is-wrong {
+  animation: keyboard-trainer-shake 0.22s ease-in-out;
+}
+
+@keyframes keyboard-trainer-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+.keyboard-trainer__char {
+  color: var(--text-muted);
+  transition: color 0.12s;
+}
+
+/* Набране гасне, поточна літера — єдине, на що треба дивитися. */
+.keyboard-trainer__char.is-done {
+  color: var(--cat-attention);
+  opacity: 0.45;
+}
+
+.keyboard-trainer__char.is-current {
+  color: var(--accent-strong);
+}
+
+.keyboard-trainer__layout-note {
+  max-width: 40ch;
+  margin: 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--cat-thinking);
+}
+
+.keyboard-trainer__keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  max-width: 560px;
+}
+
+.keyboard-trainer__row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.keyboard-trainer__key {
+  /* Ряди мають різну довжину (12, 11, 9), тож клавіші тягнуться рівномірно і
+     клавіатура лишається клавіатурою на будь-якій ширині. */
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 0;
+}
+
+.keyboard-trainer__key:hover {
+  border-color: var(--accent);
+}
+
+.keyboard-trainer__key.is-target {
+  background: var(--accent);
+  border-color: var(--accent-strong);
+  color: var(--accent-contrast);
+  font-weight: 700;
+}
+
+/* На телефоні клавіші неминуче вузькі — дванадцять у ряд на 328 px це близько
+   26 px кожна. Робимо їх вищими за ширину: палець промахується вздовж рядка
+   рідше, ніж упоперек, а знайома сітка клавіатури сама підказує ціль. */
+@media (max-width: 560px) {
+  .keyboard-trainer__key {
+    min-height: 48px;
+    font-size: 14px;
+  }
+
+  .keyboard-trainer__row {
+    gap: 3px;
+  }
+
+  .keyboard-trainer__keyboard {
+    gap: 3px;
+  }
+}

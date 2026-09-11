@@ -514,3 +514,70 @@ test.describe('малі екрани', () => {
     await expect(page.locator('.site-header__link-label').first()).toBeVisible()
   })
 })
+
+/**
+ * Клавіатурний тренажер у справжньому браузері.
+ *
+ * Playwright тисне фізичні клавіші (`KeyF`), а браузер віддає їх з англійською
+ * розкладкою — тобто відтворює рівно той випадок, заради якого гра дивиться на
+ * код клавіші, а не лише на символ: шкільний комп'ютер із неперемкненою мовою.
+ */
+test.describe('клавіатурний тренажер', () => {
+  async function codeOfHighlightedKey(page) {
+    return page.evaluate(() => {
+      const keys = [...document.querySelectorAll('.keyboard-trainer__key')]
+      const index = keys.findIndex((key) => key.classList.contains('is-target'))
+      // Порядок кнопок у DOM збігається з порядком розкладки в конфізі.
+      const CODES = [
+        'KeyQ','KeyW','KeyE','KeyR','KeyT','KeyY','KeyU','KeyI','KeyO','KeyP','BracketLeft','BracketRight',
+        'KeyA','KeyS','KeyD','KeyF','KeyG','KeyH','KeyJ','KeyK','KeyL','Semicolon','Quote',
+        'KeyZ','KeyX','KeyC','KeyV','KeyB','KeyN','KeyM','Comma','Period',
+      ]
+      return CODES[index]
+    })
+  }
+
+  test('a whole round is played with physical keys on a non-Ukrainian layout', async ({ page }) => {
+    await page.goto('/games/keyboard-trainer')
+    await page.getByRole('button', { name: 'Почати' }).click()
+    await expect(page.locator('.keyboard-trainer__keyboard')).toBeVisible({ timeout: 10_000 })
+
+    for (let trial = 0; trial < 12; trial++) {
+      await page.keyboard.press(await codeOfHighlightedKey(page))
+    }
+
+    await expect(page.getByRole('heading', { name: 'Результат' })).toBeVisible({ timeout: 10_000 })
+    // Правильний палець зарахований попри чужу розкладку — 100% точності.
+    await expect(page.getByText('100')).toBeVisible()
+  })
+
+  test('it says the layout is wrong instead of counting mistakes', async ({ page }) => {
+    await page.goto('/games/keyboard-trainer')
+    await page.getByRole('button', { name: 'Почати' }).click()
+    await expect(page.locator('.keyboard-trainer__keyboard')).toBeVisible({ timeout: 10_000 })
+
+    await page.keyboard.press(await codeOfHighlightedKey(page))
+
+    await expect(page.getByText(/розкладка не українська/i)).toBeVisible()
+  })
+
+  // Телефон фізичної клавіатури не має — екранна там єдиний спосіб грати.
+  test('it can be played by tapping on a phone', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 })
+    await page.goto('/games/keyboard-trainer')
+    await page.getByRole('button', { name: 'Почати' }).click()
+    await expect(page.locator('.keyboard-trainer__keyboard')).toBeVisible({ timeout: 10_000 })
+
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      ),
+    ).toBe(0)
+
+    for (let trial = 0; trial < 12; trial++) {
+      await page.locator('.keyboard-trainer__key.is-target').click()
+    }
+
+    await expect(page.getByRole('heading', { name: 'Результат' })).toBeVisible({ timeout: 10_000 })
+  })
+})

@@ -35,8 +35,8 @@ function Header() {
                 isActive ? 'site-header__link is-active' : 'site-header__link'
               }
             >
-              <link.icon size={16} aria-hidden="true" />
-              {link.label}
+              <link.icon size={18} aria-hidden="true" />
+              <span className="site-header__link-label">{link.label}</span>
             </NavLink>
           ))}
           <NavLink
@@ -45,7 +45,7 @@ function Header() {
               isActive ? 'site-header__link site-header__account is-active' : 'site-header__link site-header__account'
             }
           >
-            {!user && <LogIn size={16} aria-hidden="true" />}
+            {!user && <LogIn size={18} aria-hidden="true" />}
             <span className="site-header__account-label" title={accountLabel}>
               {accountLabel}
             </span>

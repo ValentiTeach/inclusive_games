@@ -64,3 +64,29 @@
   background: var(--surface-muted);
   color: var(--accent-strong);
 }
+
+/* Група з трьох кнопок — 274 px, і поруч із текстом вона не влазила: рядок
+   давав горизонтальний скрол на телефоні (48 px при ширині 360). Нижче цієї
+   межі керування стає під текстом, а не поруч. */
+@media (max-width: 560px) {
+  .settings__row {
+    flex-direction: column;
+    /* Не stretch: розтягнутий на всю ширину перемикач читається як головна дія
+       сторінки, а не як стан. Відступів усередині вистачає на цілу для пальця. */
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .settings__row p {
+    max-width: none;
+  }
+
+  .settings__options {
+    flex-wrap: wrap;
+  }
+
+  .settings__option,
+  .settings__toggle {
+    min-height: 44px;
+  }
+}

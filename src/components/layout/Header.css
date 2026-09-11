@@ -121,3 +121,81 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* На 360 px шапка займала 230 px — третину екрана до першого слова контенту:
+   логотип плюс три ряди перенесеної навігації.
+
+   Один ряд зробити не вийде чесно: шість іконок по 44 px плюс перемикач теми —
+   це вже 300 px, а після відступів на вузькому телефоні лишається близько 328.
+   Логотипу там місця не буде. Тому два ряди: логотип, під ним навігація
+   іконками. Виходить близько 100 px замість 230.
+
+   Висота теж у запиті: телефон лежачи має 360 px висоти, і там дорога кожна
+   смуга, навіть якщо ширини вистачає на підписи. */
+/* Проміжний рівень: планшет лежачи і вузький ноутбук.
+   Виміряно: навігація з підписами займає 1018 px і в один ряд вміщається лише
+   від ~1100 px. Нижче цього шапка ламалася на два ряди — 123 px замість 71.
+   Але щоб лишити підписи читабельними, досить прибрати дві необов'язкові речі:
+   приписку «| Historic_up's edition» і пошту вчителя. Обидві є на сторінці
+   акаунта, а тут вони коштували цілого ряду. */
+@media (max-width: 1080px) {
+  .site-header__logo-edition {
+    display: none;
+  }
+
+  .site-header__account-label {
+    display: none;
+  }
+
+  .site-header__nav {
+    gap: var(--space-3);
+  }
+}
+
+/* ─────────────────────────── Телефон і планшет лежачи ─────────────────────── */
+@media (max-width: 940px), (max-height: 480px) {
+  .site-header__inner {
+    padding: var(--space-2) var(--space-4);
+    gap: var(--space-2);
+  }
+
+  .site-header__logo {
+    font-size: 16px;
+  }
+
+  .site-header__logo-mark {
+    height: 24px;
+  }
+
+  .site-header__nav {
+    width: 100%;
+    gap: var(--space-1);
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  /* Підпис ховається візуально, але лишається доступною назвою посилання —
+     див. .visually-hidden в index.css. */
+  .site-header__link-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .site-header__link {
+    min-width: 40px;
+    min-height: 44px;
+    justify-content: center;
+    padding: 0;
+    border-bottom: 2px solid transparent;
+  }
+
+  .site-header__account {
+    max-width: none;
+  }
+}

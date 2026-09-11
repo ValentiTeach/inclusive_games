@@ -421,3 +421,96 @@ test.describe('логотип', () => {
     })
   }
 })
+
+/**
+ * Адаптація до телефона й планшета.
+ *
+ * До цих правил шапка на екрані 360 px займала 230 px — третину висоти до
+ * першого слова контенту, — а сторінка налаштувань давала горизонтальний скрол
+ * у 48 px. Перевіряються саме ці числа, а не наявність медіазапитів.
+ */
+test.describe('малі екрани', () => {
+  const PHONES = [
+    ['телефон 360', 360, 740],
+    ['телефон 390', 390, 844],
+    ['телефон лежачи', 740, 360],
+    ['планшет', 768, 1024],
+  ]
+
+  for (const [name, width, height] of PHONES) {
+    test(`${name}: жодна сторінка не їде вбік`, async ({ page }) => {
+      await page.setViewportSize({ width, height })
+
+      for (const path of ['/', '/games', '/progress', '/settings', '/login', '/join']) {
+        await page.goto(path)
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        )
+        expect(overflow, `${path} на ${name}`).toBe(0)
+      }
+    })
+
+    test(`${name}: шапка не з'їдає екран`, async ({ page }) => {
+      await page.setViewportSize({ width, height })
+      await page.goto('/')
+
+      const headerHeight = await page
+        .locator('.site-header')
+        .evaluate((node) => node.getBoundingClientRect().height)
+
+      // Було 230. Один ряд з іконками плюс логотип — близько 100.
+      expect(headerHeight).toBeLessThan(110)
+    })
+  }
+
+  /**
+   * Підписи ховаються візуально, а не через display: none — інакше посилання
+   * лишилося б безіменною іконкою для того, хто слухає сторінку.
+   */
+  test('іконки навігації не втрачають своїх назв', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 })
+    await page.goto('/')
+
+    const header = page.locator('.site-header')
+
+    for (const label of ['Головна', 'Каталог ігор', 'Мій прогрес', 'Налаштування']) {
+      // exact і пошук усередині шапки: «Каталог ігор» інакше збігається ще й
+      // з кнопкою «Переглянути каталог ігор» у герої.
+      await expect(header.getByRole('link', { name: label, exact: true })).toBeVisible()
+    }
+  })
+
+  // Група з трьох кнопок теми не влазила поруч із текстом і виїжджала за екран.
+  test('налаштування показують усі варіанти теми', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 })
+    await page.goto('/settings')
+
+    for (const label of ['Системна', 'Світла', 'Темна']) {
+      const button = page.getByRole('button', { name: label, exact: true })
+      await expect(button).toBeVisible()
+
+      const box = await button.boundingBox()
+      expect(box.x + box.width, `«${label}» має бути в межах екрана`).toBeLessThanOrEqual(360)
+      expect(box.height, `«${label}» — ціль для пальця`).toBeGreaterThanOrEqual(44)
+    }
+  })
+
+  /**
+   * На вузькому екрані текстова колонка займає всю ширину, тож декоративним
+   * іконкам нема де бути, крім як під словами — вони лягали на абзаци.
+   */
+  test('декоративні іконки прибрані з-під тексту', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 740 })
+    await page.goto('/')
+
+    await expect(page.locator('.decor__icon-wrap').first()).toBeHidden()
+  })
+
+  test('на десктопі декор і підписи лишаються на місці', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await page.goto('/')
+
+    await expect(page.locator('.decor__icon-wrap').first()).toBeVisible()
+    await expect(page.locator('.site-header__link-label').first()).toBeVisible()
+  })
+})

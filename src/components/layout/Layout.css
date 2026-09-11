@@ -35,3 +35,10 @@
   margin: 0 auto;
   padding: var(--space-7) var(--space-5);
 }
+
+/* Бічні відступи по 24 px на екрані 360 px — це 13% ширини під поля. */
+@media (max-width: 560px) {
+  .app-main {
+    padding: var(--space-5) var(--space-4);
+  }
+}

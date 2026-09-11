@@ -69,10 +69,14 @@
 .site-header__nav {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
+  /* Пункти тепер мають власні бічні поля, тож зовнішній проміжок менший: разом
+     вони дають ту саму ширину ряду, що й попередні 16 px проміжку без полів.
+     Ширші пігулки зсували поріг переносу на другий ряд на сотні пікселів. */
+  gap: var(--space-1);
 }
 
 .site-header__link {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -81,21 +85,60 @@
   font-weight: 600;
   color: var(--text-muted);
   text-decoration: none;
-  padding: var(--space-1) 0;
-  border-bottom: 2px solid transparent;
+  padding: var(--space-2);
+  border-radius: var(--radius-pill);
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease;
+}
+
+/* Підкреслення живе в ::after, а не в border-bottom: рамку не анімуєш із
+   центру, а смужку, що виїжджає, — так. Заразом вона лишається в межах
+   пігулки, а не тягнеться через її поля. */
+.site-header__link::after {
+  content: '';
+  position: absolute;
+  left: var(--space-2);
+  right: var(--space-2);
+  bottom: 4px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform 0.22s ease;
 }
 
 .site-header__link svg {
   flex-shrink: 0;
+  transition: transform 0.22s ease;
 }
 
 .site-header__link:hover {
   color: var(--text);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.site-header__link:hover::after {
+  transform: scaleX(1);
+}
+
+.site-header__link:hover svg {
+  transform: translateY(-1px) scale(1.14);
+}
+
+/* Натискання має відчуватися натисканням: без цього перехід між сторінками
+   виглядає так, ніби клік не зареєструвався. */
+.site-header__link:active {
+  transform: translateY(1px);
 }
 
 .site-header__link.is-active {
   color: var(--accent-strong);
-  border-bottom-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.site-header__link.is-active::after {
+  transform: scaleX(1);
 }
 
 .site-header__account {
@@ -133,12 +176,14 @@
    Висота теж у запиті: телефон лежачи має 360 px висоти, і там дорога кожна
    смуга, навіть якщо ширини вистачає на підписи. */
 /* Проміжний рівень: планшет лежачи і вузький ноутбук.
-   Виміряно: навігація з підписами займає 1018 px і в один ряд вміщається лише
-   від ~1100 px. Нижче цього шапка ламалася на два ряди — 123 px замість 71.
-   Але щоб лишити підписи читабельними, досить прибрати дві необов'язкові речі:
-   приписку «| Historic_up's edition» і пошту вчителя. Обидві є на сторінці
-   акаунта, а тут вони коштували цілого ряду. */
-@media (max-width: 1080px) {
+   Щоб лишити підписи читабельними, досить прибрати дві необов'язкові речі:
+   приписку «| Historic_up's edition» і підпис акаунта. Обидві є на сторінці
+   акаунта, а тут вони коштують цілого ряду.
+
+   Поріг 1220, а не 1080: виміряно, що учневі з усіма підписами потрібно 1190 px,
+   тож на 1100–1175 шапка ламалася на два ряди ще до появи рольових пунктів.
+   Без приписки й підпису акаунта тому ж учневі вистачає 924 px. */
+@media (max-width: 1220px) {
   .site-header__logo-edition {
     display: none;
   }
@@ -147,8 +192,57 @@
     display: none;
   }
 
+  /* Пункти тут уже мають власні поля по 8 px з кожного боку, тож зовнішній
+     проміжок зайвий: із ним ряд ставав ширшим, ніж був до появи пігулок. */
   .site-header__nav {
-    gap: var(--space-3);
+    gap: 0;
+  }
+}
+
+/* ───────────────────── Щільна навігація: вчитель і модератор ───────────────── */
+/*
+ * Скільки пунктів поміститься в ряд, залежить не від ширини екрана, а від того,
+ * скільки їх узагалі, — тож клас щільності ставить Header.jsx, а пороги стоять
+ * тут. Числа нижче виміряні на справжній шапці з дочеканим профілем (без цього
+ * вимір ловить її ще без рольових пунктів і показує неправду):
+ *
+ *                        усе видно   без приписки   і без підпису   лише іконки
+ *   учень                   1190          1008            924            572
+ *   вчитель                 1322          1140           1055            631
+ *   модератор               1442          1260           1175            691
+ *
+ * Смуга ширша за 1400 px не буває (.site-header__inner), тож модератор з усіма
+ * підписами не вміщався в один ряд на жодному екрані — звідси приписка, яка в
+ * щільній шапці ховається завжди, а не з певної ширини.
+ */
+.site-header--dense .site-header__logo-edition {
+  display: none;
+}
+
+/* 1300, а не виміряні 1260: запас, щоб поріг не стояв упритул до вимоги. */
+@media (max-width: 1300px) {
+  .site-header--dense .site-header__account-label {
+    display: none;
+  }
+}
+
+/* Далі підписи вже не врятувати — лишаються іконки. Для читача екрана підпис
+   нікуди не зникає: він ховається візуально, як і в мобільному блоці нижче. */
+@media (max-width: 1200px) {
+  .site-header--dense .site-header__link-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .site-header--dense .site-header__link {
+    min-width: 40px;
+    justify-content: center;
   }
 }
 
@@ -194,7 +288,12 @@
     min-height: 44px;
     justify-content: center;
     padding: 0;
-    border-bottom: 2px solid transparent;
+  }
+
+  /* Підписів тут немає, тож смужка тягнеться на всю іконку. */
+  .site-header__link::after {
+    left: 6px;
+    right: 6px;
   }
 
   .site-header__account {

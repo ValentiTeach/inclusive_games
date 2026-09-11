@@ -609,14 +609,34 @@ describe('Пошук цілі — навігація по сцені', () => {
   it('стрілка веде до фігури, що справді лежить у цьому напрямку', () => {
     render(<TargetSearchPlayArea level={level} onFinish={vi.fn()} />)
 
-    const before = positions()[cursorIndex()]
-    press('ArrowRight')
-    const after = positions()[cursorIndex()]
-
-    if (after !== before) {
-      expect(after.x).toBeGreaterThan(before.x)
-      expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(after.x - before.x)
+    /**
+     * Перевіряємо всі чотири напрямки, а не один: розкладка щоразу інша, і
+     * праворуч від стартової фігури може не бути нікого. Кожен крок, який
+     * справді стався, мусить вести саме туди, куди показувала стрілка.
+     */
+    const AXES = {
+      ArrowRight: (from, to) => [to.x - from.x, Math.abs(to.y - from.y)],
+      ArrowLeft: (from, to) => [from.x - to.x, Math.abs(to.y - from.y)],
+      ArrowDown: (from, to) => [to.y - from.y, Math.abs(to.x - from.x)],
+      ArrowUp: (from, to) => [from.y - to.y, Math.abs(to.x - from.x)],
     }
+
+    let moves = 0
+    for (const [key, project] of Object.entries(AXES)) {
+      const fromIndex = cursorIndex()
+      const from = positions()[fromIndex]
+      press(key)
+      const toIndex = cursorIndex()
+      if (toIndex === fromIndex) continue
+
+      moves += 1
+      const [along, perp] = project(from, positions()[toIndex])
+      expect(along, `${key}: крок має бути вперед`).toBeGreaterThan(0)
+      expect(perp, `${key}: крок має лишатись у конусі`).toBeLessThanOrEqual(along * (4 / 3) + 0.01)
+    }
+
+    // Сцена на 8 фігур — бодай один напрямок зі стартової завжди зайнятий.
+    expect(moves, 'жоден напрямок не спрацював').toBeGreaterThan(0)
   })
 
   it('на краю сцени курсор лишається на місці', () => {

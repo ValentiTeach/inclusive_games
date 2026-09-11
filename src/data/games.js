@@ -66,6 +66,14 @@ export const GAMES = [
     freeForGuests: true,
   },
   {
+    id: 'keyboard-trainer',
+    title: 'Клавіатурний тренажер',
+    category: 'reaction',
+    description: 'Знайди на клавіатурі потрібну літеру. Підказка показує, де вона.',
+    status: 'available',
+    freeForGuests: true,
+  },
+  {
     id: 'n-back',
     title: 'N-back',
     category: 'memory',

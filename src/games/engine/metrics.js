@@ -93,6 +93,8 @@ export const METRIC_LABELS = {
   worst_rt_ms: 'Найгірший час, мс',
   rt_count: 'Проб із часом',
   duration_ms: 'Тривалість, мс',
+  cpm: 'Символів за хвилину',
+  chars: 'Символів',
   hits: 'Влучань',
   targets: 'Цілей',
   misses: 'Пропущено сигналів',

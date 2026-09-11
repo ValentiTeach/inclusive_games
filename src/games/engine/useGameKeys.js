@@ -46,11 +46,21 @@ export function useGameKeys({
   onEnter,
   onArrow,
   onCancel,
+  onLetter,
 }) {
   const handlers = useRef(null)
 
   useLayoutEffect(() => {
-    handlers.current = { optionCount, onOption, onDigit, onSpace, onEnter, onArrow, onCancel }
+    handlers.current = {
+      optionCount,
+      onOption,
+      onDigit,
+      onSpace,
+      onEnter,
+      onArrow,
+      onCancel,
+      onLetter,
+    }
   })
 
   useEffect(() => {
@@ -71,9 +81,10 @@ export function useGameKeys({
         onEnter: enter,
         onArrow: arrow,
         onCancel: cancel,
+        onLetter: letter,
       } = handlers.current
 
-      if (/^[0-9]$/.test(event.key)) {
+      if ((option || digit) && /^[0-9]$/.test(event.key)) {
         const value = Number(event.key)
 
         // Дві різні речі, тому й два обробники. onOption — «цифра 1..N вибирає
@@ -119,6 +130,16 @@ export function useGameKeys({
       if (cancel && (event.key === 'Escape' || event.key === 'Backspace')) {
         event.preventDefault()
         cancel()
+        return
+      }
+
+      // Найзагальніша гілка, тому остання: якщо гра просить і Пробіл, і літери,
+      // Пробіл має лишитися Пробілом. Код клавіші йде поруч із символом, бо
+      // клавіатурний тренажер має впізнати правильний палець навіть тоді, коли
+      // в системі стоїть чужа розкладка.
+      if (letter && event.key.length === 1) {
+        event.preventDefault()
+        letter({ key: event.key, code: event.code })
       }
     }
 

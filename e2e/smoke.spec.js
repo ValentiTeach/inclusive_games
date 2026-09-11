@@ -1,4 +1,14 @@
 import { test, expect } from '@playwright/test'
+import { GAMES } from '../src/data/games.js'
+
+/*
+ * Лічильники беруться з того самого конфіга, що й сама сторінка, а не
+ * переписуються числом. Тринадцята гра (клавіатурний тренажер) показала, чому:
+ * зашиті «12» і «3» протухли мовчки і залишили два E2E червоними.
+ */
+const TOTAL = GAMES.length
+const FREE = GAMES.filter((game) => game.freeForGuests).length
+const LOCKED = TOTAL - FREE
 
 // These run against the built app with no Supabase credentials, so they cover
 // exactly the parts a visitor sees before signing in — which is also the part
@@ -15,7 +25,7 @@ test('home page renders its hero and lets you reach the catalogue', async ({ pag
 test('catalogue lists every game and opens a free one', async ({ page }) => {
   await page.goto('/games')
 
-  await expect(page.locator('.game-card')).toHaveCount(12)
+  await expect(page.locator('.game-card')).toHaveCount(TOTAL)
 
   const playable = page.locator('a.game-card[href^="/games/"]')
   await expect(playable.first()).toBeVisible()
@@ -26,16 +36,16 @@ test('catalogue lists every game and opens a free one', async ({ page }) => {
 })
 
 // Guest gating is business logic, not decoration: a signed-out visitor can play
-// the three sample games, and every other card sends them to sign in instead of
-// opening the game.
+// the sample games marked freeForGuests, and every other card sends them to sign
+// in instead of opening the game.
 test('locked games send a signed-out visitor to the login page', async ({ page }) => {
   await page.goto('/games')
 
-  await expect(page.locator('a.game-card[href^="/games/"]')).toHaveCount(3)
+  await expect(page.locator('a.game-card[href^="/games/"]')).toHaveCount(FREE)
 
   const locked = page.locator('a.game-card--locked')
-  await expect(locked).toHaveCount(9)
-  await expect(page.getByText('Потрібен вхід')).toHaveCount(9)
+  await expect(locked).toHaveCount(LOCKED)
+  await expect(page.getByText('Потрібен вхід')).toHaveCount(LOCKED)
 
   await locked.first().click()
   await expect(page).toHaveURL(/\/login/)

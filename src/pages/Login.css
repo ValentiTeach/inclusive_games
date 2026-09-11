@@ -1,33 +1,93 @@
+/*
+ * Вхід і реєстрація — скло поверх декору, а не плита поверх нього.
+ *
+ * Раніше ця сторінка була єдиною на сайті з власною зашитою темною палітрою
+ * (#0b1120 і далі): у світлій темі вона лишалася чорною, а суцільний прямокутник
+ * повністю накривав фон — фото, блоби і сітки, що світяться під курсором. Тепер
+ * кольори беруться з токенів теми, а поверхні напівпрозорі: декор видно крізь
+ * них, і сторінка нарешті належить тій темі, яку вибрав користувач.
+ *
+ * Прозорість тут не косметична дрібниця: текст лежить на тому, що просвічує
+ * знизу. Тому під нею завжди є власна підкладка (`color-mix` із --surface), а
+ * розмиття backdrop-filter глушить контрастні плями фону. Де backdrop-filter не
+ * підтримується, підкладка стає майже суцільною — див. @supports наприкінці.
+ */
 .login {
-  --login-bg-1: #0b1120;
-  --login-bg-2: #142033;
-  --login-surface: #16233a;
-  --login-border: #253552;
-  --login-text: #eef2f8;
-  --login-text-muted: #9fb0c9;
-  --login-accent: #4f8ce0;
-  --login-accent-2: #0b4da3;
+  /* Три щільності скла: зовнішня рамка найпрозоріша, панель із формою —
+     щільніша (на ній читають), поля вводу — окрема, ще темніша підкладка. */
+  --login-glass: color-mix(in srgb, var(--surface) 52%, transparent);
+  --login-glass-strong: color-mix(in srgb, var(--surface) 76%, transparent);
+  --login-field: color-mix(in srgb, var(--surface-muted) 72%, transparent);
+  --login-ring: color-mix(in srgb, var(--accent) 24%, transparent);
+  /* Приглушений текст на склі — щільніший, ніж звичайний --text-muted.
+     Причина виміряна, не вигадана: під склом лежить рухомий декор, і в
+     найтемнішій точці смуги --text-muted дає 3.62:1 — нижче норми 4.5 для
+     основного тексту. Домішка --text піднімає той самий найгірший випадок до
+     5.2:1, лишаючи тон явно другорядним. У темній темі запас і так був (6.1:1),
+     але тон однаковий в обох — різні кольори для одного й того ж рівня
+     ієрархії довелося б тримати синхронними вручну. */
+  --login-muted: color-mix(in srgb, var(--text-muted) 70%, var(--text));
+  --login-blur: blur(20px) saturate(135%);
 
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* Вміст тут вузький — картки вибору 720 px, панель форми 420 px. Розтягнута
+     на всю колонку плита була б переважно порожнім склом, тож вона обмежена по
+     вмісту і стоїть по центру. */
+  width: 100%;
+  max-width: 780px;
+  margin-inline: auto;
   padding: var(--space-8) var(--space-5) var(--space-7);
+  border: 1px solid var(--login-ring);
   border-radius: var(--radius-lg);
-  background: radial-gradient(1200px 600px at 15% -10%, rgba(79, 140, 224, 0.25), transparent),
-    radial-gradient(900px 500px at 100% 0%, rgba(11, 77, 163, 0.25), transparent),
-    linear-gradient(180deg, var(--login-bg-1), var(--login-bg-2));
-  color: var(--login-text);
+  background: var(--login-glass);
+  -webkit-backdrop-filter: var(--login-blur);
+  backdrop-filter: var(--login-blur);
+  box-shadow: var(--shadow-md);
+  color: var(--text);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-7);
 }
 
-.login--plain {
-  padding: var(--space-6) var(--space-5);
-  align-items: flex-start;
+/* Кольорове підсвічування самої панелі — два фірмові сині відсвіти в кутах.
+   Окремим шаром, а не в background самої .login: там уже лежить напівпрозора
+   підкладка, і градієнт мусить бути над нею, але під вмістом. */
+.login::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      760px 340px at 12% -8%,
+      color-mix(in srgb, var(--accent) 26%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      620px 300px at 104% 4%,
+      color-mix(in srgb, var(--accent-strong) 22%, transparent),
+      transparent 70%
+    );
 }
 
-.login h1,
-.login p {
-  color: var(--login-text);
+/* Гілка «вхід не підключено» і «Завантаження…» — звичайний текст без скла. */
+.login--plain {
+  max-width: none;
+  padding: var(--space-6) var(--space-5);
+  align-items: flex-start;
+  background: none;
+  border: none;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.login--plain::before {
+  content: none;
 }
 
 .login__hero {
@@ -40,17 +100,17 @@
   font-size: 13px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--login-accent);
+  color: var(--accent-strong);
   margin: 0 0 var(--space-3);
 }
 
 .login__title {
-  color: var(--login-text);
+  color: var(--text);
   margin: 0 0 var(--space-3);
 }
 
 .login__subtitle {
-  color: var(--login-text-muted);
+  color: var(--login-muted);
   margin: 0;
 }
 
@@ -71,25 +131,43 @@
   gap: var(--space-2);
   text-align: left;
   padding: var(--space-6);
-  background: var(--login-surface);
-  border: 1px solid var(--login-border);
+  background: var(--login-glass-strong);
+  -webkit-backdrop-filter: var(--login-blur);
+  backdrop-filter: var(--login-blur);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  color: var(--login-text);
+  color: var(--text);
   cursor: pointer;
   font-family: inherit;
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
 }
 
 .login__card:hover {
   transform: translateY(-3px);
-  border-color: var(--login-accent-2);
-  box-shadow: 0 20px 40px -20px rgba(63, 140, 255, 0.35);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  box-shadow: 0 20px 40px -20px
+    color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+/* Натискання мишею має відчуватися як натискання, а не як миготіння. */
+.login__card:active {
+  transform: translateY(-1px);
 }
 
 .login__card-icon {
   width: 32px;
   height: 32px;
-  color: var(--login-accent);
+  color: var(--accent);
+  transition: transform 0.18s ease;
+}
+
+.login__card:hover .login__card-icon {
+  transform: scale(1.12) rotate(-6deg);
 }
 
 .login__card-title {
@@ -99,35 +177,54 @@
 }
 
 .login__card-text {
-  color: var(--login-text-muted);
+  color: var(--login-muted);
   font-size: 14.5px;
 }
 
 .login__panel {
   width: 100%;
   max-width: 420px;
-  background: var(--login-surface);
-  border: 1px solid var(--login-border);
+  background: var(--login-glass-strong);
+  -webkit-backdrop-filter: var(--login-blur);
+  backdrop-filter: var(--login-blur);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   padding: var(--space-6);
+  /* Панель з'являється замість карток вибору — без цього вона просто
+     підмінює їх ривком. Глобальне правило reduced-motion в index.css
+     гасить анімацію тим, хто просив менше руху. */
+  animation: login-rise 0.28s ease-out both;
+}
+
+@keyframes login-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .login__back {
   background: none;
   border: none;
-  color: var(--login-text-muted);
+  color: var(--login-muted);
   font-family: var(--font-body);
   font-size: 14px;
   cursor: pointer;
   padding: 0 0 var(--space-4);
+  transition: color 0.15s ease;
 }
 
 .login__back:hover {
-  color: var(--login-text);
+  color: var(--text);
 }
 
 .login__panel-title {
-  color: var(--login-text);
+  color: var(--text);
   margin: 0 0 var(--space-4);
   font-size: 20px;
 }
@@ -144,7 +241,7 @@
   font-size: 12.5px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--login-text-muted);
+  color: var(--login-muted);
 }
 
 .login__input {
@@ -153,18 +250,25 @@
   font-size: 16px;
   padding: 10px 14px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--login-border);
-  background: var(--login-bg-1);
-  color: var(--login-text);
+  border: 1px solid var(--border);
+  background: var(--login-field);
+  color: var(--text);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .login__input::placeholder {
-  color: var(--login-text-muted);
+  color: var(--text-muted);
 }
 
-.login__input:focus-visible {
-  outline: 2px solid var(--login-accent-2);
-  outline-offset: 1px;
+/* Поле, в якому зараз друкують, підсвічується кільцем — щоб на склі було видно,
+   куди саме йде текст. Обведення фокуса лишається глобальне (index.css). */
+.login__input:focus {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .login__input--code {
@@ -174,48 +278,61 @@
 }
 
 .login__error {
-  color: #ff8a8a;
+  color: #d2342f;
   font-size: 14px;
   margin: 0;
 }
 
+:root[data-theme="dark"] .login__error {
+  color: #ff8a8a;
+}
+
 .login__sent {
-  color: var(--login-text-muted);
+  color: var(--login-muted);
 }
 
 .login__hint {
-  color: var(--login-text-muted);
+  color: var(--login-muted);
   font-size: 13.5px;
   margin: 0 0 var(--space-4);
 }
 
+/* Вхід і Реєстрація — сегментний перемикач, а не дві вкладки з підкресленням:
+   на склі тонка лінія знизу майже не читалася, а залита пігулка видно завжди. */
 .login__tabs {
-  display: flex;
-  gap: var(--space-2);
+  display: inline-flex;
+  gap: var(--space-1);
   margin: 0 0 var(--space-4);
-  border-bottom: 1px solid var(--login-border);
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--login-field);
 }
 
 .login__tab {
   background: none;
   border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--login-text-muted);
+  border-radius: var(--radius-pill);
+  color: var(--login-muted);
   font-family: var(--font-body);
   font-size: 14.5px;
   font-weight: 600;
-  padding: var(--space-2) var(--space-1) var(--space-3);
+  padding: 8px 18px;
   cursor: pointer;
-  margin-bottom: -1px;
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .login__tab:hover {
-  color: var(--login-text);
+  color: var(--text);
 }
 
 .login__tab--active {
-  color: var(--login-text);
-  border-bottom-color: var(--login-accent);
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
 }
 
 .login__submit {
@@ -226,12 +343,53 @@
   padding: 12px 20px;
   border-radius: var(--radius-pill);
   border: none;
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--login-accent), var(--login-accent-2));
+  /* Не білим, а токеном контрасту до акценту — як у .button--primary. У темній
+     темі --accent-strong світлий (це колір тексту на темному тлі), і білий
+     напис на ньому давав контраст близько 2:1. */
+  color: var(--accent-contrast);
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
   cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.login__submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px -14px
+    color-mix(in srgb, var(--accent) 80%, transparent);
+}
+
+.login__submit:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .login__submit:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+/*
+ * Без backdrop-filter (старий Firefox із вимкненим прапорцем, деякі вбудовані
+ * webview) напівпрозора підкладка не має чим глушити фон: під текстом лишається
+ * фото і сині блоби, і контраст стає непередбачуваним. Там скло вимикається —
+ * поверхні стають майже суцільними. Перевіряються обидва написання: Safari досі
+ * знає лише -webkit-.
+ */
+@supports not (
+  (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))
+) {
+  .login {
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+  }
+
+  .login__card,
+  .login__panel {
+    background: var(--surface);
+  }
+
+  .login__input,
+  .login__tabs {
+    background: var(--surface-muted);
+  }
 }

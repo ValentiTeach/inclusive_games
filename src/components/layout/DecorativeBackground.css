@@ -12,7 +12,17 @@
   background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('/bg.webp');
   background-repeat: no-repeat;
   background-position: right top;
-  background-size: min(1500px, 105vw) auto;
+  /* cover, а не фіксована ширина. Раніше тут стояло min(1500px, 105vw): на
+     екрані, ширшому за ~1430 px, картинка переставала діставати до лівого краю
+     і її межа читалася вертикальною лінією через усю сторінку. Маска приглушує
+     цю межу, але не прибирає — на краю лишалося близько 13% непрозорості, тобто
+     обрив із 13% у нуль.
+
+     Виміряно на справжньому рендері (середня яскравість колонки, стрибок між
+     сусідніми колонками): край стояв рівно на x = ширина − 1500 і ставав тим
+     помітнішим, чим ширший екран — 1.4 на 1600 px, 4.3 на 1920, 8.7 на 2560.
+     З cover картинка завжди перекриває полотно, і краю просто немає. */
+  background-size: cover;
   /* Keep the photo itself blue/white too — desaturate the illustration's
      other tones so it reads as part of the same two-color palette. */
   filter: grayscale(0.4) saturate(1.3) hue-rotate(-8deg);

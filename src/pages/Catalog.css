@@ -4,3 +4,121 @@
   gap: var(--space-4);
   margin-top: var(--space-6);
 }
+
+/*
+ * Фільтр за навиком. Пігулки повторюють кольори категорій із Badge.css, бо це
+ * той самий словник: дитина бачить на картці гри «Пам'ять» того ж кольору, що
+ * й у фільтрі, і зв'язок читається без пояснень.
+ */
+.catalog-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.catalog-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    border-color 0.18s ease,
+    color 0.18s ease,
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.catalog-filter:hover {
+  color: var(--text);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.catalog-filter:active {
+  transform: translateY(0);
+}
+
+.catalog-filter__count {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+
+/*
+ * Вибраний навик: відтінок категорії як тло, її колір — у рамці та іконці, а
+ * напис звичайним текстовим кольором.
+ *
+ * Двічі виміряно і двічі переробено. Суцільна заливка кольором категорії давала
+ * у світлій темі 3.0–4.3:1 для білого напису в трьох категоріях із чотирьох.
+ * Пара з Badge (колір категорії на власному відтінку) виглядала природно, але
+ * відтінок напівпрозорий: пігулка лежить не на картці, а на сторінці, і крізь
+ * неї просвічував рухомий декор — 1.7–2.9:1. Тому тло тут змішується з
+ * поверхнею явно, а не альфою, і напис узятий із --text.
+ */
+.catalog-filter.is-active {
+  color: var(--text);
+  background: var(--surface-muted);
+  border-color: var(--accent);
+  border-width: 2px;
+  padding: 7px 13px;
+}
+
+.catalog-filter.is-active .catalog-filter__count {
+  background: color-mix(in srgb, var(--text) 12%, var(--surface));
+  color: inherit;
+}
+
+.catalog-filter--attention.is-active {
+  background: color-mix(in srgb, var(--cat-attention) 14%, var(--surface));
+  border-color: var(--cat-attention);
+}
+
+.catalog-filter--memory.is-active {
+  background: color-mix(in srgb, var(--cat-memory) 14%, var(--surface));
+  border-color: var(--cat-memory);
+}
+
+.catalog-filter--thinking.is-active {
+  background: color-mix(in srgb, var(--cat-thinking) 14%, var(--surface));
+  border-color: var(--cat-thinking);
+}
+
+.catalog-filter--reaction.is-active {
+  background: color-mix(in srgb, var(--cat-reaction) 14%, var(--surface));
+  border-color: var(--cat-reaction);
+}
+
+/* Колір категорії лишається там, де він нічого не мусить нести — в іконці. */
+.catalog-filter--attention.is-active svg {
+  color: var(--cat-attention);
+}
+
+.catalog-filter--memory.is-active svg {
+  color: var(--cat-memory);
+}
+
+.catalog-filter--thinking.is-active svg {
+  color: var(--cat-thinking);
+}
+
+.catalog-filter--reaction.is-active svg {
+  color: var(--cat-reaction);
+}
+
+@media (pointer: coarse) {
+  .catalog-filter {
+    min-height: 44px;
+  }
+}

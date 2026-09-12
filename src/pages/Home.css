@@ -18,3 +18,35 @@
   flex-wrap: wrap;
   gap: var(--space-2);
 }
+
+.home-hero__categories-label {
+  margin: 0 0 var(--space-2);
+  font-size: 14px;
+}
+
+/* Посилання тільки обгортає значок: сам вигляд лишається за Badge, тож плитка
+   на головній і позначка на картці гри — це одне й те саме, а не дві схожі
+   речі, які доведеться тримати синхронними. */
+.home-hero__category {
+  display: inline-flex;
+  text-decoration: none;
+  border-radius: var(--radius-pill);
+  transition: transform 0.18s ease;
+}
+
+.home-hero__category:hover {
+  transform: translateY(-2px);
+}
+
+.home-hero__category:active {
+  transform: translateY(0);
+}
+
+/* Дотиком плитка має бути ціллю для пальця, а не для пінцета: сам значок
+   близько 24 px заввишки. */
+@media (pointer: coarse) {
+  .home-hero__category .badge {
+    min-height: 44px;
+    padding-inline: var(--space-4);
+  }
+}

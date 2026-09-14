@@ -133,4 +133,19 @@ export const GAMES = [
     description: 'Повтори ряд цифр — у тому самому або у зворотному порядку.',
     status: 'available',
   },
+  {
+    id: 'odd-one-out',
+    title: 'Зайвий предмет',
+    category: 'thinking',
+    description: 'Три фігури схожі за однією ознакою, а одна — ні. Знайди зайву.',
+    status: 'available',
+    freeForGuests: true,
+  },
+  {
+    id: 'continue-row',
+    title: 'Продовж ряд',
+    category: 'thinking',
+    description: 'Фігури стоять за правилом — обери ту, що має бути наступною.',
+    status: 'available',
+  },
 ]

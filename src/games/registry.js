@@ -32,6 +32,10 @@ import { config as whatVanishedConfig } from './what-vanished/whatVanished.confi
 import WhatVanishedPlayArea from './what-vanished/WhatVanishedPlayArea'
 import { config as digitSpanConfig } from './digit-span/digitSpan.config'
 import DigitSpanPlayArea from './digit-span/DigitSpanPlayArea'
+import { config as oddOneOutConfig } from './odd-one-out/oddOneOut.config'
+import OddOneOutPlayArea from './odd-one-out/OddOneOutPlayArea'
+import { config as continueRowConfig } from './continue-row/continueRow.config'
+import ContinueRowPlayArea from './continue-row/ContinueRowPlayArea'
 
 export const GAME_REGISTRY = {
   schulte: { config: schulteConfig, PlayArea: SchultePlayArea },
@@ -51,4 +55,6 @@ export const GAME_REGISTRY = {
   'catch-the-moment': { config: catchTheMomentConfig, PlayArea: CatchTheMomentPlayArea },
   'what-vanished': { config: whatVanishedConfig, PlayArea: WhatVanishedPlayArea },
   'digit-span': { config: digitSpanConfig, PlayArea: DigitSpanPlayArea },
+  'odd-one-out': { config: oddOneOutConfig, PlayArea: OddOneOutPlayArea },
+  'continue-row': { config: continueRowConfig, PlayArea: ContinueRowPlayArea },
 }

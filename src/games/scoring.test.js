@@ -16,6 +16,8 @@ import { scoring as trafficLight } from './traffic-light/trafficLight.config'
 import { scoring as catchTheMoment } from './catch-the-moment/catchTheMoment.config'
 import { scoring as whatVanished } from './what-vanished/whatVanished.config'
 import { scoring as digitSpan } from './digit-span/digitSpan.config'
+import { scoring as oddOneOut } from './odd-one-out/oddOneOut.config'
+import { scoring as continueRow } from './continue-row/continueRow.config'
 import { GAME_REGISTRY } from './registry'
 
 // 3 правильні з 4, часи 400/600/500/300 — точність 75%, середнє 450, найкраще 300.
@@ -92,6 +94,8 @@ const SCENARIOS = [
         { target_length: 9 },
       ),
   },
+  { id: 'odd-one-out', run: () => oddOneOut(TRIALS) },
+  { id: 'continue-row', run: () => continueRow(TRIALS) },
   {
     id: 'keyboard-trainer',
     run: () =>

@@ -1,0 +1,100 @@
+.row-game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.row-game__progress {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Ряд може бути довшим за екран на телефоні — тоді він прокручується вбік сам,
+   а сторінка лишається на місці. */
+.row-game__sequence {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 100%;
+  overflow-x: auto;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.row-game__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+}
+
+.row-game__cell--next {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-muted);
+  border: 2px dashed var(--border);
+  background: none;
+}
+
+.row-game__prompt {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.row-game__options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.row-game__option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.row-game__option:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.row-game__option.is-answer {
+  border-color: var(--cat-thinking);
+  background: color-mix(in srgb, var(--cat-thinking) 16%, var(--surface));
+}
+
+@media (max-width: 560px) {
+  .row-game__cell {
+    width: 52px;
+    height: 52px;
+  }
+
+  .row-game__option {
+    width: 76px;
+    height: 76px;
+  }
+}

@@ -1,0 +1,63 @@
+.odd {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.odd__progress {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.odd__prompt {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.odd__items {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-4);
+}
+
+/* Клітинка стала, а фігура всередині — різного розміру: якби кнопка росла
+   разом із фігурою, найбільша впадала б в око ще до того, як дитина порівняє
+   ознаки, і «зайвий за розміром» вирішувався б сам собою. */
+.odd__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 108px;
+  height: 108px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.odd__item:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.odd__item.is-answer {
+  border-color: var(--cat-thinking);
+  background: color-mix(in srgb, var(--cat-thinking) 16%, var(--surface));
+}
+
+@media (max-width: 560px) {
+  .odd__item {
+    width: 84px;
+    height: 84px;
+  }
+}

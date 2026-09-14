@@ -118,4 +118,19 @@ export const GAMES = [
     status: 'available',
     freeForGuests: true,
   },
+  {
+    id: 'what-vanished',
+    title: 'Що зникло',
+    category: 'memory',
+    description: 'Запам’ятай предмети — один зникне, і треба сказати, який саме.',
+    status: 'available',
+    freeForGuests: true,
+  },
+  {
+    id: 'digit-span',
+    title: 'Послідовність цифр',
+    category: 'memory',
+    description: 'Повтори ряд цифр — у тому самому або у зворотному порядку.',
+    status: 'available',
+  },
 ]

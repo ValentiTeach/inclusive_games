@@ -1,0 +1,99 @@
+.vanished {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.vanished__progress {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.vanished__prompt {
+  margin: 0;
+  min-height: 1.6em;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* Набір тримає однакову висоту в усіх фазах: якби він стискався, коли предмет
+   зникає, місце пропажі було б видно за самим зсувом сусідів. */
+.vanished__set {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 72px);
+  gap: var(--space-3);
+  justify-content: center;
+  /* Висота рахується з кількості рядків, а не зашита числом.
+     На чинних рівнях блок і без цього не стрибає: 4→3 предмети в чотири
+     колонки, 6→5 у три, 8→7 у чотири — кількість рядків не падає. Правило
+     лишається страховкою на випадок рівня, де колонки не поділять набір рівно
+     (наприклад 4 предмети в три колонки: 2 рядки до і 1 після). */
+  min-height: calc(var(--rows) * 72px + (var(--rows) - 1) * var(--space-3) + 2 * var(--space-4));
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.vanished__set.is-hidden {
+  visibility: hidden;
+}
+
+.vanished__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.vanished__options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.vanished__option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.vanished__option:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.vanished__option.is-answer {
+  border-color: var(--cat-memory);
+  background: color-mix(in srgb, var(--cat-memory) 16%, var(--surface));
+}
+
+@media (max-width: 560px) {
+  .vanished__set {
+    grid-template-columns: repeat(var(--cols), 56px);
+    min-height: calc(var(--rows) * 56px + (var(--rows) - 1) * var(--space-3) + 2 * var(--space-4));
+  }
+
+  .vanished__item {
+    width: 56px;
+    height: 56px;
+  }
+}

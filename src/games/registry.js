@@ -28,6 +28,10 @@ import { config as trafficLightConfig } from './traffic-light/trafficLight.confi
 import TrafficLightPlayArea from './traffic-light/TrafficLightPlayArea'
 import { config as catchTheMomentConfig } from './catch-the-moment/catchTheMoment.config'
 import CatchTheMomentPlayArea from './catch-the-moment/CatchTheMomentPlayArea'
+import { config as whatVanishedConfig } from './what-vanished/whatVanished.config'
+import WhatVanishedPlayArea from './what-vanished/WhatVanishedPlayArea'
+import { config as digitSpanConfig } from './digit-span/digitSpan.config'
+import DigitSpanPlayArea from './digit-span/DigitSpanPlayArea'
 
 export const GAME_REGISTRY = {
   schulte: { config: schulteConfig, PlayArea: SchultePlayArea },
@@ -45,4 +49,6 @@ export const GAME_REGISTRY = {
   'keyboard-trainer': { config: keyboardTrainerConfig, PlayArea: KeyboardTrainerPlayArea },
   'traffic-light': { config: trafficLightConfig, PlayArea: TrafficLightPlayArea },
   'catch-the-moment': { config: catchTheMomentConfig, PlayArea: CatchTheMomentPlayArea },
+  'what-vanished': { config: whatVanishedConfig, PlayArea: WhatVanishedPlayArea },
+  'digit-span': { config: digitSpanConfig, PlayArea: DigitSpanPlayArea },
 }

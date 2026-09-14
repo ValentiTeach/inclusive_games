@@ -103,4 +103,19 @@ export const GAMES = [
     status: 'available',
     beta: true,
   },
+  {
+    id: 'traffic-light',
+    title: 'Світлофор',
+    category: 'reaction',
+    description: 'Загоряється один із вогнів — натисни саме ту кнопку, що йому відповідає.',
+    status: 'available',
+  },
+  {
+    id: 'catch-the-moment',
+    title: 'Лови момент',
+    category: 'reaction',
+    description: 'Зупини бігунець точно в зеленій зоні — тут важлива не швидкість, а влучність.',
+    status: 'available',
+    freeForGuests: true,
+  },
 ]

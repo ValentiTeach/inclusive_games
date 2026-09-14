@@ -24,6 +24,10 @@ import { config as mentalRotationConfig } from './mental-rotation/mentalRotation
 import MentalRotationPlayArea from './mental-rotation/MentalRotationPlayArea'
 import { config as keyboardTrainerConfig } from './keyboard-trainer/keyboardTrainer.config'
 import KeyboardTrainerPlayArea from './keyboard-trainer/KeyboardTrainerPlayArea'
+import { config as trafficLightConfig } from './traffic-light/trafficLight.config'
+import TrafficLightPlayArea from './traffic-light/TrafficLightPlayArea'
+import { config as catchTheMomentConfig } from './catch-the-moment/catchTheMoment.config'
+import CatchTheMomentPlayArea from './catch-the-moment/CatchTheMomentPlayArea'
 
 export const GAME_REGISTRY = {
   schulte: { config: schulteConfig, PlayArea: SchultePlayArea },
@@ -39,4 +43,6 @@ export const GAME_REGISTRY = {
   matrices: { config: matricesConfig, PlayArea: MatricesPlayArea },
   'mental-rotation': { config: mentalRotationConfig, PlayArea: MentalRotationPlayArea },
   'keyboard-trainer': { config: keyboardTrainerConfig, PlayArea: KeyboardTrainerPlayArea },
+  'traffic-light': { config: trafficLightConfig, PlayArea: TrafficLightPlayArea },
+  'catch-the-moment': { config: catchTheMomentConfig, PlayArea: CatchTheMomentPlayArea },
 }

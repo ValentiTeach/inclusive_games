@@ -1,0 +1,119 @@
+.traffic {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.traffic__progress {
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Корпус світлофора: вертикальний стовпчик вогнів, як у справжнього. Форма тут
+   несе сенс — дитина впізнає предмет раніше, ніж прочитає підпис. */
+.traffic__box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+}
+
+.traffic__lamp {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  /* Згаслий вогонь — не сірий кружок, а той самий колір, приглушений до
+     чверті: так видно, який вогонь де, ще до того, як він загориться. */
+  background: color-mix(in srgb, var(--lamp-color) 22%, var(--surface));
+  border: 2px solid color-mix(in srgb, var(--lamp-color) 35%, var(--border));
+  transition:
+    background-color 0.08s ease,
+    box-shadow 0.08s ease;
+}
+
+.traffic__lamp.is-lit {
+  background: var(--lamp-color);
+  border-color: var(--lamp-color);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--lamp-color) 70%, transparent);
+}
+
+.traffic__lamp-name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.traffic__status {
+  margin: 0;
+  min-height: 1.6em;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.traffic__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.traffic__button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 56px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--lamp-color);
+  /* Заливка змішується з поверхнею явно, а не альфою: кнопка лежить на
+     сторінці, крізь яку просвічує рухомий фон, і напівпрозоре тло робило б
+     контраст напису непередбачуваним. */
+  background: color-mix(in srgb, var(--lamp-color) 16%, var(--surface));
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.traffic__button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -14px color-mix(in srgb, var(--lamp-color) 80%, transparent);
+}
+
+.traffic__button:active {
+  transform: translateY(0);
+}
+
+/* Після хибного натискання підсвічуємо, який вогонь горів насправді. */
+.traffic__button.is-answer {
+  background: color-mix(in srgb, var(--lamp-color) 34%, var(--surface));
+}
+
+@media (max-width: 560px) {
+  .traffic__lamp {
+    width: 64px;
+    height: 64px;
+  }
+
+  .traffic__button {
+    padding: 0 var(--space-4);
+    font-size: 15px;
+  }
+}

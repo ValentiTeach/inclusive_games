@@ -12,6 +12,8 @@ import { scoring as stroop } from './stroop/stroop.config'
 import { scoring as subitizing } from './subitizing/subitizing.config'
 import { scoring as targetSearch } from './target-search/targetSearch.config'
 import { scoring as keyboardTrainer } from './keyboard-trainer/keyboardTrainer.config'
+import { scoring as trafficLight } from './traffic-light/trafficLight.config'
+import { scoring as catchTheMoment } from './catch-the-moment/catchTheMoment.config'
 import { GAME_REGISTRY } from './registry'
 
 // 3 правильні з 4, часи 400/600/500/300 — точність 75%, середнє 450, найкраще 300.
@@ -57,6 +59,20 @@ const SCENARIOS = [
     run: () => memoryPairs({ moves: 20, elapsedMs: 61_500, pairs: 8 }),
   },
   { id: 'simon', run: () => simon({ roundsCompleted: 5, targetLength: 8 }) },
+  {
+    id: 'traffic-light',
+    run: () => trafficLight(TRIALS, { early_presses: 2 }),
+  },
+  {
+    id: 'catch-the-moment',
+    run: () =>
+      catchTheMoment([
+        { hit: true, offsetPct: 2 },
+        { hit: true, offsetPct: 5 },
+        { hit: false, offsetPct: 14 },
+        { hit: true, offsetPct: 3 },
+      ]),
+  },
   {
     id: 'keyboard-trainer',
     run: () =>

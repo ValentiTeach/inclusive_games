@@ -14,6 +14,8 @@ import { scoring as targetSearch } from './target-search/targetSearch.config'
 import { scoring as keyboardTrainer } from './keyboard-trainer/keyboardTrainer.config'
 import { scoring as trafficLight } from './traffic-light/trafficLight.config'
 import { scoring as catchTheMoment } from './catch-the-moment/catchTheMoment.config'
+import { scoring as whatVanished } from './what-vanished/whatVanished.config'
+import { scoring as digitSpan } from './digit-span/digitSpan.config'
 import { GAME_REGISTRY } from './registry'
 
 // 3 правильні з 4, часи 400/600/500/300 — точність 75%, середнє 450, найкраще 300.
@@ -72,6 +74,23 @@ const SCENARIOS = [
         { hit: false, offsetPct: 14 },
         { hit: true, offsetPct: 3 },
       ]),
+  },
+  {
+    id: 'what-vanished',
+    run: () => whatVanished(TRIALS, { set_size: 6 }),
+  },
+  {
+    id: 'digit-span',
+    run: () =>
+      digitSpan(
+        [
+          { correct: true, length: 3, direction: 'forward' },
+          { correct: true, length: 4, direction: 'forward' },
+          { correct: false, length: 5, direction: 'forward' },
+          { correct: false, length: 5, direction: 'forward' },
+        ],
+        { target_length: 9 },
+      ),
   },
   {
     id: 'keyboard-trainer',

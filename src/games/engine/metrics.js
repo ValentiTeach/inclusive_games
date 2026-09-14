@@ -110,6 +110,8 @@ export const METRIC_LABELS = {
   extra_moves: 'Зайвих ходів',
   grid_size: 'Розмір таблиці',
   rounds_completed: 'Пройдено раундів',
+  span: 'Обсяг пам’яті, цифр',
+  set_size: 'Предметів у наборі',
   target_length: 'Ціль рівня',
   reached_target: 'Ціль досягнута',
 }

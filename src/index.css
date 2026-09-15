@@ -27,7 +27,7 @@
   --surface: #ffffff;
   --surface-muted: #eef1f6;
   --text: #101a2b;
-  --text-muted: #5b6b84;
+  --text-muted: #36425a;
   --border: #e1e6ee;
 
   --accent: #0b4da3;
@@ -38,6 +38,10 @@
   --shadow-md: 0 10px 24px -12px rgba(16, 26, 43, 0.18);
 
   --bg-overlay: rgba(247, 249, 252, 0.74);
+  /* Щільність підкладки під текстовою колонкою — див. Layout.css. Світла тема
+     потребує більше: там декор синій на світлому, і найгірша точка темніша
+     відносно тексту. Виміряно на вікні 1280×720: 66% дають близько 5.8:1. */
+  --column-scrim: 66%;
 
   /* Кольори категорій ігор */
   --cat-attention: #2f8fae;
@@ -68,7 +72,7 @@
   --surface: #121b2e;
   --surface-muted: #16213a;
   --text: #eef2f8;
-  --text-muted: #93a3bd;
+  --text-muted: #b4c0d6;
   --border: #223252;
 
   --accent: #4f8ce0;
@@ -83,6 +87,9 @@
      theme's 0.74 it competes with the words instead of sitting behind them —
      which is what made the dark theme look murky. */
   --bg-overlay: rgba(11, 18, 32, 0.92);
+  /* У темній темі вистачає слабшої: виміряно 50% → 5.4:1, тож 55% лишає більше
+     декору видимим і тримає той самий запас, що й у світлій. */
+  --column-scrim: 55%;
 
   --cat-attention: #5fb7d6;
   --cat-attention-bg: rgba(95, 183, 214, 0.16);

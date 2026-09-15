@@ -50,7 +50,15 @@ export function makeResults(students, perStudent = 3) {
       game_id: ['schulte', 'stroop', 'memory-pairs'][index % 3],
       level_id: 'classic',
       score: 50 + ((studentIndex * 7 + index * 13) % 50),
-      metrics: { accuracy_pct: 60 + index * 5, avg_rt_ms: 400 + index * 40 },
+      // total і rt_count тут не для краси: без них зріз за іграми не має чим
+      // зважувати середні, і перевірка зважування перетворилася б на перевірку
+      // простого середнього.
+      metrics: {
+        total: 10 + index * 5,
+        accuracy_pct: 60 + index * 5,
+        avg_rt_ms: 400 + index * 40,
+        rt_count: 10 + index * 5,
+      },
       played_at: `2026-09-0${(index % 9) + 1}T11:00:00Z`,
     })),
   )

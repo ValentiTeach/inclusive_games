@@ -5,6 +5,8 @@ import { GAMES, CATEGORIES } from '../data/games'
 import { CATEGORY_ICONS } from '../data/categoryIcons'
 import { ACHIEVEMENTS } from '../data/achievements'
 import { getResults } from '../games/engine/storage'
+import { metricLabel } from '../games/engine/metrics'
+import { highlightMetrics, improvement } from '../lib/progressMetrics'
 import { fetchCloudHistory } from '../lib/cloudSync'
 import { useAuth } from '../lib/authContext'
 import { computeStreak } from '../lib/streak'
@@ -141,6 +143,8 @@ function Progress() {
           const scores = [...history].reverse().map((attempt) => attempt.score)
           const best = Math.max(...history.map((attempt) => attempt.score))
           const CategoryIcon = CATEGORY_ICONS[game.category]
+          const highlights = highlightMetrics(history)
+          const growth = improvement(history)
 
           return (
             <Link key={game.id} to={`/games/${game.id}`} className="progress-game">
@@ -155,7 +159,32 @@ function Progress() {
               <div className="progress-game__stats">
                 <span>Спроб: {history.length}</span>
                 <span>Найкращий результат: {best}%</span>
+                {growth !== null && growth !== 0 && (
+                  <span
+                    className={
+                      growth > 0 ? 'progress-game__growth is-up' : 'progress-game__growth is-down'
+                    }
+                  >
+                    {growth > 0 ? `+${growth}` : growth} за останні спроби
+                  </span>
+                )}
               </div>
+
+              {/* Показники, які гра міряє, а дитина досі не бачила: найкращий
+                  час, обсяг пам'яті, точність. Раніше вони жили лише в базі. */}
+              {highlights.length > 0 && (
+                <dl className="progress-game__metrics">
+                  {highlights.map(({ key, value }) => (
+                    <div key={key} className="progress-game__metric">
+                      <dt>{metricLabel(key).split(',')[0]}</dt>
+                      <dd>
+                        {value}
+                        {key.endsWith('_ms') ? ' мс' : key.endsWith('_pct') ? '%' : ''}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
             </Link>
           )
         })}

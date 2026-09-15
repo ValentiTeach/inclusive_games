@@ -41,7 +41,9 @@ function IntroScreen({ config, levelId, isAutoSuggested, onLevelChange, onStart,
         </div>
         {isAutoSuggested && (
           <p className="game-shell__auto-note">
-            Рівень підібрано автоматично за твоїм попереднім результатом.
+            {history.length > 0
+              ? 'Рівень підібрано автоматично за твоїм попереднім результатом.'
+              : 'Ця гра в тебе перша, тож рівень підібрано за схожими іграми.'}
           </p>
         )}
       </div>

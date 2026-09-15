@@ -11,6 +11,7 @@ import {
   X,
   Copy,
   UserRoundPlus,
+  Printer,
 } from 'lucide-react'
 import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
@@ -29,6 +30,15 @@ const GAME_TITLES = Object.fromEntries(GAMES.map((game) => [game.id, game.title]
 function formatDate(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' })
+}
+
+/* На папері дата має бути повною: «15 вер.» через півроку нічого не означає. */
+function formatFullDate(iso) {
+  return new Date(iso).toLocaleDateString('uk-UA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 }
 
 function GroupDetail() {
@@ -176,6 +186,18 @@ function GroupDetail() {
       </Link>
       <h1>{data.group.name}</h1>
 
+      {/*
+        Шапка існує лише на папері. Аркуш, що пішов із кабінету, має сам казати,
+        про яку групу він і станом на коли, — інакше через місяць це просто стос
+        чисел. Код приєднання сюди навмисно не потрапляє: він відкриває вхід у
+        групу, а роздрукований звіт лишають на столах і в теках.
+      */}
+      <div className="print-only group-detail__print-head">
+        <p>
+          Звіт про заняття · {formatFullDate(new Date().toISOString())} · Inclusive Games
+        </p>
+      </div>
+
       {/* Код — головне, що вчителю треба з цієї сторінки на уроці: його
           диктують класу або показують з екрана. Раніше він лежав дрібним
           рядком усередині речення. */}
@@ -226,6 +248,13 @@ function GroupDetail() {
         >
           <Download size={16} aria-hidden="true" />
           Експортувати CSV
+        </button>
+      )}
+
+      {data.students.length > 0 && (
+        <button type="button" className="group-detail__export" onClick={() => window.print()}>
+          <Printer size={16} aria-hidden="true" />
+          Друкувати звіт
         </button>
       )}
 

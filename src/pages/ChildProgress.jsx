@@ -201,7 +201,24 @@ function ChildProgress() {
 
       {active && (
         <>
-          <h2 className="child-progress__name">{active.display_name ?? 'Без імені'}</h2>
+          {/*
+            Шапка існує лише на папері. Аркуш, що пішов із кабінету, має сам
+            казати, про кого він і станом на коли, — інакше через місяць це
+            просто стос чисел.
+          */}
+          <div className="print-only child-progress__print-head">
+            <h2>Звіт про заняття: {active.display_name ?? 'Без імені'}</h2>
+            <p>Станом на {formatDate(new Date().toISOString())} · Inclusive Games</p>
+          </div>
+
+          <div className="child-progress__name-row">
+            <h2 className="child-progress__name">{active.display_name ?? 'Без імені'}</h2>
+            {rows !== null && totalAttempts > 0 && (
+              <Button variant="secondary" onClick={() => window.print()}>
+                Друкувати
+              </Button>
+            )}
+          </div>
 
           {rows === null && <p>Завантаження…</p>}
 

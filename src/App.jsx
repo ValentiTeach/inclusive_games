@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Catalog from './pages/Catalog'
 import GamePage from './pages/GamePage'
 import Progress from './pages/Progress'
+import ChildProgress from './pages/ChildProgress'
 import Settings from './pages/Settings'
 import Account from './pages/Account'
 import Groups from './pages/Groups'
@@ -26,6 +27,7 @@ function App() {
           <Route path="/settings" element={<Settings />} />
           <Route path="/account" element={<Account />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/child" element={<ChildProgress />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/groups" element={<Groups />} />
           <Route path="/groups/:groupId" element={<GroupDetail />} />

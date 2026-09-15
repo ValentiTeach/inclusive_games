@@ -117,10 +117,12 @@ function Admin() {
             <tbody>
               {users.map((entry) => (
                 <tr key={entry.id}>
-                  <td>{entry.email ?? entry.display_name ?? '—'}</td>
-                  <td>{entry.is_anonymous ? 'За кодом групи' : 'Поштою'}</td>
-                  <td>{entry.group_name ?? '—'}</td>
-                  <td>
+                  <td data-label="Користувач" className="admin__cell-user">
+                    {entry.email ?? entry.display_name ?? '—'}
+                  </td>
+                  <td data-label="Тип входу">{entry.is_anonymous ? 'За кодом групи' : 'Поштою'}</td>
+                  <td data-label="Група">{entry.group_name ?? '—'}</td>
+                  <td data-label="Роль">
                     <div className="admin__role-cell">
                       <RoleBadge role={entry.role} />
                       <select
@@ -137,7 +139,7 @@ function Admin() {
                       </select>
                     </div>
                   </td>
-                  <td>{formatDate(entry.created_at)}</td>
+                  <td data-label="Зареєстрований">{formatDate(entry.created_at)}</td>
                 </tr>
               ))}
             </tbody>

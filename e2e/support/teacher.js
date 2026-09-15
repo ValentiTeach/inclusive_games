@@ -83,6 +83,11 @@ export async function signInAsTeacher(page, fixtures = {}) {
      * мовчки обійтися без розділу, а не показувати помилку.
      */
     assignments = [],
+    /*
+     * Список для адмін-панелі. Він приходить не з таблиці, а з RPC
+     * admin_list_users, тож підміняється окремо від решти.
+     */
+    allUsers = [],
   } = fixtures
 
   await page.addInitScript((session) => {
@@ -94,6 +99,15 @@ export async function signInAsTeacher(page, fixtures = {}) {
     const url = new URL(request.url())
     const path = url.pathname.replace('/rest/v1/', '')
     const select = url.searchParams.get('select') ?? ''
+
+    if (path === 'rpc/admin_list_users') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(allUsers),
+      })
+      return
+    }
 
     if (path === 'assignments' && assignments === null) {
       // Так PostgREST відповідає на запит до таблиці, якої немає.

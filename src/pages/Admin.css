@@ -54,3 +54,77 @@
   background: var(--surface);
   color: var(--text);
 }
+
+/* ─────────────────────── Телефон і планшет ───────────────────────
+   Таблиця користувачів займала 999 px у колонці 326 px: модератор бачив третину
+   і догортував решту вбік, не знаючи, що там ще є. Нижче цієї межі кожен рядок
+   стає карткою, а підписи колонок переїжджають у клітинки через data-label —
+   бейдж «Учень» ще вгадується сам, а дата «15 вер. 2026» без підпису не каже,
+   чи це реєстрація, чи остання гра.
+
+   Це той самий прийом, що на сторінці групи: межа 900, бо планшет у портреті
+   (768) — це дотик, а зміна ролі там робиться пальцем. */
+@media (max-width: 900px) {
+  .admin__table-wrap {
+    border: none;
+    overflow-x: visible;
+  }
+
+  .admin__table,
+  .admin__table tbody,
+  .admin__table tr,
+  .admin__table td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin__table thead {
+    /* Заголовки не ховаємо display:none — вони лишаються для зчитувача екрана. */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .admin__table tr {
+    margin-bottom: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+
+  .admin__table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding: var(--space-1) 0;
+    border-bottom: none;
+    white-space: normal;
+  }
+
+  .admin__table td::before {
+    content: attr(data-label);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  /* Пошта буває довша за ширину екрана, а переносити її ніде, крім як усередині
+     слова: інакше картка розсуває сторінку вбік. */
+  .admin__cell-user {
+    font-weight: 700;
+    padding-bottom: var(--space-2);
+    overflow-wrap: anywhere;
+  }
+
+  .admin__role-select {
+    /* Мінімальна ціль для пальця: зміна ролі — дія, яку не можна промазати. */
+    min-height: 44px;
+  }
+}

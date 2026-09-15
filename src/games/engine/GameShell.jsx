@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Badge from '../../components/ui/Badge'
 import { CATEGORIES, GAMES } from '../../data/games'
+import { GAME_REGISTRY } from '../registry'
 import { ACHIEVEMENTS } from '../../data/achievements'
 import { computeAchievementStats } from '../../lib/achievementStats'
 import { computeStreak } from '../../lib/streak'
@@ -25,13 +26,27 @@ function achievementStatsExcluding(gameId, overrideHistory) {
   return { ...stats, longestStreak: longest }
 }
 
+/*
+ * Спроби в інших іграх тієї самої категорії — з них suggestLevel добирає рівень
+ * для гри, яку дитина відкриває вперше.
+ */
+function categoryHistoryFor(config) {
+  return Object.values(GAME_REGISTRY)
+    .map(({ config: peer }) => peer)
+    .filter((peer) => peer.category === config.category && peer.id !== config.id)
+    .map((peer) => ({ levels: peer.levels, attempts: getResults(peer.id) }))
+    .filter((peer) => peer.attempts.length > 0)
+}
+
 const COUNTDOWN_START = 3
 const COUNTDOWN_STEP_MS = 700
 
 function GameShell({ config, renderPlay }) {
   const [phase, setPhase] = useState('intro')
   const [history, setHistory] = useState(() => getResults(config.id))
-  const [levelState, setLevelState] = useState(() => suggestLevel(config, history))
+  const [levelState, setLevelState] = useState(() =>
+    suggestLevel(config, history, categoryHistoryFor(config)),
+  )
   const [countdown, setCountdown] = useState(COUNTDOWN_START)
   const [result, setResult] = useState(null)
   const [isNewBest, setIsNewBest] = useState(false)

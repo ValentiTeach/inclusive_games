@@ -6,8 +6,13 @@ import { listAllUsers, setUserRole } from '../lib/admin'
 import RoleBadge from '../components/ui/RoleBadge'
 import './Admin.css'
 
-const ROLE_OPTIONS = ['student', 'teacher', 'moderator']
-const ROLE_LABELS = { student: 'Учень', teacher: 'Вчитель', moderator: 'Модератор' }
+const ROLE_OPTIONS = ['student', 'teacher', 'moderator', 'parent']
+const ROLE_LABELS = {
+  student: 'Учень',
+  teacher: 'Вчитель',
+  moderator: 'Модератор',
+  parent: 'Батьки',
+}
 
 function formatDate(iso) {
   if (!iso) return '—'

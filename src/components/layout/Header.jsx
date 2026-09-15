@@ -1,5 +1,14 @@
 import { NavLink } from 'react-router-dom'
-import { Home, Gamepad2, TrendingUp, Settings, LogIn, Users, ShieldCheck } from 'lucide-react'
+import {
+  Home,
+  Gamepad2,
+  TrendingUp,
+  Settings,
+  LogIn,
+  Users,
+  ShieldCheck,
+  HeartHandshake,
+} from 'lucide-react'
 import { useAuth } from '../../lib/authContext'
 import RoleBadge from '../ui/RoleBadge'
 import ThemeToggle from '../ui/ThemeToggle'
@@ -24,6 +33,7 @@ const NAV_LINKS = [
  * Меню лише перестає ховати те, заради чого вчитель сюди заходить.
  */
 const ROLE_LINKS = [
+  { to: '/child', label: 'Моя дитина', icon: HeartHandshake, roles: ['parent'] },
   { to: '/groups', label: 'Мої групи', icon: Users, roles: ['teacher', 'moderator'] },
   { to: '/admin', label: 'Адмінка', icon: ShieldCheck, roles: ['moderator'] },
 ]

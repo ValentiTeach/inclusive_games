@@ -88,6 +88,13 @@ export async function signInAsTeacher(page, fixtures = {}) {
      * admin_list_users, тож підміняється окремо від решти.
      */
     allUsers = [],
+    /*
+     * Батьківський бік: зв'язки «дорослий → дитина», відповідь на введений код
+     * і спроби дитини. redeemed — це те, що поверне RPC redeem_parent_invite:
+     * або id дитини, або текст помилки сервера.
+     */
+    parentLinks = [],
+    redeemed = null,
   } = fixtures
 
   await page.addInitScript((session) => {
@@ -99,6 +106,32 @@ export async function signInAsTeacher(page, fixtures = {}) {
     const url = new URL(request.url())
     const path = url.pathname.replace('/rest/v1/', '')
     const select = url.searchParams.get('select') ?? ''
+
+    if (path === 'rpc/create_parent_invite') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify('KRDM47XZ'),
+      })
+      return
+    }
+
+    if (path === 'rpc/redeem_parent_invite') {
+      if (typeof redeemed === 'string' && redeemed.includes('_')) {
+        await route.fulfill({
+          status: 400,
+          contentType: 'application/json',
+          body: JSON.stringify({ code: 'P0001', message: redeemed, details: redeemed }),
+        })
+        return
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(redeemed),
+      })
+      return
+    }
 
     if (path === 'rpc/admin_list_users') {
       await route.fulfill({
@@ -144,7 +177,8 @@ export async function signInAsTeacher(page, fixtures = {}) {
     }
 
     let body = []
-    if (path === 'profiles' && select.includes('role')) body = [profile]
+    if (path === 'parent_links') body = parentLinks
+    else if (path === 'profiles' && select.includes('role')) body = [profile]
     else if (path === 'profiles') body = students
     else if (path === 'groups') body = group && url.searchParams.has('id') ? [group] : groups
     else if (path === 'results') body = results

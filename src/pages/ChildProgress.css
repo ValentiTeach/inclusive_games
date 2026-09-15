@@ -1,0 +1,157 @@
+.child-progress {
+  max-width: 820px;
+}
+
+.child-progress__intro,
+.child-progress__note {
+  max-width: 62ch;
+  color: var(--text-muted);
+}
+
+.child-progress__form {
+  margin: var(--space-5) 0;
+  padding: var(--space-4);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.child-progress__label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+.child-progress__row {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.child-progress__input {
+  flex: 1 1 200px;
+  min-width: 0;
+  /* Код диктують уголос і переписують з паперу — літери мають бути великі й
+     однакової ширини, щоб не сплутати. */
+  font-family: var(--font-mono);
+  font-size: 20px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-3);
+  min-height: 48px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.child-progress__error {
+  margin: var(--space-3) 0 0;
+  color: var(--cat-reaction);
+}
+
+.child-progress__switch {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+
+.child-progress__chip {
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.child-progress__chip--active {
+  background: var(--accent);
+  border-color: var(--accent-strong);
+  color: var(--accent-contrast);
+  font-weight: 700;
+}
+
+.child-progress__name {
+  margin-bottom: var(--space-2);
+}
+
+.child-progress__summary,
+.child-progress__empty {
+  color: var(--text-muted);
+}
+
+.child-progress__games {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.child-progress__game {
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.child-progress__game-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.child-progress__game-head h3 {
+  margin: 0;
+}
+
+.child-progress__game-meta {
+  margin: var(--space-2) 0 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.child-progress__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: var(--space-3) 0 0;
+}
+
+.child-progress__metrics div {
+  min-width: 0;
+}
+
+.child-progress__metrics dt {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.child-progress__metrics dd {
+  margin: 2px 0 0;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.child-progress__growth {
+  margin: var(--space-3) 0 0;
+  font-weight: 700;
+  color: var(--cat-thinking);
+}
+
+.child-progress__growth--down {
+  color: var(--text-muted);
+}

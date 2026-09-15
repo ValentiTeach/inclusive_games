@@ -6,6 +6,7 @@ import { isCloudConfigured } from '../lib/supabaseClient'
 import { getGroupDetails, renameStudent, removeStudentFromGroup } from '../lib/groups'
 import { buildGroupCsv, csvFileName, downloadCsv } from '../lib/csv'
 import GameBreakdown from '../components/teacher/GameBreakdown'
+import Assignments from '../components/teacher/Assignments'
 import { GAMES } from '../data/games'
 import './GroupDetail.css'
 
@@ -196,6 +197,12 @@ function GroupDetail() {
           Експортувати CSV
         </button>
       )}
+
+      <Assignments
+        groupId={groupId}
+        students={data.students}
+        results={data.results ?? []}
+      />
 
       {data.students.length > 0 && (
         <GameBreakdown results={data.results ?? []} students={data.students} />

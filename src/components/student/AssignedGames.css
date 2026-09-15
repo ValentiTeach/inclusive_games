@@ -1,0 +1,58 @@
+.assigned {
+  margin: var(--space-5) 0 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  /* Заливка змішується з поверхнею явно, а не альфою: блок лежить на сторінці,
+     крізь яку просвічує рухомий декор. */
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+}
+
+.assigned__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  font-size: 17px;
+}
+
+.assigned__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.assigned__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+}
+
+.assigned__link {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-strong);
+}
+
+.assigned__meta {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.assigned__due.is-overdue {
+  color: #d2342f;
+  font-weight: 700;
+}
+
+@media (pointer: coarse) {
+  .assigned__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}

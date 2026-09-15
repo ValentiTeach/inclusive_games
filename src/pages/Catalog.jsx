@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import GameCard from '../components/ui/GameCard'
+import AssignedGames from '../components/student/AssignedGames'
 import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
 import { CATEGORIES, GAMES } from '../data/games'
@@ -25,6 +26,8 @@ function Catalog() {
           : 'Ігри поступово додаються. Обери навик, щоб побачити лише потрібні вправи.'}
         {gatingActive && ' Кілька ігор доступні без входу — решта відкриється після реєстрації.'}
       </p>
+
+      <AssignedGames />
 
       <nav className="catalog-filters" aria-label="Фільтр за навиком">
         <Link

@@ -1,6 +1,36 @@
 const KEY_PREFIX = 'inclusive-games:results:'
 const HISTORY_LIMIT = 20
 
+/**
+ * Чия це локальна історія.
+ *
+ * Ключі з результатами належать браузеру, а не людині: на одному шкільному
+ * комп'ютері грають по черзі кілька дітей і вчитель. Без позначки власника
+ * будь-хто, хто ввійде наступним, забирає чужі спроби собі — і саме це сталося
+ * на живому проекті: ігри вчителя опинилися в результатах двох учнів.
+ *
+ * Порожнє значення означає «грав гість»: такі спроби справді нічиї, і той, хто
+ * вперше ввійде, має право забрати їх як свої.
+ */
+const OWNER_KEY = 'inclusive-games:history-owner'
+
+export function getHistoryOwner() {
+  try {
+    return localStorage.getItem(OWNER_KEY)
+  } catch {
+    return null
+  }
+}
+
+export function setHistoryOwner(userId) {
+  try {
+    localStorage.setItem(OWNER_KEY, userId)
+  } catch {
+    // Приватне вікно або заповнене сховище: втратити позначку не страшно,
+    // наступний вхід просто перевірить її заново.
+  }
+}
+
 export function getResults(gameId) {
   try {
     const raw = localStorage.getItem(KEY_PREFIX + gameId)
@@ -31,6 +61,8 @@ export function clearAllResults() {
       if (key && key.startsWith(KEY_PREFIX)) keys.push(key)
     }
     keys.forEach((key) => localStorage.removeItem(key))
+    // Разом з історією зникає і позначка власника: далі сховище знову «нічиє».
+    localStorage.removeItem(OWNER_KEY)
     return keys.length
   } catch {
     return 0

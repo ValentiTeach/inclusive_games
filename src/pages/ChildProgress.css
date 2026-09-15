@@ -155,3 +155,20 @@
 .child-progress__growth--down {
   color: var(--text-muted);
 }
+
+.child-progress__name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.child-progress__print-head h2 {
+  margin: 0 0 var(--space-1);
+}
+
+.child-progress__print-head p {
+  margin: 0 0 var(--space-4);
+  color: var(--text-muted);
+}

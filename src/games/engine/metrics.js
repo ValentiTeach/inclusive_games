@@ -117,6 +117,99 @@ export const METRIC_LABELS = {
 }
 
 /**
+ * Як показник зводиться докупи з кількох спроб.
+ *
+ * Живе поруч із підписами й з тієї самої причини: доданий показник, для якого
+ * ніхто не сказав, що з ним робити, мовчки усереднився б — і в зрізі групи
+ * зʼявилося б число, яке нічого не означає.
+ *
+ * Чотири способи, і кожен обраний за змістом самого показника:
+ *
+ * - `mean` — середнє, зважене за кількістю проб (див. aggregateMetric). Просте
+ *   середнє від середніх бреше, щойно спроби різної довжини: гра з трьох проб
+ *   важила б стільки ж, скільки гра з двадцяти.
+ * - `sum` — лічильники: скільки всього проб, помилок, влучань.
+ * - `min` — найкраще з можливих, коли менше означає краще: найшвидша реакція,
+ *   найточніше влучання.
+ * - `max` — досягнута стеля: обсяг пам'яті, розмір таблиці, пройдений раунд.
+ *
+ * Показник, якого тут немає, у зріз не потрапляє взагалі — краще не показати,
+ * ніж показати неправду.
+ */
+export const METRIC_AGGREGATION = {
+  accuracy_pct: 'mean',
+  correct: 'sum',
+  total: 'sum',
+  errors: 'sum',
+  avg_rt_ms: 'mean',
+  best_rt_ms: 'min',
+  worst_rt_ms: 'max',
+  rt_count: 'sum',
+  duration_ms: 'mean',
+  cpm: 'mean',
+  chars: 'sum',
+  hits: 'sum',
+  targets: 'sum',
+  misses: 'sum',
+  false_alarms: 'sum',
+  correct_rejections: 'sum',
+  go_trials: 'sum',
+  nogo_trials: 'sum',
+  moves: 'sum',
+  pairs: 'sum',
+  extra_moves: 'sum',
+  grid_size: 'max',
+  rounds_completed: 'max',
+  span: 'max',
+  set_size: 'max',
+  early_presses: 'sum',
+  avg_offset_pct: 'mean',
+  best_offset_pct: 'min',
+  target_length: 'max',
+}
+
+/**
+ * Вага спроби при усередненні.
+ *
+ * Точність — це частка від `total` проб, середній час — середнє по `rt_count`
+ * вимірах. Зважувати треба саме цим: без ваги спроба з трьох проб тягнула б
+ * середнє класу так само сильно, як спроба з двадцяти.
+ */
+export function metricWeight(key, metrics) {
+  if (key === 'avg_rt_ms') return metrics.rt_count ?? 1
+  if (key === 'accuracy_pct') return metrics.total ?? 1
+  return 1
+}
+
+/**
+ * Зводить один показник із кількох спроб. Спроби, де показника немає,
+ * пропускаються: відсутність означає «ця гра цього не міряє», а не нуль.
+ */
+export function aggregateMetric(key, attempts) {
+  const kind = METRIC_AGGREGATION[key]
+  if (!kind) return undefined
+
+  const values = []
+  const weights = []
+  for (const metrics of attempts) {
+    const value = metrics?.[key]
+    if (!Number.isFinite(value)) continue
+    values.push(value)
+    weights.push(metricWeight(key, metrics))
+  }
+
+  if (values.length === 0) return undefined
+  if (kind === 'min') return Math.min(...values)
+  if (kind === 'max') return Math.max(...values)
+  if (kind === 'sum') return values.reduce((sum, value) => sum + value, 0)
+
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0)
+  if (totalWeight === 0) return Math.round(values.reduce((s, v) => s + v, 0) / values.length)
+  const weighted = values.reduce((sum, value, index) => sum + value * weights[index], 0)
+  return Math.round(weighted / totalWeight)
+}
+
+/**
  * Ключі в порядку METRIC_LABELS, а невідомі — за абеткою в кінці. Невідомий
  * ключ потрапляє в експорт під власним іменем: краще сира назва колонки, ніж
  * тихо загублене вимірювання.

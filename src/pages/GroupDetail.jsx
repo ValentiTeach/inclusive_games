@@ -5,6 +5,7 @@ import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
 import { getGroupDetails, renameStudent, removeStudentFromGroup } from '../lib/groups'
 import { buildGroupCsv, csvFileName, downloadCsv } from '../lib/csv'
+import GameBreakdown from '../components/teacher/GameBreakdown'
 import { GAMES } from '../data/games'
 import './GroupDetail.css'
 
@@ -194,6 +195,10 @@ function GroupDetail() {
           <Download size={16} aria-hidden="true" />
           Експортувати CSV
         </button>
+      )}
+
+      {data.students.length > 0 && (
+        <GameBreakdown results={data.results ?? []} students={data.students} />
       )}
 
       {data.students.length === 0 ? (

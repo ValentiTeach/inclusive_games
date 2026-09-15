@@ -1,0 +1,218 @@
+.breakdown {
+  margin-top: var(--space-7);
+}
+
+.breakdown__lead {
+  margin: 0 0 var(--space-4);
+  font-size: 15px;
+}
+
+.breakdown__empty {
+  margin-top: var(--space-6);
+}
+
+.breakdown__table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.breakdown__table th,
+.breakdown__table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.breakdown__table th {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+}
+
+/* Числа в колонках вирівнюються по розрядах — інакше «9» і «90» не порівняти
+   поглядом, а саме заради порівняння ця таблиця й існує. */
+.breakdown__table td:not(:first-child) {
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdown__row.is-open td {
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  border-bottom-color: transparent;
+}
+
+.breakdown__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: left;
+}
+
+.breakdown__toggle:hover .breakdown__game-title {
+  color: var(--accent-strong);
+}
+
+.breakdown__details-row td {
+  padding-top: 0;
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+}
+
+.breakdown__details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-2) 0 var(--space-4);
+}
+
+.breakdown__extra {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.breakdown__extra-item {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.breakdown__extra-item dt {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.breakdown__extra-item dd {
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdown__students {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.breakdown__student {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.breakdown__student-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.breakdown__student-score {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.breakdown__student-meta {
+  grid-column: 1 / -1;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdown__missing {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.breakdown__blank {
+  color: var(--text-muted);
+}
+
+/* На вузькому екрані таблиця стає картками — той самий прийом, що й у списку
+   учнів нижче: підпис колонки береться з data-label. */
+@media (max-width: 900px) {
+  .breakdown__table,
+  .breakdown__table tbody,
+  .breakdown__table tr,
+  .breakdown__table td {
+    display: block;
+    width: 100%;
+  }
+
+  .breakdown__table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  .breakdown__row {
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .breakdown__row td {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    border: none;
+    padding: var(--space-1) var(--space-4);
+  }
+
+  .breakdown__row td::before {
+    content: attr(data-label);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  /* Назва гри — заголовок картки, а не пара «підпис — значення». */
+  .breakdown__row td:first-child {
+    display: block;
+  }
+
+  .breakdown__row td:first-child::before {
+    content: none;
+  }
+
+  .breakdown__details-row td {
+    padding: 0 var(--space-4);
+  }
+
+  .breakdown__details-row td::before {
+    content: none;
+  }
+}

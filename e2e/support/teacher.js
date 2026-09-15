@@ -77,6 +77,12 @@ export async function signInAsTeacher(page, fixtures = {}) {
     students = [],
     results = [],
     profile = { display_name: 'Вчителька', group_id: null, role: 'teacher' },
+    /*
+     * null означає «таблиці assignments у базі ще немає»: міграція
+     * застосовується окремо від викладки коду, і в цьому проміжку сторінка має
+     * мовчки обійтися без розділу, а не показувати помилку.
+     */
+    assignments = [],
   } = fixtures
 
   await page.addInitScript((session) => {
@@ -89,11 +95,46 @@ export async function signInAsTeacher(page, fixtures = {}) {
     const path = url.pathname.replace('/rest/v1/', '')
     const select = url.searchParams.get('select') ?? ''
 
+    if (path === 'assignments' && assignments === null) {
+      // Так PostgREST відповідає на запит до таблиці, якої немає.
+      await route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          code: 'PGRST205',
+          message: "Could not find the table 'public.assignments' in the schema cache",
+        }),
+      })
+      return
+    }
+
+    if (path === 'assignments' && request.method() === 'POST') {
+      const created = {
+        id: `a${assignments.length + 1}`,
+        created_at: new Date().toISOString(),
+        ...JSON.parse(request.postData() ?? '{}'),
+      }
+      assignments.push(created)
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify(created),
+      })
+      return
+    }
+
+    if (path === 'assignments' && request.method() === 'DELETE') {
+      assignments.length = 0
+      await route.fulfill({ status: 204, contentType: 'application/json', body: '' })
+      return
+    }
+
     let body = []
     if (path === 'profiles' && select.includes('role')) body = [profile]
     else if (path === 'profiles') body = students
     else if (path === 'groups') body = group && url.searchParams.has('id') ? [group] : groups
     else if (path === 'results') body = results
+    else if (path === 'assignments') body = assignments
 
     // PostgREST віддає один обʼєкт замість масиву, коли клієнт просить .single();
     // supabase-js позначає це заголовком Accept.

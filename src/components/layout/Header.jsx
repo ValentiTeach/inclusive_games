@@ -59,7 +59,8 @@ function Header() {
         <NavLink to="/" className="site-header__logo">
           <img src="/logo.png" alt="" className="site-header__logo-mark" />
           <span className="site-header__logo-text">
-            Inclusive Games <span className="site-header__logo-edition">| Historic_up's edition</span>
+            <span className="site-header__logo-name">Inclusive Games</span>
+            <span className="site-header__logo-edition">| Historic_up&apos;s edition</span>
           </span>
         </NavLink>
         <nav className="site-header__nav" aria-label="Основна навігація">

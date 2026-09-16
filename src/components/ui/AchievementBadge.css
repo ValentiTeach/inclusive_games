@@ -36,10 +36,35 @@
   transform: translateY(-2px);
 }
 
-.achievement-badge--locked {
-  opacity: 0.45;
-}
-
 .achievement-badge--locked .achievement-badge__icon {
   color: var(--text-muted);
+}
+
+.achievement-badge__bar {
+  display: block;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.achievement-badge__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.achievement-badge__count {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Замкнений значок із прогресом уже не докір, а ціль — тож він не має бути
+   таким блідим, щоб на ньому не читалися цифри. */
+.achievement-badge--locked {
+  opacity: 0.72;
 }

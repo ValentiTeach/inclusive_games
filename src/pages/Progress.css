@@ -184,3 +184,58 @@
 .progress-game__growth.is-down {
   color: var(--text-muted);
 }
+
+.progress-goal {
+  margin: var(--space-5) 0;
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.progress-goal__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.progress-goal__title {
+  margin: 0;
+}
+
+.progress-goal__count {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-goal__bar {
+  display: block;
+  height: 8px;
+  margin: var(--space-3) 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.progress-goal__bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+.progress-goal__text {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progress-goal__bar-fill {
+    transition: none;
+  }
+}

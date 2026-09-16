@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Flame, Trophy } from 'lucide-react'
 import { GAMES, CATEGORIES } from '../data/games'
 import { CATEGORY_ICONS } from '../data/categoryIcons'
-import { ACHIEVEMENTS } from '../data/achievements'
+import { ACHIEVEMENTS, achievementProgress } from '../data/achievements'
 import { getResults } from '../games/engine/storage'
 import { metricLabel } from '../games/engine/metrics'
 import { highlightMetrics, improvement } from '../lib/progressMetrics'
@@ -11,6 +11,7 @@ import { fetchCloudHistory } from '../lib/cloudSync'
 import { useAuth } from '../lib/authContext'
 import { computeStreak } from '../lib/streak'
 import { computeAchievementStats } from '../lib/achievementStats'
+import { dailyGoal, dailyGoalText } from '../lib/dailyGoal'
 import Badge from '../components/ui/Badge'
 import Sparkline from '../components/ui/Sparkline'
 import Button from '../components/ui/Button'
@@ -80,6 +81,7 @@ function Progress() {
   const baseStats = computeAchievementStats(gamesWithHistory)
   const { current, longest } = computeStreak(baseStats.dates)
   const achievementStats = { ...baseStats, longestStreak: longest }
+  const goal = dailyGoal(baseStats.attemptsToday)
 
   return (
     <section className="progress-page">
@@ -100,13 +102,37 @@ function Progress() {
         </div>
       </div>
 
+      {/*
+        Серія показує, що дитина зробила, мета — що робити зараз. Разом вони
+        відповідають на обидва питання, з якими сюди заходять.
+      */}
+      <div className="progress-goal">
+        <div className="progress-goal__head">
+          <h2 className="progress-goal__title">Сьогодні</h2>
+          <span className="progress-goal__count">
+            {goal.done} / {goal.target}
+          </span>
+        </div>
+        <span
+          className="progress-goal__bar"
+          role="progressbar"
+          aria-valuenow={goal.done}
+          aria-valuemin={0}
+          aria-valuemax={goal.target}
+          aria-label={`Мета на сьогодні: ${goal.done} з ${goal.target}`}
+        >
+          <span className="progress-goal__bar-fill" style={{ width: `${goal.percent}%` }} />
+        </span>
+        <p className="progress-goal__text">{dailyGoalText(goal)}</p>
+      </div>
+
       <h2>Досягнення</h2>
       <div className="progress-achievements">
         {ACHIEVEMENTS.map((achievement) => (
           <AchievementBadge
             key={achievement.id}
             achievement={achievement}
-            unlocked={achievement.check(achievementStats)}
+            progress={achievementProgress(achievement, achievementStats)}
           />
         ))}
       </div>

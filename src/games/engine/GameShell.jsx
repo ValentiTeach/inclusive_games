@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Badge from '../../components/ui/Badge'
 import { CATEGORIES, GAMES } from '../../data/games'
 import { GAME_REGISTRY } from '../registry'
-import { ACHIEVEMENTS } from '../../data/achievements'
+import { ACHIEVEMENTS, isUnlocked } from '../../data/achievements'
 import { computeAchievementStats } from '../../lib/achievementStats'
 import { computeStreak } from '../../lib/streak'
 import { getResults, saveResult } from './storage'
@@ -91,7 +91,7 @@ function GameShell({ config, renderPlay }) {
 
     const statsAfter = achievementStatsExcluding(config.id, updated)
     const unlocked = ACHIEVEMENTS.filter(
-      (achievement) => !achievement.check(statsBefore) && achievement.check(statsAfter),
+      (achievement) => !isUnlocked(achievement, statsBefore) && isUnlocked(achievement, statsAfter),
     )
 
     const isBest = previousBest !== null && finishResult.score > previousBest

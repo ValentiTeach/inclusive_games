@@ -34,7 +34,12 @@ function ResultsScreen({ score, entries, isNewBest, newAchievements, onRestart }
           <p className="game-shell__achievements-title">Нове досягнення!</p>
           <div className="game-shell__achievements-list">
             {newAchievements.map((achievement) => (
-              <AchievementBadge key={achievement.id} achievement={achievement} unlocked />
+              <AchievementBadge
+                key={achievement.id}
+                achievement={achievement}
+                /* Щойно здобуте — тут завжди повна ціль, тож смужки не буде. */
+                progress={{ current: 1, target: 1, unlocked: true }}
+              />
             ))}
           </div>
         </div>

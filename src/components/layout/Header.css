@@ -58,6 +58,41 @@
   flex-wrap: wrap;
 }
 
+/* Марка звучала одним кольором, хоча платформа побудована на чотирьох навичках.
+   Напис бере всі чотири — і цим сам каже, про що тут ідеться.
+
+   Колір лишається звичайним кольором тексту доти, доки браузер не підтвердить,
+   що вміє обрізати тло по літерах. Без цієї перевірки color: transparent у
+   старому браузері дав би невидиму назву сайту. */
+.site-header__logo-name {
+  color: var(--text);
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  .site-header__logo-name {
+    background-image: linear-gradient(
+      100deg,
+      var(--brand-1) 0%,
+      var(--brand-2) 34%,
+      var(--brand-3) 67%,
+      var(--brand-4) 100%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+  }
+}
+
+/* У режимі високої контрастності система сама призначає кольори, і прозорий
+   текст на градієнті там просто зникає. Тому повертаємо звичайний текст. */
+@media (forced-colors: active) {
+  .site-header__logo-name {
+    background-image: none;
+    color: CanvasText;
+    forced-color-adjust: none;
+  }
+}
+
 .site-header__logo-edition {
   font-family: var(--font-mono);
   font-weight: 500;

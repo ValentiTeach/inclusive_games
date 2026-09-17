@@ -157,3 +157,61 @@ describe('браузери, що працювали до появи теґу в�
     expect(getResults('schulte')).toHaveLength(1)
   })
 })
+
+describe('коли сховище недоступне', () => {
+  let realStorage
+
+  beforeEach(() => {
+    localStorage.clear()
+    insert.mockReset()
+    insert.mockResolvedValue({ error: null })
+    realStorage = Object.getOwnPropertyDescriptor(window, 'localStorage')
+  })
+
+  function breakStorage() {
+    const boom = () => {
+      throw new Error('сховище недоступне')
+    }
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: boom,
+        setItem: boom,
+        removeItem: boom,
+        key: boom,
+        clear: boom,
+        get length() {
+          return boom()
+        },
+      },
+    })
+  }
+
+  function restoreStorage() {
+    if (realStorage) Object.defineProperty(window, 'localStorage', realStorage)
+  }
+
+  /**
+   * Приватне вікно не має валити вхід у застосунок. Прапорець «перенесено»
+   * просто не переживе вкладку, і наступний вхід спробує знову — це прийнятно.
+   */
+  it('вхід не падає, коли писати нікуди', async () => {
+    breakStorage()
+    try {
+      await expect(migrateLocalHistoryOnce('user-alice')).resolves.toBeUndefined()
+    } finally {
+      restoreStorage()
+    }
+  })
+
+  it('без сховища нічого не вивантажується — переносити нічого', async () => {
+    breakStorage()
+    try {
+      await migrateLocalHistoryOnce('user-alice')
+    } finally {
+      restoreStorage()
+    }
+
+    expect(insert).not.toHaveBeenCalled()
+  })
+})

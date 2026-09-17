@@ -115,9 +115,32 @@ function legacyOwner() {
   return null
 }
 
+/*
+ * Сховище може бути недоступне: приватне вікно, заборонені дані сайту. Прапорець
+ * «перенесено» тоді просто не переживе вкладку, і наступний вхід спробує знову —
+ * це прийнятно. Неприйнятно, щоб вхід у застосунок валився через те, що браузер
+ * не дає писати на диск.
+ */
+function readFlag(key) {
+  try {
+    return localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+function writeFlag(key) {
+  try {
+    localStorage.setItem(key, '1')
+  } catch {
+    // Без прапорця перенесення повториться наступного разу — і нічого не
+    // зіпсує: спроби вже вивантажені, а локальні стерті.
+  }
+}
+
 async function runMigration(userId) {
   const flagKey = SYNCED_KEY_PREFIX + userId
-  if (localStorage.getItem(flagKey)) return
+  if (readFlag(flagKey)) return
 
   const owner = getHistoryOwner() ?? legacyOwner()
   if (owner && owner !== userId) {
@@ -128,7 +151,7 @@ async function runMigration(userId) {
      */
     clearAllResults()
     setHistoryOwner(userId)
-    localStorage.setItem(flagKey, '1')
+    writeFlag(flagKey)
     return
   }
 
@@ -146,7 +169,7 @@ async function runMigration(userId) {
 
   if (rows.length === 0) {
     setHistoryOwner(userId)
-    localStorage.setItem(flagKey, '1')
+    writeFlag(flagKey)
     return
   }
 
@@ -161,7 +184,7 @@ async function runMigration(userId) {
 
   clearAllResults()
   setHistoryOwner(userId)
-  localStorage.setItem(flagKey, '1')
+  writeFlag(flagKey)
 }
 
 export async function fetchCloudHistory() {

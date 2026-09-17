@@ -40,10 +40,27 @@ export function getResults(gameId) {
   }
 }
 
+/*
+ * Запис може не вдатися: приватне вікно, заборонені дані сайту, переповнене
+ * сховище. Гра від цього не має ламатися — дитина дограла, і вона мусить
+ * побачити свій результат, навіть якщо зберегти його нікуди.
+ *
+ * Мовчки: пояснити дитині посеред гри, чому браузер не дає писати на диск,
+ * однаково нічим не допоможе.
+ */
+function write(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+    return true
+  } catch {
+    return false
+  }
+}
+
 export function saveResult(gameId, { score, entries, levelId, metrics }) {
   const attempt = { score, entries, metrics, levelId, date: new Date().toISOString() }
   const updated = [attempt, ...getResults(gameId)].slice(0, HISTORY_LIMIT)
-  localStorage.setItem(KEY_PREFIX + gameId, JSON.stringify(updated))
+  write(KEY_PREFIX + gameId, updated)
   return updated
 }
 
@@ -60,7 +77,7 @@ export function rateLastResult(gameId, felt) {
   if (history.length === 0) return history
 
   const updated = [{ ...history[0], felt }, ...history.slice(1)]
-  localStorage.setItem(KEY_PREFIX + gameId, JSON.stringify(updated))
+  write(KEY_PREFIX + gameId, updated)
   return updated
 }
 

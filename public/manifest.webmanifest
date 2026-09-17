@@ -1,8 +1,11 @@
 {
+  "id": "/",
   "name": "Inclusive Games — когнітивні ігри для дітей",
-  "short_name": "Inclusive Games",
-  "description": "Короткі вправи на увагу, пам'ять, мислення та реакцію.",
+  "short_name": "Inclusive",
+  "description": "Дев'ятнадцять коротких вправ на увагу, пам'ять, мислення та реакцію. Кожна — на пару хвилин, для уроку чи домашнього тренування.",
+  "categories": ["education", "kids", "games"],
   "lang": "uk",
+  "dir": "ltr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -12,7 +15,63 @@
   "icons": [
     { "src": "/favicon-32.png", "sizes": "32x32", "type": "image/png" },
     { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
-    { "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/phone-home.jpg",
+      "sizes": "390x844",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Головна: вибір навички"
+    },
+    {
+      "src": "/screenshots/phone-games.jpg",
+      "sizes": "390x844",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Каталог ігор"
+    },
+    {
+      "src": "/screenshots/phone-progress.jpg",
+      "sizes": "390x844",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Мій прогрес: серія, мета і досягнення"
+    },
+    {
+      "src": "/screenshots/desktop-home.jpg",
+      "sizes": "1280x800",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Головна на комп'ютері"
+    },
+    {
+      "src": "/screenshots/desktop-games.jpg",
+      "sizes": "1280x800",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Каталог ігор на комп'ютері"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Каталог ігор",
+      "short_name": "Ігри",
+      "url": "/games",
+      "icons": [{ "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png" }]
+    },
+    {
+      "name": "Мій прогрес",
+      "short_name": "Прогрес",
+      "url": "/progress",
+      "icons": [{ "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png" }]
+    }
   ]
 }

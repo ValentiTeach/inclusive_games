@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { LogOut } from 'lucide-react'
 import Badge from '../../components/ui/Badge'
 import { CATEGORIES, GAMES } from '../../data/games'
 import { GAME_REGISTRY } from '../registry'
@@ -52,6 +53,7 @@ function GameShell({ config, renderPlay }) {
   const [isNewBest, setIsNewBest] = useState(false)
   const [newAchievements, setNewAchievements] = useState([])
   const [felt, setFelt] = useState(null)
+  const [leaving, setLeaving] = useState(false)
 
   const level = config.levels.find((item) => item.id === levelState.levelId)
   const categoryInfo = CATEGORIES[config.category]
@@ -110,6 +112,9 @@ function GameShell({ config, renderPlay }) {
   function handleFinish(finishResult) {
     setResult(finishResult)
     setFelt(null)
+    // Гра могла дограти, поки дитина думала над питанням про вихід: лишити
+    // його поверх результату означало б питати про те, чого вже немає.
+    setLeaving(false)
 
     const previousBest = history.length ? Math.max(...history.map((entry) => entry.score)) : null
     const statsBefore = achievementStatsExcluding(config.id, history)
@@ -140,12 +145,97 @@ function GameShell({ config, renderPlay }) {
     setPhase('intro')
   }
 
+  /*
+   * Вихід посеред гри. Досі дитина, яка почала не ту гру або не той рівень,
+   * мусила або догравати до кінця, або йти через меню — а меню посеред гри
+   * виглядає як «я зламала».
+   *
+   * Під час відліку виходимо одразу: там ще нічого не втрачено. Під час гри
+   * питаємо, бо спробу справді буде втрачено, і випадковий дотик не має
+   * коштувати дитині зіграного.
+   */
+  function handleLeaveRequest() {
+    playClick()
+    if (phase === 'countdown') {
+      leaveNow()
+      return
+    }
+    setLeaving(true)
+  }
+
+  function leaveNow() {
+    setLeaving(false)
+    setResult(null)
+    setIsNewBest(false)
+    setNewAchievements([])
+    setPhase('intro')
+  }
+
+  const inPlay = phase === 'playing' || phase === 'countdown'
+
+  /*
+   * Escape — те, чого чекають від «вийти» і на клавіатурі, і в програмах
+   * загалом. Коли питання вже на екрані, той самий Escape його знімає:
+   * інакше клавіша, яка щойно щось відкрила, не могла б це закрити.
+   */
+  useEffect(() => {
+    if (!inPlay && !leaving) return undefined
+
+    function onKeyDown(event) {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      if (leaving) {
+        setLeaving(false)
+        return
+      }
+      if (phase === 'countdown') leaveNow()
+      else setLeaving(true)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [inPlay, leaving, phase])
+
   return (
     <div className="game-shell">
       <header className="game-shell__head">
-        <Badge tone={categoryInfo.color}>{categoryInfo.label}</Badge>
-        <h1>{config.title}</h1>
+        <div className="game-shell__head-main">
+          <Badge tone={categoryInfo.color}>{categoryInfo.label}</Badge>
+          <h1>{config.title}</h1>
+        </div>
+
+        {inPlay && (
+          <button
+            type="button"
+            className="game-shell__leave"
+            onClick={handleLeaveRequest}
+          >
+            <LogOut size={16} aria-hidden="true" />
+            Вийти
+          </button>
+        )}
       </header>
+
+      {leaving && (
+        <div className="game-shell__leave-confirm" role="alertdialog" aria-labelledby="leave-title">
+          <p id="leave-title" className="game-shell__leave-question">
+            Вийти з гри? Ця спроба не збережеться.
+          </p>
+          <div className="game-shell__leave-actions">
+            <button type="button" className="game-shell__leave-yes" onClick={leaveNow}>
+              Вийти
+            </button>
+            <button
+              type="button"
+              className="game-shell__leave-no"
+              autoFocus
+              onClick={() => setLeaving(false)}
+            >
+              Продовжити гру
+            </button>
+          </div>
+        </div>
+      )}
 
       {phase === 'intro' && (
         <IntroScreen

@@ -11,6 +11,8 @@ export const PARENT_ERROR = {
   INVALID_CODE: 'invalid_code',
   CODE_ALREADY_USED: 'code_already_used',
   CANNOT_WATCH_SELF: 'cannot_watch_self',
+  CODE_REVOKED: 'code_revoked',
+  CODE_EXPIRED: 'code_expired',
   STUDENT_NOT_FOUND: 'student_not_found',
   NOT_ALLOWED: 'not_allowed',
   UNKNOWN: 'unknown',
@@ -28,6 +30,10 @@ export const PARENT_ERROR_TEXT = {
   [PARENT_ERROR.CODE_ALREADY_USED]:
     'Цей код уже використали. Попросіть учителя виписати новий.',
   [PARENT_ERROR.CANNOT_WATCH_SELF]: 'Це код вашого власного профілю.',
+  [PARENT_ERROR.CODE_REVOKED]:
+    'Цей код скасував учитель. Попросіть новий.',
+  [PARENT_ERROR.CODE_EXPIRED]:
+    'Строк дії коду минув. Попросіть учителя виписати новий.',
   [PARENT_ERROR.STUDENT_NOT_FOUND]: 'Цієї дитини вже немає в групі.',
   [PARENT_ERROR.NOT_ALLOWED]: 'Код для батьків виписує вчитель цієї групи.',
   [PARENT_ERROR.UNKNOWN]: 'Не вдалося. Спробуйте ще раз за хвилину.',
@@ -59,6 +65,52 @@ export async function createParentInvite(studentId) {
   })
   if (error) throw new ParentError(parentErrorReason(error), error)
   return data
+}
+
+/** Коди, виписані на цю дитину, і дорослі, що вже мають доступ. */
+export async function listParentAccess(studentId) {
+  const { data, error } = await supabase.rpc('list_parent_access', {
+    p_student_id: studentId,
+  })
+  if (error) throw new ParentError(parentErrorReason(error), error)
+  return data ?? []
+}
+
+/** Погасити невикористаний код. */
+export async function revokeParentInvite(code) {
+  const { error } = await supabase.rpc('revoke_parent_invite', { p_code: code })
+  if (error) throw new ParentError(parentErrorReason(error), error)
+}
+
+/*
+ * Відібрати доступ у дорослого, який уже ввійшов. Скасування коду тут не
+ * допомагає: доступ живе у зв'язку, а не в коді, і код після використання
+ * мертвий сам по собі.
+ */
+export async function revokeParentAccess(parentId, studentId) {
+  const { error } = await supabase.rpc('revoke_parent_access', {
+    p_parent_id: parentId,
+    p_student_id: studentId,
+  })
+  if (error) throw new ParentError(parentErrorReason(error), error)
+}
+
+/**
+ * Стан коду — одним словом, у порядку, в якому вони перебивають одне одного:
+ * використаний код уже нічого не відкриє, хай навіть його строк минув.
+ */
+export function inviteState(invite, now = Date.now()) {
+  if (invite.used_at) return 'used'
+  if (invite.revoked_at) return 'revoked'
+  if (new Date(invite.expires_at).getTime() <= now) return 'expired'
+  return 'active'
+}
+
+export const INVITE_STATE_TEXT = {
+  active: 'Діє',
+  used: 'Використано',
+  revoked: 'Скасовано',
+  expired: 'Строк минув',
 }
 
 /** Дорослий уводить код і дістає доступ до однієї дитини. */

@@ -18,6 +18,8 @@ const {
   createParentInvite,
   redeemParentInvite,
   fetchMyChildren,
+  inviteState,
+  INVITE_STATE_TEXT,
 } = await import('./parents')
 
 describe('розбір відмов сервера', () => {
@@ -136,5 +138,52 @@ describe('список дітей', () => {
     await expect(fetchMyChildren('parent-1')).resolves.toEqual([
       { id: 'child-1', display_name: 'Андрій' },
     ])
+  })
+})
+
+describe('стан коду', () => {
+  const NOW = new Date('2026-09-17T12:00:00Z').getTime()
+
+  function invite(overrides) {
+    return {
+      used_at: null,
+      revoked_at: null,
+      expires_at: '2026-09-24T12:00:00Z',
+      ...overrides,
+    }
+  }
+
+  it('свіжий код діє', () => {
+    expect(inviteState(invite(), NOW)).toBe('active')
+  })
+
+  it('скасований код не діє', () => {
+    expect(inviteState(invite({ revoked_at: '2026-09-17T11:00:00Z' }), NOW)).toBe('revoked')
+  })
+
+  it('код зі збіглим строком не діє', () => {
+    expect(inviteState(invite({ expires_at: '2026-09-16T12:00:00Z' }), NOW)).toBe('expired')
+  })
+
+  /**
+   * Використаний код уже нічого не відкриє, хай навіть його строк минув або
+   * учитель натиснув «скасувати». Показати «строк минув» там, де насправді
+   * хтось увійшов, означало б збрехати вчителю про те, чи має дорослий доступ.
+   */
+  it('використаний код лишається використаним, що б з ним не сталося далі', () => {
+    const used = { used_at: '2026-09-16T10:00:00Z' }
+
+    expect(inviteState(invite({ ...used, expires_at: '2026-09-16T12:00:00Z' }), NOW)).toBe('used')
+    expect(inviteState(invite({ ...used, revoked_at: '2026-09-17T11:00:00Z' }), NOW)).toBe('used')
+  })
+
+  it('мить збігу строку — це вже не «діє»', () => {
+    expect(inviteState(invite({ expires_at: '2026-09-17T12:00:00Z' }), NOW)).toBe('expired')
+  })
+
+  it('кожен стан має слово для вчителя', () => {
+    for (const state of ['active', 'used', 'revoked', 'expired']) {
+      expect(INVITE_STATE_TEXT[state]).toBeTruthy()
+    }
   })
 })

@@ -17,7 +17,7 @@ import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
 import { getGroupDetails, renameStudent, removeStudentFromGroup } from '../lib/groups'
 import { buildGroupCsv, csvFileName, downloadCsv } from '../lib/csv'
-import { createParentInvite, PARENT_ERROR_TEXT } from '../lib/parents'
+import ParentAccess from '../components/teacher/ParentAccess'
 import GameBreakdown from '../components/teacher/GameBreakdown'
 import Assignments from '../components/teacher/Assignments'
 import { GAMES } from '../data/games'
@@ -50,7 +50,7 @@ function GroupDetail() {
   const [draftName, setDraftName] = useState('')
   const [busyId, setBusyId] = useState(null)
   const [actionError, setActionError] = useState(null)
-  const [parentCode, setParentCode] = useState(null)
+  const [accessFor, setAccessFor] = useState(null)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -107,24 +107,6 @@ function GroupDetail() {
       await reload()
     } catch {
       setActionError('Не вдалося прибрати учня. Спробуй ще раз.')
-    } finally {
-      setBusyId(null)
-    }
-  }
-
-  /*
-   * Код для батьків виписується на одну дитину і показується тут же: вчитель
-   * диктує або переписує його дорослому. Зберігати його довше нема потреби —
-   * після використання він мертвий, а новий виписується однією кнопкою.
-   */
-  async function handleParentCode(student) {
-    setBusyId(student.id)
-    setActionError(null)
-    try {
-      const code = await createParentInvite(student.id)
-      setParentCode({ studentId: student.id, name: student.displayName, code })
-    } catch (error) {
-      setActionError(PARENT_ERROR_TEXT[error?.reason] ?? PARENT_ERROR_TEXT.unknown)
     } finally {
       setBusyId(null)
     }
@@ -310,34 +292,8 @@ function GroupDetail() {
 
           {actionError && <p className="group-detail__error">{actionError}</p>}
 
-          {parentCode && (
-            <div className="group-detail__parent-code" role="status">
-              <div>
-                <p className="group-detail__parent-code-title">
-                  Код для батьків: {parentCode.name}
-                </p>
-                <p className="group-detail__parent-code-note">
-                  Дорослий уводить його на сторінці «Моя дитина». Код діє один раз.
-                </p>
-              </div>
-              <code className="group-detail__parent-code-value">{parentCode.code}</code>
-              <button
-                type="button"
-                className="group-detail__icon-btn"
-                aria-label="Скопіювати код для батьків"
-                onClick={() => navigator.clipboard?.writeText(parentCode.code)}
-              >
-                <Copy size={16} aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className="group-detail__icon-btn"
-                aria-label="Сховати код для батьків"
-                onClick={() => setParentCode(null)}
-              >
-                <X size={16} aria-hidden="true" />
-              </button>
-            </div>
+          {accessFor && (
+            <ParentAccess student={accessFor} onClose={() => setAccessFor(null)} />
           )}
 
           <div className="group-detail__table-wrap">
@@ -416,9 +372,9 @@ function GroupDetail() {
                           <button
                             type="button"
                             className="group-detail__icon-btn"
-                            aria-label={`Код для батьків ${student.displayName}`}
+                            aria-label={`Доступ батьків: ${student.displayName}`}
                             disabled={busyId === student.id}
-                            onClick={() => handleParentCode(student)}
+                            onClick={() => setAccessFor(student)}
                           >
                             <UserRoundPlus size={16} aria-hidden="true" />
                           </button>

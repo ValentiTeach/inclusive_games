@@ -1,0 +1,163 @@
+.parent-access {
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.parent-access__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.parent-access__head h3 {
+  margin: 0;
+}
+
+.parent-access__close {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  background: none;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.parent-access__note,
+.parent-access__empty {
+  max-width: 62ch;
+  margin: var(--space-2) 0 var(--space-3);
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.parent-access__error {
+  margin: 0 0 var(--space-3);
+  color: var(--cat-reaction);
+}
+
+.parent-access__create {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  margin-bottom: var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.parent-access__create:hover {
+  border-color: var(--accent);
+}
+
+.parent-access__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.parent-access__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* Щойно виписаний код треба знайти очима серед інших — його диктують просто
+   зараз. */
+.parent-access__row--fresh {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.parent-access__code {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.parent-access__state {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.parent-access__state--active {
+  color: var(--brand-1);
+  background: var(--cat-attention-bg);
+}
+
+.parent-access__state--used {
+  color: var(--brand-3);
+  background: var(--cat-thinking-bg);
+}
+
+/* Скасований і протермінований — не тривога, а просто минуле: вони нічого не
+   відкривають, і червоним їх позначати означало б лякати вчителя там, де все
+   гаразд. */
+.parent-access__state--revoked,
+.parent-access__state--expired {
+  color: var(--text-muted);
+  background: var(--surface-muted);
+}
+
+.parent-access__when {
+  flex: 1 1 140px;
+  min-width: 0;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.parent-access__actions {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.parent-access__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.parent-access__icon:hover {
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.parent-access__icon--danger:hover {
+  border-color: var(--cat-reaction);
+  color: var(--cat-reaction);
+}
+
+@media (max-width: 560px) {
+  .parent-access__when {
+    flex-basis: 100%;
+  }
+}

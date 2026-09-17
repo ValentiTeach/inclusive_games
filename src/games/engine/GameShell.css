@@ -4,11 +4,24 @@
 }
 
 .game-shell__head {
+  /* Назва ліворуч, вихід праворуч. Рядок замість колонки з'явився разом із
+     кнопкою виходу: сама назва як була стовпчиком, так і лишилася — за це
+     тепер відповідає __head-main. */
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.game-shell__head-main {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-2);
-  margin-bottom: var(--space-6);
+  min-width: 0;
 }
 
 .game-shell__head h1 {
@@ -250,4 +263,76 @@
   border-color: var(--accent-strong);
   color: var(--accent-contrast);
   font-weight: 700;
+}
+
+/* ─── Вихід із гри ───
+   Кнопка стоїть у шапці гри, якнайдалі від поля, де дитина тисне відповіді:
+   випадковий дотик тут коштує всієї спроби. */
+.game-shell__leave {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.game-shell__leave:hover {
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.game-shell__leave-confirm {
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--cat-reaction);
+  border-radius: var(--radius-md);
+}
+
+.game-shell__leave-question {
+  margin: 0 0 var(--space-3);
+  font-weight: 700;
+}
+
+.game-shell__leave-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.game-shell__leave-yes,
+.game-shell__leave-no {
+  min-height: 48px;
+  padding: 0 var(--space-5);
+  font-family: var(--font-body);
+  font-size: 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+/* «Продовжити гру» помітніше за «вийти»: у сумніві дитина має повернутися до
+   гри, а не втратити спробу. */
+.game-shell__leave-no {
+  background: var(--accent);
+  border: 1px solid var(--accent-strong);
+  color: var(--accent-contrast);
+  font-weight: 700;
+}
+
+.game-shell__leave-yes {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.game-shell__leave-yes:hover {
+  border-color: var(--cat-reaction);
+  color: var(--cat-reaction);
 }

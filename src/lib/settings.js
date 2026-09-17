@@ -36,7 +36,15 @@ export function getSettings() {
 }
 
 export function saveSettings(settings) {
-  localStorage.setItem(KEY, JSON.stringify(settings))
+  try {
+    localStorage.setItem(KEY, JSON.stringify(settings))
+  } catch {
+    /*
+     * Приватне вікно або заборонені дані сайту. Налаштування діють до кінця
+     * сеансу і просто не переживуть закриття вкладки — це краще, ніж сторінка
+     * налаштувань, яка падає на кожному натисканні.
+     */
+  }
 }
 
 /**

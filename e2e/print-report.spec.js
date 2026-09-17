@@ -69,6 +69,14 @@ test('темна тема не потрапляє на папір', async ({ pag
   })
   await page.emulateMedia({ media: 'print' })
 
+  /*
+   * Дочекатися саме тих вузлів, у яких вимірюється колір. Без цього під
+   * навантаженням повного прогону вони могли ще не з'явитися, і вимір падав на
+   * getComputedStyle(null) — тест хитався не через колір, а через час.
+   */
+  await page.locator('.child-progress__game-meta').first().waitFor()
+  await page.locator('.child-progress__game').first().waitFor()
+
   const colors = await page.evaluate(() => {
     const body = getComputedStyle(document.body)
     const root = getComputedStyle(document.documentElement)

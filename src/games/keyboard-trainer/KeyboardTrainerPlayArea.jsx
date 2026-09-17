@@ -1,16 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   KEYBOARD_ROWS,
+  NARROW_KEYBOARD_ROWS,
   generateTrial,
   letterForCode,
   scoring,
 } from './keyboardTrainer.config'
 import { now } from '../engine/time'
 import { useGameKeys } from '../engine/useGameKeys'
+import { useNarrowScreen } from '../../lib/useNarrowScreen'
 import { playCorrect, playWrong } from '../../lib/sound'
 import './KeyboardTrainerPlayArea.css'
 
 function KeyboardTrainerPlayArea({ level, onFinish }) {
+  /*
+   * На вузькому екрані ті самі літери в тому самому порядку лягають у чотири
+   * ряди по вісім: дванадцять у ряд дають 24 px, у які дитина не влучає.
+   */
+  const narrow = useNarrowScreen()
+  const rows = narrow ? NARROW_KEYBOARD_ROWS : KEYBOARD_ROWS
+
   const [trialIndex, setTrialIndex] = useState(0)
   const [trial, setTrial] = useState(() => generateTrial(level))
   const [position, setPosition] = useState(0)
@@ -131,7 +140,7 @@ function KeyboardTrainerPlayArea({ level, onFinish }) {
       {/* Клавіатура тут працює на два боки: на комп'ютері це підказка, де
           шукати клавішу, а на телефоні й планшеті — сам спосіб грати. */}
       <div className="keyboard-trainer__keyboard" role="group" aria-label="Клавіатура">
-        {KEYBOARD_ROWS.map((row, rowIndex) => (
+        {rows.map((row, rowIndex) => (
           <div key={rowIndex} className="keyboard-trainer__row">
             {row.map(([code, letter]) => (
               <button

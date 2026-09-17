@@ -33,11 +33,26 @@ function fromOwnHistory(config, history) {
   const lastIndex = config.levels.findIndex((level) => level.id === last.levelId)
   const currentIndex = lastIndex === -1 ? 0 : lastIndex
 
+  /*
+   * Слово дитини важить більше за бал, бо бал не розрізняє «легко» і «ледве
+   * витягнула». Дев'яносто, здобуті на межі, — не привід підіймати рівень;
+   * п'ятдесят у грі, яка здалася легкою, — не привід його знижувати, бо там
+   * ідеться про уважність, а не про складність.
+   *
+   * Вона нічого не мусить натискати: без відповіді все лишається як було —
+   * рішення за балом.
+   */
   if (last.score >= RAISE_THRESHOLD && currentIndex < config.levels.length - 1) {
+    if (last.felt === 'hard') {
+      return { levelId: config.levels[currentIndex].id, isAutoSuggested: false }
+    }
     return { levelId: config.levels[currentIndex + 1].id, isAutoSuggested: true }
   }
 
   if (last.score <= LOWER_THRESHOLD && currentIndex > 0) {
+    if (last.felt === 'easy') {
+      return { levelId: config.levels[currentIndex].id, isAutoSuggested: false }
+    }
     return { levelId: config.levels[currentIndex - 1].id, isAutoSuggested: true }
   }
 

@@ -1,16 +1,35 @@
 const KEY = 'inclusive-games:settings'
 
 const DEFAULTS = {
-  soundEnabled: true,
+  sound: 'clicks',
   textSize: 'normal',
   reducedMotion: false,
   theme: 'system',
 }
 
+export const SOUND_MODES = ['off', 'clicks', 'music']
+
+/**
+ * Раніше звук був перемикачем «увімк./вимк.». Той, хто його вимкнув, зробив це
+ * не випадково: тиша буває умовою, за якої дитина взагалі може займатися.
+ * Просто додати нове поле зі значенням за замовчуванням означало б увімкнути
+ * звук назад усім таким дітям — тому старе «вимкнено» читається як 'off'.
+ */
+function migrate(stored) {
+  if (typeof stored.sound === 'string' && SOUND_MODES.includes(stored.sound)) {
+    return stored
+  }
+  if (stored.soundEnabled === false) {
+    return { ...stored, sound: 'off' }
+  }
+  return stored
+}
+
 export function getSettings() {
   try {
     const raw = localStorage.getItem(KEY)
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS }
+    if (!raw) return { ...DEFAULTS }
+    return { ...DEFAULTS, ...migrate(JSON.parse(raw)) }
   } catch {
     return { ...DEFAULTS }
   }

@@ -1,10 +1,11 @@
 import { Sparkles } from 'lucide-react'
+import { FELT_OPTIONS } from './felt'
 import Button from '../../components/ui/Button'
 import CountUpNumber from '../../components/ui/CountUpNumber'
 import Confetti from '../../components/ui/Confetti'
 import AchievementBadge from '../../components/ui/AchievementBadge'
 
-function ResultsScreen({ score, entries, isNewBest, newAchievements, onRestart }) {
+function ResultsScreen({ score, entries, isNewBest, newAchievements, onRestart, felt, onFelt }) {
   return (
     <div className="game-shell__results">
       <h2>Результат</h2>
@@ -44,6 +45,35 @@ function ResultsScreen({ score, entries, isNewBest, newAchievements, onRestart }
           </div>
         </div>
       )}
+
+      {/*
+        Один рядок, три кнопки, жодного обов'язку. Двадцять змін поспіль
+        вирішувалося, що корисно, без жодного питання до тих, хто грає, — а бал
+        90 може означати і «легко», і «ледве витягнула». Пропустити можна: екран
+        не тримає дитину, поки вона не натисне, і порожньо — теж відповідь.
+      */}
+      <div className="game-shell__felt">
+        <p className="game-shell__felt-label" id="felt-label">
+          Як тобі було?
+        </p>
+        <div className="game-shell__felt-options" role="group" aria-labelledby="felt-label">
+          {FELT_OPTIONS.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              className={
+                felt === id
+                  ? 'game-shell__felt-button game-shell__felt-button--chosen'
+                  : 'game-shell__felt-button'
+              }
+              aria-pressed={felt === id}
+              onClick={() => onFelt(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       <div className="game-shell__results-actions">
         <Button onClick={onRestart}>Спробувати ще раз</Button>

@@ -56,6 +56,36 @@ const inFlight = new Map()
  *   живе в хмарі, а копія в браузері лишалася б лише приводом завантажити те
  *   саме вдруге.
  */
+/**
+ * Оцінка складності для однієї спроби.
+ *
+ * Спроба знаходиться за миттю гри: user_id + game_id + played_at — це той самий
+ * ключ, на якому стоїть унікальний індекс, тож він завжди вказує рівно на один
+ * рядок.
+ *
+ * Мовчазна невдача навмисна: дитина натиснула «важко», а мережа підвела — це не
+ * привід показувати їй помилку посеред екрана з результатом. Локально оцінка
+ * вже збережена, і саме вона впливає на наступний рівень.
+ */
+export async function pushRating(gameId, playedAt, felt) {
+  if (!isCloudConfigured) return
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session) return
+
+  try {
+    await supabase.rpc('rate_attempt', {
+      p_game_id: gameId,
+      p_played_at: playedAt,
+      p_felt: felt,
+    })
+  } catch {
+    // Оцінка — не результат гри; втратити її мовчки краще, ніж лякати дитину.
+  }
+}
+
 export async function migrateLocalHistoryOnce(userId) {
   if (!isCloudConfigured) return
 

@@ -48,6 +48,23 @@ export function saveResult(gameId, { score, entries, levelId, metrics }) {
 }
 
 /**
+ * Дитина каже, як їй було, вже після того, як спроба збережена: оцінку вона
+ * ставить на екрані результатів. Тому це правка останньої спроби, а не частина
+ * saveResult.
+ *
+ * Оцінка змінна: дитина може перемислити й натиснути іншу кнопку, і остання
+ * відповідь — правильна.
+ */
+export function rateLastResult(gameId, felt) {
+  const history = getResults(gameId)
+  if (history.length === 0) return history
+
+  const updated = [{ ...history[0], felt }, ...history.slice(1)]
+  localStorage.setItem(KEY_PREFIX + gameId, JSON.stringify(updated))
+  return updated
+}
+
+/**
  * Wipe every game's local history. Used when the computer is handed to another
  * child: these keys are per-browser, not per-child, so without this the next
  * child inherits the previous one's attempts — and, worse, uploads them to the

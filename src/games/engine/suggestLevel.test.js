@@ -81,6 +81,78 @@ function peer(attempts) {
   return { levels: peerLevels, attempts }
 }
 
+describe('слово дитини про складність', () => {
+  /**
+   * Бал не розрізняє «легко» і «ледве витягнула». Дев'яносто, здобуті на межі,
+   * — не привід підіймати рівень.
+   */
+  it('«важко» спиняє підвищення рівня навіть при високому балі', () => {
+    const history = [{ levelId: 'easy', score: 95, felt: 'hard' }]
+
+    expect(suggestLevel(config, history)).toEqual({
+      levelId: 'easy',
+      isAutoSuggested: false,
+    })
+  })
+
+  /**
+   * Дзеркально: низький бал у грі, яка здалася легкою, каже про уважність, а не
+   * про складність. Знизити рівень означало б лікувати не те.
+   */
+  it('«легко» спиняє зниження рівня навіть при низькому балі', () => {
+    const history = [{ levelId: 'normal', score: 20, felt: 'easy' }]
+
+    expect(suggestLevel(config, history)).toEqual({
+      levelId: 'normal',
+      isAutoSuggested: false,
+    })
+  })
+
+  it('«нормально» нічого не змінює — рішення лишається за балом', () => {
+    expect(suggestLevel(config, [{ levelId: 'easy', score: 95, felt: 'ok' }])).toEqual({
+      levelId: 'normal',
+      isAutoSuggested: true,
+    })
+    expect(suggestLevel(config, [{ levelId: 'normal', score: 20, felt: 'ok' }])).toEqual({
+      levelId: 'easy',
+      isAutoSuggested: true,
+    })
+  })
+
+  /**
+   * Дитина нічого не мусить натискати. Без відповіді все має лишитися рівно
+   * таким, яким було до появи цієї кнопки.
+   */
+  it('без відповіді все працює як раніше', () => {
+    expect(suggestLevel(config, [{ levelId: 'easy', score: 95 }])).toEqual({
+      levelId: 'normal',
+      isAutoSuggested: true,
+    })
+    expect(suggestLevel(config, [{ levelId: 'normal', score: 20 }])).toEqual({
+      levelId: 'easy',
+      isAutoSuggested: true,
+    })
+  })
+
+  /**
+   * «Важко» на найлегшому рівні нікуди не веде — там і так нікуди знижувати, —
+   * але й не повинно ламатися.
+   */
+  it('«важко» на найлегшому рівні лишає дитину на місці', () => {
+    expect(suggestLevel(config, [{ levelId: 'easy', score: 20, felt: 'hard' }])).toEqual({
+      levelId: 'easy',
+      isAutoSuggested: false,
+    })
+  })
+
+  it('«легко» на найважчому рівні лишає дитину на місці', () => {
+    expect(suggestLevel(config, [{ levelId: 'hard', score: 95, felt: 'easy' }])).toEqual({
+      levelId: 'hard',
+      isAutoSuggested: false,
+    })
+  })
+})
+
 describe('suggestLevel за спорідненими іграми', () => {
   it('не вигадує рівень з однієї-єдиної спроби в категорії', () => {
     const category = [peer([peerAttempt('p5', 100, '2026-09-10')])]

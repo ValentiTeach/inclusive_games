@@ -5,10 +5,10 @@ import { GAME_REGISTRY } from '../registry'
 import { ACHIEVEMENTS, isUnlocked } from '../../data/achievements'
 import { computeAchievementStats } from '../../lib/achievementStats'
 import { computeStreak } from '../../lib/streak'
-import { getResults, saveResult } from './storage'
+import { getResults, saveResult, rateLastResult } from './storage'
 import { suggestLevel } from './suggestLevel'
-import { pushResult } from '../../lib/cloudSync'
-import { playVictory } from '../../lib/sound'
+import { pushResult, pushRating } from '../../lib/cloudSync'
+import { playVictory, playClick, startAmbient, stopAmbient } from '../../lib/sound'
 import IntroScreen from './IntroScreen'
 import CountdownScreen from './CountdownScreen'
 import ResultsScreen from './ResultsScreen'
@@ -51,6 +51,7 @@ function GameShell({ config, renderPlay }) {
   const [result, setResult] = useState(null)
   const [isNewBest, setIsNewBest] = useState(false)
   const [newAchievements, setNewAchievements] = useState([])
+  const [felt, setFelt] = useState(null)
 
   const level = config.levels.find((item) => item.id === levelState.levelId)
   const categoryInfo = CATEGORIES[config.category]
@@ -71,6 +72,19 @@ function GameShell({ config, renderPlay }) {
     return () => clearTimeout(timer)
   }, [phase, countdown])
 
+  /*
+   * Фон звучить лише поки дитина грає. На екранах вступу й результатів там
+   * читають — музика під читанням заважає, а не допомагає. Зупинка стоїть і в
+   * прибиранні: якщо піти з гри посеред спроби, звук інакше лишився б грати на
+   * весь застосунок.
+   */
+  useEffect(() => {
+    if (phase !== 'playing') return undefined
+
+    startAmbient()
+    return () => stopAmbient()
+  }, [phase])
+
   function handleLevelChange(levelId) {
     setLevelState({ levelId, isAutoSuggested: false })
   }
@@ -80,8 +94,22 @@ function GameShell({ config, renderPlay }) {
     setPhase('countdown')
   }
 
+  /*
+   * Оцінка зберігається локально одразу, а в хмару йде окремо: локальна копія —
+   * та, з якої suggestLevel добирає наступний рівень, і вона має пережити
+   * невдалу мережу.
+   */
+  function handleFelt(value) {
+    playClick()
+    setFelt(value)
+    const updated = rateLastResult(config.id, value)
+    setHistory(updated)
+    if (updated[0]) pushRating(config.id, updated[0].date, value)
+  }
+
   function handleFinish(finishResult) {
     setResult(finishResult)
+    setFelt(null)
 
     const previousBest = history.length ? Math.max(...history.map((entry) => entry.score)) : null
     const statsBefore = achievementStatsExcluding(config.id, history)
@@ -146,6 +174,8 @@ function GameShell({ config, renderPlay }) {
           isNewBest={isNewBest}
           newAchievements={newAchievements}
           onRestart={handleRestart}
+          felt={felt}
+          onFelt={handleFelt}
         />
       )}
     </div>

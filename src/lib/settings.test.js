@@ -109,3 +109,62 @@ describe('saveSettings', () => {
     expect(getSettings().theme).toBe('dark')
   })
 })
+
+describe('перехід від перемикача звуку до трьох режимів', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  /**
+   * Той, хто вимкнув звук, зробив це не випадково: тиша буває умовою, за якої
+   * дитина взагалі може займатися. Просто додати нове поле зі значенням за
+   * замовчуванням означало б увімкнути їй звук назад.
+   */
+  it('старе «вимкнено» читається як тиша', () => {
+    localStorage.setItem(
+      'inclusive-games:settings',
+      JSON.stringify({ soundEnabled: false, theme: 'dark' }),
+    )
+
+    expect(getSettings().sound).toBe('off')
+  })
+
+  it('старе «увімкнено» стає клацанням', () => {
+    localStorage.setItem('inclusive-games:settings', JSON.stringify({ soundEnabled: true }))
+
+    expect(getSettings().sound).toBe('clicks')
+  })
+
+  it('новий вибір важливіший за старий перемикач', () => {
+    localStorage.setItem(
+      'inclusive-games:settings',
+      JSON.stringify({ soundEnabled: false, sound: 'music' }),
+    )
+
+    expect(getSettings().sound).toBe('music')
+  })
+
+  it('невідомий режим не приймається за вибір', () => {
+    localStorage.setItem(
+      'inclusive-games:settings',
+      JSON.stringify({ soundEnabled: false, sound: 'радіо' }),
+    )
+
+    expect(getSettings().sound).toBe('off')
+  })
+
+  it('новачок чує клацання', () => {
+    expect(getSettings().sound).toBe('clicks')
+  })
+
+  it('решта налаштувань переходом не зачеплена', () => {
+    localStorage.setItem(
+      'inclusive-games:settings',
+      JSON.stringify({ soundEnabled: false, theme: 'dark', textSize: 'large' }),
+    )
+
+    const settings = getSettings()
+    expect(settings.theme).toBe('dark')
+    expect(settings.textSize).toBe('large')
+  })
+})

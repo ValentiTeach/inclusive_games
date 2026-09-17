@@ -17,19 +17,38 @@ function Settings() {
       <h1>Налаштування</h1>
       <p>Зберігаються лише в цьому браузері, на цьому пристрої.</p>
 
+      {/*
+        Три режими, а не перемикач: для частини дітей тиша — умова, за якої
+        вони взагалі можуть займатися, для інших порожній звуковий фон сам стає
+        відволіканням. Одне «увімк./вимк.» не давало ні того, ні того.
+      */}
       <div className="settings__row">
         <div>
           <h2>Звук</h2>
-          <p>Короткі сигнали на кнопках і за правильні чи неправильні відповіді.</p>
+          <p>
+            «Тихо» — жодного звуку. «Клацання» — короткі сигнали на кнопках і за
+            відповіді. «Музика» — ще й рівний тихий фон, поки триває гра.
+          </p>
         </div>
-        <button
-          type="button"
-          className={settings.soundEnabled ? 'settings__toggle is-on' : 'settings__toggle'}
-          onClick={() => update({ soundEnabled: !settings.soundEnabled })}
-          aria-pressed={settings.soundEnabled}
-        >
-          {settings.soundEnabled ? 'Увімкнено' : 'Вимкнено'}
-        </button>
+        <div className="settings__options">
+          {[
+            ['off', 'Тихо'],
+            ['clicks', 'Клацання'],
+            ['music', 'Музика'],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={
+                settings.sound === value ? 'settings__option is-active' : 'settings__option'
+              }
+              onClick={() => update({ sound: value })}
+              aria-pressed={settings.sound === value}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="settings__row">

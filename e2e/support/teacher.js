@@ -95,6 +95,12 @@ export async function signInAsTeacher(page, fixtures = {}) {
      */
     parentLinks = [],
     redeemed = null,
+    /*
+     * Коди, виписані на дитину, як їх повертає list_parent_access. Масив живий:
+     * скасування й відбирання доступу правлять його на місці, тож наступний
+     * запит бачить наслідок дії, а не початковий стан.
+     */
+    parentAccess = [],
   } = fixtures
 
   await page.addInitScript((session) => {
@@ -107,11 +113,50 @@ export async function signInAsTeacher(page, fixtures = {}) {
     const path = url.pathname.replace('/rest/v1/', '')
     const select = url.searchParams.get('select') ?? ''
 
-    if (path === 'rpc/create_parent_invite') {
+    if (path === 'rpc/list_parent_access') {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify('KRDM47XZ'),
+        body: JSON.stringify(parentAccess),
+      })
+      return
+    }
+
+    if (path === 'rpc/revoke_parent_invite') {
+      const { p_code: code } = JSON.parse(request.postData() ?? '{}')
+      const row = parentAccess.find((entry) => entry.code === code)
+      if (row) row.revoked_at = new Date().toISOString()
+      await route.fulfill({ status: 204, contentType: 'application/json', body: '' })
+      return
+    }
+
+    if (path === 'rpc/revoke_parent_access') {
+      const { p_parent_id: parentId } = JSON.parse(request.postData() ?? '{}')
+      for (const row of parentAccess) {
+        if (row.parent_id === parentId) {
+          row.parent_id = null
+          row.parent_label = null
+        }
+      }
+      await route.fulfill({ status: 204, contentType: 'application/json', body: '' })
+      return
+    }
+
+    if (path === 'rpc/create_parent_invite') {
+      const code = `NEW${parentAccess.length + 1}CODE`
+      parentAccess.unshift({
+        code,
+        created_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + 7 * 86400000).toISOString(),
+        used_at: null,
+        revoked_at: null,
+        parent_id: null,
+        parent_label: null,
+      })
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(code),
       })
       return
     }

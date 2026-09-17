@@ -40,7 +40,7 @@
   /* Код приєднання відкриває вхід у групу, а роздрукований звіт лишають на
      столах і в теках. На папері його немає. */
   .group-detail__join,
-  .group-detail__parent-code,
+  .parent-access,
   .child-progress__form {
     display: none !important;
   }

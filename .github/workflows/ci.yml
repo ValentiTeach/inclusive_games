@@ -1,0 +1,103 @@
+# Перевірка кожної зміни.
+#
+# Досі 610 модульних і 188 наскрізних тестів запускалися тільки вручну. Це
+# означало, що будь-яке злиття без окремого прогону не перевірялося взагалі —
+# а саме такі злиття й трапляються, коли поспішаєш.
+#
+# Робіт дві, і поділ навмисний: перевірки коду тривають менш ніж хвилину, а
+# наскрізні — близько чотирьох. Помилка в лінті не має чекати чотири хвилини,
+# щоб про себе повідомити.
+
+name: Перевірка
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Нова викладка в ту саму гілку скасовує попередню: перевіряти код, який уже
+# застарів, — марно витрачені хвилини.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Лінт, тести, збірка
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # npm ci, а не npm install: ставить рівно те, що в package-lock, і падає,
+      # якщо lock розійшовся з package.json. Перевірка має бачити ті самі
+      # версії, що й прод.
+      - run: npm ci
+
+      - name: Лінт
+        run: npm run lint
+
+      - name: Модульні тести
+        run: npm run test
+
+      - name: Збірка
+        run: npm run build
+
+  e2e:
+    name: Наскрізні тести
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Версія браузера прив'язана до версії Playwright, тож ключ кешу береться
+      # з неї: оновиться Playwright — завантажиться новий браузер, а не
+      # використається старий, несумісний.
+      - name: Визначити версію Playwright
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Кеш браузерів
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}
+
+      - name: Встановити браузер
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      # Системні залежності ставляться навіть при влучанні в кеш: кешується сам
+      # браузер, а не бібліотеки, яких він потребує від системи.
+      - name: Системні залежності браузера
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Наскрізні тести
+        run: npm run test:e2e
+
+      # Звіт лишається тільки коли є що дивитися: у ньому сліди невдалих
+      # прогонів зі знімками й записом дій.
+      - name: Звіт про невдачі
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

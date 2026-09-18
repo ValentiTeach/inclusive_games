@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { computeAchievementStats } from './achievementStats'
 import { ACHIEVEMENTS, achievementProgress, isUnlocked } from '../data/achievements'
 
@@ -51,11 +51,30 @@ describe('computeAchievementStats', () => {
     expect(stats.perfectCount).toBe(1)
   })
 
-  it('reduces dates to plain days, dropping the time part', () => {
+  /**
+   * День береться за годинником дитини, а не за Гринвічем.
+   *
+   * 23:59 UTC першого червня — це вже 02:59 другого червня в Києві. Раніше
+   * така спроба лягала у вчорашній день: серія днів обривалася на рівному
+   * місці, а щоденна мета показувала вчорашній прогрес. Тест саме на цю мить,
+   * бо будь-який інший час доби розбіжності не покаже.
+   */
+  it('відносить спробу до місцевого дня, а не до UTC-доби', () => {
     const stats = computeAchievementStats([
       {
         game: { id: 'simon', category: 'memory' },
         history: [attempt('2026-06-01T23:59:00Z', 10)],
+      },
+    ])
+
+    expect(stats.dates).toEqual(['2026-06-02'])
+  })
+
+  it('удень обидва відліки збігаються', () => {
+    const stats = computeAchievementStats([
+      {
+        game: { id: 'simon', category: 'memory' },
+        history: [attempt('2026-06-01T12:00:00Z', 10)],
       },
     ])
 
@@ -208,16 +227,32 @@ describe('досягнення за вміння', () => {
     expect(stats.distinctGamesByCategory).toEqual({ attention: 2, memory: 1 })
   })
 
-  it('спроби сьогодні рахуються за сьогоднішньою датою', () => {
-    const today = new Date().toISOString().slice(0, 10)
+  /**
+   * Перша версія цього тесту будувала «сьогодні» через toISOString — тобто за
+   * Гринвічем. Під мутацією, що повертала UTC-добу в сам код, фікстура й код
+   * збігалися, і тест не бачив нічого. Тепер мить задається явно: 01:30 ночі
+   * за Києвом, коли UTC-доба ще вчорашня.
+   */
+  it('сьогоднішні спроби рахуються за місцевим днем, а не за UTC', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-15T22:30:00Z')) // 01:30 шістнадцятого в Києві
+
     const stats = computeAchievementStats([
       game('schulte', 'attention', [
-        attempt(`${today}T10:00:00Z`, 50),
-        attempt('2020-01-01T10:00:00Z', 50),
+        attempt('2026-06-15T22:00:00Z', 50), // 01:00 шістнадцятого — сьогодні
+        attempt('2026-06-15T21:30:00Z', 50), // 00:30 шістнадцятого — теж сьогодні
+        attempt('2026-06-15T09:00:00Z', 50), // полудень п'ятнадцятого — учора
       ]),
     ])
 
-    expect(stats.attemptsToday).toBe(1)
+    /*
+     * Двоє проти одного навмисно: якби сьогоднішній день рахувався за UTC,
+     * зарахувалася б рівно одна спроба — та, що вчорашня за київським часом.
+     * Однакові кількості по обидва боки нічого б не розрізнили, і перша версія
+     * цього тесту саме на цьому й попалася.
+     */
+    expect(stats.attemptsToday).toBe(2)
+    vi.useRealTimers()
   })
 })
 

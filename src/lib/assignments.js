@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { localDay } from './day'
 
 /**
  * Завдання від учителя.
@@ -120,5 +121,5 @@ export function openAssignments(assignments, myResults, studentId) {
 /** Прострочене завдання лишається видимим, але позначається окремо. */
 export function isOverdue(assignment, today = new Date()) {
   if (!assignment.due_on) return false
-  return assignment.due_on < today.toISOString().slice(0, 10)
+  return assignment.due_on < localDay(today)
 }

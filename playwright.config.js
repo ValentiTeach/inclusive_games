@@ -37,7 +37,13 @@ export default defineConfig({
   // Tests run against the production build, not the dev server, so what they
   // check is what actually ships.
   webServer: {
-    command: 'npm run build && npm run preview -- --port 4173 --strictPort',
+    // --host 127.0.0.1 не для краси: без нього vite preview слухає `localhost`,
+    // а на чистому раннері GitHub це ім'я розв'язується спершу в IPv6 (::1),
+    // тоді як Playwright стукає в IPv4 (127.0.0.1) і мовчки чекає до самого
+    // тайм-ауту. Локально розбіжності не видно ніколи — саме це й знайшла
+    // перша ж перевірка на GitHub.
+    command:
+      'npm run build && npm run preview -- --port 4173 --strictPort --host 127.0.0.1',
     url: 'http://127.0.0.1:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

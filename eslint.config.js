@@ -25,8 +25,13 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
   // Vitest injects describe/it/expect as globals (test.globals in vite.config).
+  // Node globals belong here too: vitest runs on Node, and a test that checks
+  // for unhandled promise rejections has to listen on `process` — jsdom does
+  // not fire those as window events.
   {
     files: ['src/**/*.test.{js,jsx}', 'src/test/**/*.js'],
-    languageOptions: { globals: { ...globals.browser, ...globals.vitest } },
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.node, ...globals.vitest },
+    },
   },
 ])

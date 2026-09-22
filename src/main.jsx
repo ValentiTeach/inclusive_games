@@ -7,6 +7,7 @@ import App from './App.jsx'
 import ErrorBoundary from './components/layout/ErrorBoundary'
 import { registerOffline } from './lib/offline'
 import { watchGlobalErrors } from './lib/errorLog'
+import { warmOfflineCache } from './lib/prefetch'
 
 /*
  * Зовнішня межа — остання лінія. Вона ловить те, що впало поза сторінкою:
@@ -28,4 +29,5 @@ createRoot(document.getElementById('root')).render(
  * в обіцянці без catch. Їх ловлять глобальні слухачі.
  */
 watchGlobalErrors()
+warmOfflineCache()
 registerOffline()

@@ -98,4 +98,47 @@ test.describe('робота без мережі', () => {
 
     await expect(page.getByText('Влучань')).toBeVisible()
   })
+
+  /**
+   * Регресія, яку принесло розділення коду.
+   *
+   * Поки весь застосунок лежав одним шматком, кеш або мав усе, або не мав
+   * нічого. Тепер кожна гра — окремий файл, а service worker кешує лише те, що
+   * вже хоч раз запитали. Дитина, яка відкрила головну, встановила застосунок і
+   * поїхала без мережі, дістала б помилку на першій же грі, у яку ще не грала.
+   *
+   * Рятує прогрів на простої (lib/prefetch). Тест навмисно не заходить на
+   * сторінку гри до вимкнення мережі — інакше шматок приїхав би сам собою і
+   * перевірялося б не те.
+   */
+  test('офлайн відкривається гра, в яку ще не заходили', async ({ page, context }) => {
+    await page.goto('/')
+    await page.evaluate(() => navigator.serviceWorker.ready)
+    // Перезавантаження: прогрів чекає, поки воркер перехопить сторінку, а на
+    // найпершому відкритті controller ще порожній.
+    await page.reload()
+
+    // Чекаємо, поки прогрів справді покладе шматок гри в кеш. Без цього тест
+    // ганяв би перегони з requestIdleCallback і блимав би.
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(async () => {
+            for (const name of await caches.keys()) {
+              const cache = await caches.open(name)
+              const keys = await cache.keys()
+              if (keys.some((request) => request.url.includes('SchultePlayArea'))) return true
+            }
+            return false
+          }),
+        { timeout: 20_000, message: 'прогрів мав покласти шматок гри в кеш' },
+      )
+      .toBe(true)
+
+    await context.setOffline(true)
+    await page.goto('/games/schulte')
+
+    await page.getByText('Почати', { exact: true }).first().click()
+    await expect(page.locator('.schulte__cell').first()).toBeVisible({ timeout: 10000 })
+  })
 })

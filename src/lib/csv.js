@@ -1,4 +1,5 @@
 import { metricLabel, orderMetricKeys } from '../games/engine/metrics'
+import { localDay } from './day'
 
 // Excel is the target here, not a parser: teachers open these files to build a
 // report or show a parent. Two details matter for that and are easy to get
@@ -122,7 +123,7 @@ export function csvFileName(groupName) {
     .trim()
     .replaceAll(/[^\p{L}\p{N}]+/gu, '-')
     .replaceAll(/^-|-$/g, '')
-  const today = new Date().toISOString().slice(0, 10)
+  const today = localDay()
   return `${slug || 'grupa'}-${today}.csv`
 }
 

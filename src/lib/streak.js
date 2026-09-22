@@ -1,5 +1,10 @@
+import { localDay, dayBefore } from './day'
+
 const DAY_MS = 24 * 60 * 60 * 1000
 
+/**
+ * @param dateStrings дні у вигляді YYYY-MM-DD за місцевим часом дитини
+ */
 export function computeStreak(dateStrings) {
   const uniqueDates = [...new Set(dateStrings)].sort()
 
@@ -19,15 +24,20 @@ export function computeStreak(dateStrings) {
   }
 
   const dateSet = new Set(uniqueDates)
-  const today = new Date().toISOString().slice(0, 10)
-  const yesterday = new Date(Date.now() - DAY_MS).toISOString().slice(0, 10)
+  const today = localDay()
+  const yesterday = dayBefore(today)
 
   let current = 0
   if (dateSet.has(today) || dateSet.has(yesterday)) {
-    let cursor = new Date(dateSet.has(today) ? today : yesterday)
-    while (dateSet.has(cursor.toISOString().slice(0, 10))) {
+    /*
+     * Курсор іде по рядках днів, а не по мілісекундах: рядки вже місцеві, а
+     * крок робиться в UTC-опівночі, де доба завжди рівно доба — інакше ніч
+     * переходу на зимовий час зарахувала б той самий день двічі.
+     */
+    let cursor = dateSet.has(today) ? today : yesterday
+    while (dateSet.has(cursor)) {
       current += 1
-      cursor = new Date(cursor.getTime() - DAY_MS)
+      cursor = dayBefore(cursor)
     }
   }
 

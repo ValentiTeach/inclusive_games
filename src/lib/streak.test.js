@@ -62,3 +62,48 @@ describe('computeStreak', () => {
     expect(shuffled).toEqual(sorted)
   })
 })
+
+describe('серія за місцевим часом', () => {
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  /**
+   * Дитина грала вчора і сьогодні о першій ночі. За Гринвічем обидві спроби
+   * припадають на вчора — серія обірвалася б на рівному місці.
+   */
+  it('гра після місцевої півночі продовжує серію, а не обриває', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-15T22:30:00Z')) // 01:30 шістнадцятого в Києві
+
+    expect(computeStreak(['2026-06-15', '2026-06-16'])).toMatchObject({ current: 2 })
+  })
+
+  it('учорашня гра тримає серію, поки не минув сьогоднішній день', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-16T09:00:00Z'))
+
+    expect(computeStreak(['2026-06-14', '2026-06-15'])).toMatchObject({ current: 2 })
+  })
+
+  it('позавчорашня гра серію вже не тримає', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-16T09:00:00Z'))
+
+    expect(computeStreak(['2026-06-13', '2026-06-14'])).toMatchObject({ current: 0 })
+  })
+
+  /**
+   * Курсор іде по календарних днях, а не по мілісекундах: інакше ніч переходу
+   * на зимовий час зарахувала б той самий день двічі й завищила серію.
+   */
+  it('перехід на зимовий час не задвоює день у серії', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-10-26T09:00:00Z'))
+
+    expect(computeStreak(['2026-10-24', '2026-10-25', '2026-10-26'])).toMatchObject({
+      current: 3,
+      longest: 3,
+    })
+  })
+})

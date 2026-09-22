@@ -1,60 +1,107 @@
+import { lazy } from 'react'
+
 import { config as schulteConfig } from './schulte/schulte.config'
-import SchultePlayArea from './schulte/SchultePlayArea'
 import { config as stroopConfig } from './stroop/stroop.config'
-import StroopPlayArea from './stroop/StroopPlayArea'
 import { config as simonConfig } from './simon/simon.config'
-import SimonPlayArea from './simon/SimonPlayArea'
 import { config as memoryPairsConfig } from './memory-pairs/memoryPairs.config'
-import MemoryPairsPlayArea from './memory-pairs/MemoryPairsPlayArea'
 import { config as reactionTimeConfig } from './reaction-time/reactionTime.config'
-import ReactionTimePlayArea from './reaction-time/ReactionTimePlayArea'
 import { config as quickMathConfig } from './quick-math/quickMath.config'
-import QuickMathPlayArea from './quick-math/QuickMathPlayArea'
 import { config as subitizingConfig } from './subitizing/subitizing.config'
-import SubitizingPlayArea from './subitizing/SubitizingPlayArea'
 import { config as goNoGoConfig } from './go-no-go/goNoGo.config'
-import GoNoGoPlayArea from './go-no-go/GoNoGoPlayArea'
 import { config as nbackConfig } from './n-back/nback.config'
-import NBackPlayArea from './n-back/NBackPlayArea'
 import { config as targetSearchConfig } from './target-search/targetSearch.config'
-import TargetSearchPlayArea from './target-search/TargetSearchPlayArea'
 import { config as matricesConfig } from './matrices/matrices.config'
-import MatricesPlayArea from './matrices/MatricesPlayArea'
 import { config as mentalRotationConfig } from './mental-rotation/mentalRotation.config'
-import MentalRotationPlayArea from './mental-rotation/MentalRotationPlayArea'
 import { config as keyboardTrainerConfig } from './keyboard-trainer/keyboardTrainer.config'
-import KeyboardTrainerPlayArea from './keyboard-trainer/KeyboardTrainerPlayArea'
 import { config as trafficLightConfig } from './traffic-light/trafficLight.config'
-import TrafficLightPlayArea from './traffic-light/TrafficLightPlayArea'
 import { config as catchTheMomentConfig } from './catch-the-moment/catchTheMoment.config'
-import CatchTheMomentPlayArea from './catch-the-moment/CatchTheMomentPlayArea'
 import { config as whatVanishedConfig } from './what-vanished/whatVanished.config'
-import WhatVanishedPlayArea from './what-vanished/WhatVanishedPlayArea'
 import { config as digitSpanConfig } from './digit-span/digitSpan.config'
-import DigitSpanPlayArea from './digit-span/DigitSpanPlayArea'
 import { config as oddOneOutConfig } from './odd-one-out/oddOneOut.config'
-import OddOneOutPlayArea from './odd-one-out/OddOneOutPlayArea'
 import { config as continueRowConfig } from './continue-row/continueRow.config'
-import ContinueRowPlayArea from './continue-row/ContinueRowPlayArea'
+
+/*
+ * Ігрові поля вантажаться окремими шматками, конфіги — ні.
+ *
+ * Конфіг потрібен синхронно і не одній сторінці: GameShell перебирає всі 19,
+ * щоб дібрати рівень за спробами в сусідніх іграх тієї ж категорії, а список
+ * завдань учителя бере з них рівні. Разом конфіги важать небагато.
+ *
+ * Важать поля — розмітка, стилі й логіка кожної гри. Дитина за раз грає в одну,
+ * а завантажувала досі всі дев'ятнадцять. Тепер приходить тільки та, яку
+ * відкрили.
+ *
+ * Завантажувачі лежать окремою мапою, а не тільки всередині lazy(): дістати
+ * функцію назад із lazy-компонента можна лише через внутрішні поля React, а
+ * вони не є частиною публічного API. Мапа потрібна і для випередження нижче,
+ * і для офлайну — щоб service worker мав що покласти в кеш наперед.
+ */
+const LOADERS = {
+  schulte: () => import('./schulte/SchultePlayArea'),
+  stroop: () => import('./stroop/StroopPlayArea'),
+  simon: () => import('./simon/SimonPlayArea'),
+  'memory-pairs': () => import('./memory-pairs/MemoryPairsPlayArea'),
+  'reaction-time': () => import('./reaction-time/ReactionTimePlayArea'),
+  'quick-math': () => import('./quick-math/QuickMathPlayArea'),
+  subitizing: () => import('./subitizing/SubitizingPlayArea'),
+  'go-no-go': () => import('./go-no-go/GoNoGoPlayArea'),
+  'n-back': () => import('./n-back/NBackPlayArea'),
+  'target-search': () => import('./target-search/TargetSearchPlayArea'),
+  matrices: () => import('./matrices/MatricesPlayArea'),
+  'mental-rotation': () => import('./mental-rotation/MentalRotationPlayArea'),
+  'keyboard-trainer': () => import('./keyboard-trainer/KeyboardTrainerPlayArea'),
+  'traffic-light': () => import('./traffic-light/TrafficLightPlayArea'),
+  'catch-the-moment': () => import('./catch-the-moment/CatchTheMomentPlayArea'),
+  'what-vanished': () => import('./what-vanished/WhatVanishedPlayArea'),
+  'digit-span': () => import('./digit-span/DigitSpanPlayArea'),
+  'odd-one-out': () => import('./odd-one-out/OddOneOutPlayArea'),
+  'continue-row': () => import('./continue-row/ContinueRowPlayArea'),
+}
 
 export const GAME_REGISTRY = {
-  schulte: { config: schulteConfig, PlayArea: SchultePlayArea },
-  stroop: { config: stroopConfig, PlayArea: StroopPlayArea },
-  simon: { config: simonConfig, PlayArea: SimonPlayArea },
-  'memory-pairs': { config: memoryPairsConfig, PlayArea: MemoryPairsPlayArea },
-  'reaction-time': { config: reactionTimeConfig, PlayArea: ReactionTimePlayArea },
-  'quick-math': { config: quickMathConfig, PlayArea: QuickMathPlayArea },
-  subitizing: { config: subitizingConfig, PlayArea: SubitizingPlayArea },
-  'go-no-go': { config: goNoGoConfig, PlayArea: GoNoGoPlayArea },
-  'n-back': { config: nbackConfig, PlayArea: NBackPlayArea },
-  'target-search': { config: targetSearchConfig, PlayArea: TargetSearchPlayArea },
-  matrices: { config: matricesConfig, PlayArea: MatricesPlayArea },
-  'mental-rotation': { config: mentalRotationConfig, PlayArea: MentalRotationPlayArea },
-  'keyboard-trainer': { config: keyboardTrainerConfig, PlayArea: KeyboardTrainerPlayArea },
-  'traffic-light': { config: trafficLightConfig, PlayArea: TrafficLightPlayArea },
-  'catch-the-moment': { config: catchTheMomentConfig, PlayArea: CatchTheMomentPlayArea },
-  'what-vanished': { config: whatVanishedConfig, PlayArea: WhatVanishedPlayArea },
-  'digit-span': { config: digitSpanConfig, PlayArea: DigitSpanPlayArea },
-  'odd-one-out': { config: oddOneOutConfig, PlayArea: OddOneOutPlayArea },
-  'continue-row': { config: continueRowConfig, PlayArea: ContinueRowPlayArea },
+  schulte: { config: schulteConfig, PlayArea: lazy(LOADERS['schulte']) },
+  stroop: { config: stroopConfig, PlayArea: lazy(LOADERS['stroop']) },
+  simon: { config: simonConfig, PlayArea: lazy(LOADERS['simon']) },
+  'memory-pairs': { config: memoryPairsConfig, PlayArea: lazy(LOADERS['memory-pairs']) },
+  'reaction-time': { config: reactionTimeConfig, PlayArea: lazy(LOADERS['reaction-time']) },
+  'quick-math': { config: quickMathConfig, PlayArea: lazy(LOADERS['quick-math']) },
+  subitizing: { config: subitizingConfig, PlayArea: lazy(LOADERS['subitizing']) },
+  'go-no-go': { config: goNoGoConfig, PlayArea: lazy(LOADERS['go-no-go']) },
+  'n-back': { config: nbackConfig, PlayArea: lazy(LOADERS['n-back']) },
+  'target-search': { config: targetSearchConfig, PlayArea: lazy(LOADERS['target-search']) },
+  matrices: { config: matricesConfig, PlayArea: lazy(LOADERS['matrices']) },
+  'mental-rotation': { config: mentalRotationConfig, PlayArea: lazy(LOADERS['mental-rotation']) },
+  'keyboard-trainer': { config: keyboardTrainerConfig, PlayArea: lazy(LOADERS['keyboard-trainer']) },
+  'traffic-light': { config: trafficLightConfig, PlayArea: lazy(LOADERS['traffic-light']) },
+  'catch-the-moment': { config: catchTheMomentConfig, PlayArea: lazy(LOADERS['catch-the-moment']) },
+  'what-vanished': { config: whatVanishedConfig, PlayArea: lazy(LOADERS['what-vanished']) },
+  'digit-span': { config: digitSpanConfig, PlayArea: lazy(LOADERS['digit-span']) },
+  'odd-one-out': { config: oddOneOutConfig, PlayArea: lazy(LOADERS['odd-one-out']) },
+  'continue-row': { config: continueRowConfig, PlayArea: lazy(LOADERS['continue-row']) },
+}
+
+/*
+ * Починає завантажувати поле гри, не чекаючи, поки воно знадобиться.
+ *
+ * Без цього дитина натискала б «Почати», дивилася три секунди зворотного
+ * відліку — і бачила порожнечу, поки йде шматок. Виклик на відкритті сторінки
+ * дає цим трьом секундам корисну роботу: поле встигає приїхати до першої проби.
+ *
+ * Помилка тут навмисно ковтається: це лише випередження. Якщо шматок так і не
+ * приїде, його попросить Suspense — і тоді збій побачить межа помилок, а не
+ * порожня консоль.
+ */
+export function preloadPlayArea(gameId) {
+  const load = LOADERS[gameId]
+  if (load) void load().catch(() => {})
+}
+
+/**
+ * Усі ігрові поля — для випередження на простої, коли мережа ще є.
+ * Порядок не важливий: це кеш, а не черга показу.
+ */
+export function preloadAllPlayAreas() {
+  for (const load of Object.values(LOADERS)) {
+    void load().catch(() => {})
+  }
 }

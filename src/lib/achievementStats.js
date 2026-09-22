@@ -1,3 +1,5 @@
+import { localDay } from './day'
+
 /**
  * Числа, з яких виводяться всі досягнення.
  *
@@ -22,7 +24,9 @@ export function computeAchievementStats(gamesWithHistory) {
 
     history.forEach((attempt) => {
       categoryCounts[game.category] += 1
-      const day = attempt.date.slice(0, 10)
+      // День за годинником дитини: обрізати ISO-рядок означало б рахувати
+      // добу за Гринвічем, і все зігране після півночі падало б у вчора.
+      const day = localDay(attempt.date)
       allDates.push(day)
       if (attempt.score >= 100) perfectCount += 1
 
@@ -76,6 +80,6 @@ function longestPerfectRun(gamesWithHistory) {
 }
 
 function countToday(dates) {
-  const today = new Date().toISOString().slice(0, 10)
+  const today = localDay()
   return dates.filter((date) => date === today).length
 }

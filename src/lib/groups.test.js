@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { saveResult, getResults } from '../games/engine/storage'
+import { enqueueResult, pendingCount, resetOutboxForTests } from './outbox'
 
 const mocks = vi.hoisted(() => ({
   calls: [],
@@ -7,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   profileRow: null,
   rpcResult: { error: null },
   rpcArgs: null,
+  insertResult: { error: null },
 }))
 
 // Скільки локальних спроб лежить у браузері прямо зараз. Саме це число
@@ -32,6 +34,10 @@ vi.mock('./supabaseClient', () => ({
       },
     },
     from: () => ({
+      insert: async (row) => {
+        mocks.calls.push(`insert:${row.game_id}`)
+        return mocks.insertResult
+      },
       select: () => ({
         eq: () => ({ maybeSingle: async () => ({ data: mocks.profileRow }) }),
       }),
@@ -129,6 +135,65 @@ describe('startFreshStudentSession — передача комп\'ютера', (
 
     expect(mocks.calls).toContain('signIn(localResults=0)')
     expect(countLocalResults()).toBe(0)
+  })
+})
+
+describe('startFreshStudentSession — черга попередньої дитини', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    resetOutboxForTests()
+    mocks.insertResult = { error: null }
+  })
+
+  function queuedAttempt(userId) {
+    enqueueResult(userId, 'stroop', {
+      score: 90,
+      entries: [],
+      levelId: 'classic',
+      date: '2026-09-24T10:00:00.000Z',
+    })
+  }
+
+  /**
+   * Поки сеанс першої дитини ще живий — остання нагода відправити її ігри.
+   * Після виходу RLS не пустить їх ні від кого.
+   */
+  it('відправляє ігри попередньої дитини ще до виходу', async () => {
+    mocks.session = { user: { id: 'child-a', is_anonymous: true } }
+    queuedAttempt('child-a')
+
+    await startFreshStudentSession()
+
+    expect(mocks.calls.slice(0, 2)).toEqual(['insert:stroop', 'signOut'])
+    expect(pendingCount('child-a')).toBe(0)
+  })
+
+  /**
+   * Анонімний акаунт відкрити знову неможливо, тож ці ігри вже ніхто не
+   * відправить. Лежати в браузері спільного комп'ютера їм нема чого.
+   */
+  it('не відправлене анонімною дитиною прибирається з браузера', async () => {
+    mocks.session = { user: { id: 'child-a', is_anonymous: true } }
+    mocks.insertResult = { error: { message: 'Failed to fetch', code: '' } }
+    queuedAttempt('child-a')
+
+    await startFreshStudentSession()
+
+    expect(pendingCount('child-a')).toBe(0)
+  })
+
+  /**
+   * Учитель, що вийшов, увійде знову — і тоді його черга піде. Прибирати її
+   * означало б губити спроби, які ще можна доставити.
+   */
+  it('черга акаунта з поштою лишається до наступного входу', async () => {
+    mocks.session = { user: { id: 'teacher-1', is_anonymous: false } }
+    mocks.insertResult = { error: { message: 'Failed to fetch', code: '' } }
+    queuedAttempt('teacher-1')
+
+    await startFreshStudentSession()
+
+    expect(pendingCount('teacher-1')).toBe(1)
   })
 })
 

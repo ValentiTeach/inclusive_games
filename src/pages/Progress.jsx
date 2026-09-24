@@ -1,13 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Link } from 'react-router-dom'
 import { Flame, Trophy } from 'lucide-react'
 import { GAMES, CATEGORIES } from '../data/games'
 import { CATEGORY_ICONS } from '../data/categoryIcons'
 import { ACHIEVEMENTS, achievementProgress } from '../data/achievements'
-import { getResults } from '../games/engine/storage'
+import { getHistoryOwner, getResults } from '../games/engine/storage'
 import { metricLabel } from '../games/engine/metrics'
 import { highlightMetrics, improvement } from '../lib/progressMetrics'
-import { fetchCloudHistory } from '../lib/cloudSync'
+import { fetchCloudHistory, mergeHistories } from '../lib/cloudSync'
+import {
+  onOutboxChange,
+  outboxSnapshot,
+  pendingCount,
+  pendingResults,
+  unsentText,
+} from '../lib/outbox'
 import { useAuth } from '../lib/authContext'
 import { computeStreak } from '../lib/streak'
 import { computeAchievementStats } from '../lib/achievementStats'
@@ -23,25 +30,71 @@ function average(numbers) {
   return numbers.length ? Math.round(numbers.reduce((sum, n) => sum + n, 0) / numbers.length) : null
 }
 
+/*
+ * Спроби, зіграні на цьому пристрої, — але лише якщо вони справді цього учня.
+ * Позначку власника ставить перенесення історії при вході; поки воно не
+ * відбулося, чужі спроби на спільному комп'ютері показувати не можна.
+ */
+function localHistoryOf(userId) {
+  if (getHistoryOwner() !== userId) return {}
+  return Object.fromEntries(GAMES.map((game) => [game.id, getResults(game.id)]))
+}
+
 function Progress() {
   const { user } = useAuth()
-  const [cloudHistory, setCloudHistory] = useState(null)
+  const userId = user?.id ?? null
+  /*
+   * undefined — ще вантажиться; null — хмара не відповіла (немає мережі чи
+   * сесії); об'єкт — відповідь. Розрізняти останні два важливо: «не вдалося
+   * дізнатися» і «ще нічого не грав» — різні речі, і дитина має бачити саме те,
+   * що сталося.
+   */
+  const [cloudHistory, setCloudHistory] = useState(undefined)
   const [barsVisible, setBarsVisible] = useState(false)
+  // Черга змінилась — сторінка перемальовується: лічильник «ще не надіслано»
+  // має танути в дитини на очах, коли повертається мережа.
+  useSyncExternalStore(onOutboxChange, outboxSnapshot)
 
   useEffect(() => {
-    if (!user) return undefined
+    if (!userId) return undefined
 
+    let cancelled = false
     fetchCloudHistory().then((data) => {
-      setCloudHistory(data)
+      if (!cancelled) setCloudHistory(data)
     })
-  }, [user])
+    return () => {
+      cancelled = true
+    }
+  }, [userId])
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => setBarsVisible(true))
     return () => cancelAnimationFrame(frame)
   }, [])
 
-  const isLoadingCloud = Boolean(user) && cloudHistory === null
+  /*
+   * Для учня, що ввійшов, правда — це хмара. Але хмара знає лише те, що вже
+   * дійшло: гра, зіграна хвилину тому без мережі, лежить у черзі, і без неї
+   * дитина бачила б, як щойно зіграна спроба «пропала». Тож до хмари
+   * додаються спроби цього пристрою й черга; однакова мить гри — одна спроба.
+   *
+   * Локальна історія тут потрібна й тоді, коли мережа є: спроба, що пішла з
+   * черги вже після завантаження хмари, інакше зникла б з екрана до
+   * наступного відкриття сторінки.
+   *
+   * І поки хмара думає, показуємо те, що є на пристрої. Без мережі supabase-js
+   * сам повторює запит тричі з паузами 1, 2 і 4 секунди — сім секунд напису
+   * «Завантажуємо…» над іграми, які вже лежать у браузері.
+   */
+  const onDevice = userId
+    ? mergeHistories(localHistoryOf(userId), pendingResults(userId))
+    : null
+  const signedInHistory = userId ? mergeHistories(cloudHistory ?? {}, onDevice) : null
+
+  const unsent = userId ? pendingCount(userId) : 0
+  const cloudUnavailable = Boolean(userId) && cloudHistory === null
+  const isLoadingCloud =
+    Boolean(userId) && cloudHistory === undefined && Object.keys(onDevice).length === 0
 
   if (isLoadingCloud) {
     return (
@@ -54,13 +107,28 @@ function Progress() {
 
   const gamesWithHistory = GAMES.map((game) => ({
     game,
-    history: user ? cloudHistory?.[game.id] || [] : getResults(game.id),
+    history: userId ? signedInHistory?.[game.id] || [] : getResults(game.id),
   })).filter(({ history }) => history.length > 0)
+
+  /*
+   * Про зв'язок — спокійно і без слова «помилка»: для дитини нічого не
+   * зламалось, її ігри на місці, просто вчитель побачить їх трохи пізніше.
+   */
+  const syncNotice = (cloudUnavailable || unsent > 0) && (
+    <p className="progress-page__sync" role="status">
+      {cloudUnavailable
+        ? 'Немає зв’язку з хмарою — показуємо ігри, зіграні на цьому пристрої.'
+        : null}
+      {cloudUnavailable && unsent > 0 ? ' ' : null}
+      {unsent > 0 ? `${unsentText(unsent)} — вчитель побачить їх, щойно з’явиться інтернет.` : null}
+    </p>
+  )
 
   if (gamesWithHistory.length === 0) {
     return (
       <section className="progress-page">
         <h1>Мій прогрес</h1>
+        {syncNotice}
         <p>
           Ще немає жодної зіграної гри. Зіграй у щось із каталогу — і тут з’явиться статистика.
         </p>
@@ -86,6 +154,7 @@ function Progress() {
   return (
     <section className="progress-page">
       <h1>Мій прогрес</h1>
+      {syncNotice}
 
       <div className="progress-summary">
         <div className="progress-summary__stat">

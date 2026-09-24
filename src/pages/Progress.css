@@ -239,3 +239,14 @@
     transition: none;
   }
 }
+
+/* Про зв'язок — тихо, як примітка, а не як тривога: для дитини нічого не
+   зламалось, ігри на місці, просто вчитель побачить їх трохи пізніше. */
+.progress-page__sync {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}

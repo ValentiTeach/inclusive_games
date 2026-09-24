@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient'
 import { clearAllResults } from '../games/engine/storage'
+import { discardOutbox, settleOutbox } from './outbox'
 
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 const CODE_LENGTH = 6
@@ -219,9 +220,23 @@ export async function getSessionIdentity() {
  * order matters. Those keys are per-browser, and migrateLocalHistoryOnce fires
  * off onAuthStateChange with a flag keyed by user id — so a brand-new account
  * would otherwise upload the previous child's attempts to the cloud as its own.
+ *
+ * The previous child's outbox gets one bounded last chance to go out while their
+ * session still exists: afterwards nobody can send it (RLS only accepts a row
+ * from its owner), so an anonymous owner's leftovers are dropped rather than
+ * left lying in a shared browser. The previous child isn't at the keyboard to
+ * be asked — unlike the handover on the account page, which does ask.
  */
 export async function startFreshStudentSession() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  const previous = session?.user ?? null
+
+  if (previous) await settleOutbox(previous.id)
+
   await supabase.auth.signOut()
+  if (previous?.is_anonymous) discardOutbox(previous.id)
   clearAllResults()
   const { error } = await supabase.auth.signInAnonymously()
   if (error) throw error

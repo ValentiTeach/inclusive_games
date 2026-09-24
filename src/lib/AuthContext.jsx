@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase, isCloudConfigured } from './supabaseClient'
 import { migrateLocalHistoryOnce } from './cloudSync'
+import { flushOutbox, flushWhenOnline } from './outbox'
 import { AuthContext } from './authContext'
 
 export function AuthProvider({ children }) {
@@ -62,7 +63,15 @@ export function AuthProvider({ children }) {
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) {
-        migrateLocalHistoryOnce(session.user.id)
+        const userId = session.user.id
+        /*
+         * Спершу стара історія гостя, потім черга: обидві пишуть у results, і
+         * порядок тут лише для передбачуваності — дублікатів не буде в жодному
+         * разі, їх відкидає унікальний індекс. Невдача перенесення не спиняє
+         * чергу: це дві незалежні доставки. Сама невдача, як і досі, доходить
+         * до журналу падінь як необроблена обіцянка.
+         */
+        migrateLocalHistoryOnce(userId).finally(() => flushOutbox(userId))
         refreshProfile(session.user)
       } else {
         setProfile(null)
@@ -71,6 +80,14 @@ export function AuthProvider({ children }) {
 
     return () => subscription.subscription.unsubscribe()
   }, [refreshProfile])
+
+  /*
+   * Мережа повернулась — відправити те, що назбиралось без неї. Без цього гра,
+   * зіграна офлайн, чекала б наступної гри чи наступного входу, а вчитель
+   * тим часом дивився б на неповну групу.
+   */
+  const userId = user?.id ?? null
+  useEffect(() => flushWhenOnline(userId), [userId])
 
   return (
     <AuthContext.Provider value={{ user, profile, loading, refreshProfile }}>

@@ -9,6 +9,7 @@ import { computeStreak } from '../../lib/streak'
 import { getResults, saveResult, rateLastResult } from './storage'
 import { suggestLevel } from './suggestLevel'
 import { pushResult, pushRating } from '../../lib/cloudSync'
+import { useAuth } from '../../lib/authContext'
 import { playVictory, playClick, startAmbient, stopAmbient } from '../../lib/sound'
 import IntroScreen from './IntroScreen'
 import CountdownScreen from './CountdownScreen'
@@ -43,6 +44,8 @@ const COUNTDOWN_START = 3
 const COUNTDOWN_STEP_MS = 700
 
 function GameShell({ config, renderPlay }) {
+  const { user } = useAuth()
+  const userId = user?.id ?? null
   const [phase, setPhase] = useState('intro')
   const [history, setHistory] = useState(() => getResults(config.id))
   const [levelState, setLevelState] = useState(() =>
@@ -106,7 +109,7 @@ function GameShell({ config, renderPlay }) {
     setFelt(value)
     const updated = rateLastResult(config.id, value)
     setHistory(updated)
-    if (updated[0]) pushRating(config.id, updated[0].date, value)
+    if (updated[0]) pushRating(userId, config.id, updated[0].date, value)
   }
 
   function handleFinish(finishResult) {
@@ -131,7 +134,7 @@ function GameShell({ config, renderPlay }) {
     setIsNewBest(isBest)
     setNewAchievements(unlocked)
     setPhase('results')
-    pushResult(config.id, updated[0])
+    pushResult(userId, config.id, updated[0])
 
     if (isBest || unlocked.length > 0) {
       playVictory()

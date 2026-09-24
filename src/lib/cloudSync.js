@@ -1,5 +1,6 @@
 import { supabase, isCloudConfigured } from './supabaseClient'
 import { GAMES } from '../data/games'
+import { enqueueRating, enqueueResult, flushOutbox, resultRow } from './outbox'
 import {
   clearAllResults,
   getHistoryOwner,
@@ -9,25 +10,31 @@ import {
 
 const SYNCED_KEY_PREFIX = 'inclusive-games:synced:'
 
-export async function pushResult(gameId, attempt) {
-  if (!isCloudConfigured) return
+/**
+ * Спроба учня, що ввійшов, — у хмару через чергу (див. lib/outbox).
+ *
+ * userId приходить від того, хто викликає, а не з getSession: з простроченим
+ * токеном без мережі getSession може не повернути сесію взагалі, і тоді гра,
+ * зіграна саме офлайн, не потрапила б навіть у чергу.
+ */
+export async function pushResult(userId, gameId, attempt) {
+  if (!isCloudConfigured || !userId || !attempt) return
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session) return
+  if (enqueueResult(userId, gameId, attempt)) {
+    await flushOutbox(userId)
+    return
+  }
 
-  await supabase.from('results').insert({
-    user_id: session.user.id,
-    game_id: gameId,
-    score: attempt.score,
-    entries: attempt.entries,
-    // Спроби, зіграні до появи колонки, метрик не мають. null тут читається
-    // так само, як у старих рядках бази: «не міряли».
-    metrics: attempt.metrics ?? null,
-    level_id: attempt.levelId,
-    played_at: attempt.date,
-  })
+  /*
+   * Писати в чергу нікуди — приватне вікно чи переповнене сховище. Тоді як
+   * раніше: один запит, і якщо не вийшло, то не вийшло. Це гірше за чергу, але
+   * не гірше, ніж було до неї.
+   */
+  try {
+    await supabase.from('results').insert({ ...resultRow(gameId, attempt), user_id: userId })
+  } catch {
+    // Мовчки: дитина вже бачить свій результат, помилка мережі їй нічого не дасть.
+  }
 }
 
 /*
@@ -59,21 +66,21 @@ const inFlight = new Map()
 /**
  * Оцінка складності для однієї спроби.
  *
- * Спроба знаходиться за миттю гри: user_id + game_id + played_at — це той самий
- * ключ, на якому стоїть унікальний індекс, тож він завжди вказує рівно на один
- * рядок.
+ * Теж через чергу, і це важливо не лише для офлайну: оцінка правит рядок, який
+ * мусить уже бути в базі. Якщо сама спроба ще в черзі, то оцінка, відправлена
+ * напряму, оновила б нуль рядків і мовчки загубилась би. У черзі вона стоїть
+ * за своєю спробою і не обганяє її.
  *
- * Мовчазна невдача навмисна: дитина натиснула «важко», а мережа підвела — це не
- * привід показувати їй помилку посеред екрана з результатом. Локально оцінка
- * вже збережена, і саме вона впливає на наступний рівень.
+ * Локально оцінка вже збережена, і саме вона впливає на наступний рівень, тож
+ * невдала мережа дитині нічого не ламає — і показувати їй помилку немає сенсу.
  */
-export async function pushRating(gameId, playedAt, felt) {
-  if (!isCloudConfigured) return
+export async function pushRating(userId, gameId, playedAt, felt) {
+  if (!isCloudConfigured || !userId) return
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session) return
+  if (enqueueRating(userId, gameId, playedAt, felt)) {
+    await flushOutbox(userId)
+    return
+  }
 
   try {
     await supabase.rpc('rate_attempt', {
@@ -187,33 +194,74 @@ async function runMigration(userId) {
   writeFlag(flagKey)
 }
 
+/**
+ * Уся хмарна історія учня, згрупована за іграми.
+ *
+ * null означає «не вдалося дізнатися» — немає мережі, сесії чи сервер
+ * відповів помилкою. Це не те саме, що {} («ще нічого не грав»): досі обидва
+ * випадки виглядали однаково, і дитина без мережі читала, що в неї немає
+ * жодної зіграної гри.
+ */
 export async function fetchCloudHistory() {
-  if (!isCloudConfigured) return {}
+  if (!isCloudConfigured) return null
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session) return {}
+  try {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    if (!session) return null
 
-  const { data, error } = await supabase
-    .from('results')
-    .select('game_id, score, entries, metrics, level_id, played_at')
-    .eq('user_id', session.user.id)
-    .order('played_at', { ascending: false })
+    const { data, error } = await supabase
+      .from('results')
+      .select('game_id, score, entries, metrics, level_id, played_at, felt')
+      .eq('user_id', session.user.id)
+      .order('played_at', { ascending: false })
 
-  if (error || !data) return {}
+    if (error || !data) return null
 
-  const byGame = {}
-  data.forEach((row) => {
-    if (!byGame[row.game_id]) byGame[row.game_id] = []
-    byGame[row.game_id].push({
-      score: row.score,
-      entries: row.entries,
-      metrics: row.metrics ?? undefined,
-      levelId: row.level_id,
-      date: row.played_at,
+    const byGame = {}
+    data.forEach((row) => {
+      if (!byGame[row.game_id]) byGame[row.game_id] = []
+      byGame[row.game_id].push({
+        score: row.score,
+        entries: row.entries,
+        metrics: row.metrics ?? undefined,
+        levelId: row.level_id,
+        date: row.played_at,
+        ...(row.felt ? { felt: row.felt } : {}),
+      })
     })
+
+    return byGame
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Хмарна історія плюс те, що ще в дорозі.
+ *
+ * Спроба, яка вже дійшла, але ще й досі в черзі (відповідь сервера загубилась),
+ * не має двоїтися: однакова мить гри — це та сама спроба. Мить порівнюється як
+ * час, а не як рядок: база віддає «+00:00», браузер пише «Z».
+ */
+export function mergeHistories(primary, extra) {
+  const merged = {}
+  const games = new Set([...Object.keys(primary ?? {}), ...Object.keys(extra ?? {})])
+
+  games.forEach((gameId) => {
+    const seen = new Set()
+    const attempts = []
+    ;[...(primary?.[gameId] ?? []), ...(extra?.[gameId] ?? [])].forEach((attempt) => {
+      const moment = Date.parse(attempt.date)
+      const key = Number.isNaN(moment) ? attempt.date : moment
+      if (seen.has(key)) return
+      seen.add(key)
+      attempts.push(attempt)
+    })
+    attempts.sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+    if (attempts.length > 0) merged[gameId] = attempts
   })
 
-  return byGame
+  return merged
 }

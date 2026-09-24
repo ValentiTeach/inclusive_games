@@ -56,6 +56,19 @@
   flex-wrap: wrap;
 }
 
+/* Ігри, які не встигли піти до вчителя. Рамка акцентним кольором, а не
+   червоним: нічого ще не втрачено, це питання, а не помилка. */
+.account__unsent {
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius-lg);
+}
+
+.account__unsent p {
+  margin: 0 0 var(--space-2);
+}
+
 .account__alt {
   margin-top: var(--space-5);
   padding-top: var(--space-4);

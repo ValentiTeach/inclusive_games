@@ -74,10 +74,10 @@ describe('зведення одного показника', () => {
    * і в зрізі зʼявилося б число, яке нічого не означає.
    */
   it('кожен показник зі словника підписів уміє зводитись', () => {
+    // Булеві позначки — «так/ні» про спробу, а не число, яке зводять.
+    const flags = ['reached_target', 'relaxed_pace']
     const labelled = Object.keys(METRIC_LABELS)
-    const missing = labelled.filter(
-      (key) => !(key in METRIC_AGGREGATION) && key !== 'reached_target',
-    )
+    const missing = labelled.filter((key) => !(key in METRIC_AGGREGATION) && !flags.includes(key))
 
     expect(missing, `без способу зведення: ${missing.join(', ')}`).toEqual([])
   })

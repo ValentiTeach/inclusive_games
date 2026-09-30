@@ -1,5 +1,6 @@
 import { pickRandom, shuffle } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
+import { slower } from '../engine/adapt'
 
 /**
  * Зорова робоча пам'ять: що саме зникло з набору.
@@ -25,6 +26,13 @@ export const config = {
     'Обери серед варіантів той, що зник.',
   ],
   keyHint: { keys: '1–4', text: 'вибрати предмет' },
+  practice: {
+    hint: 'Запамʼятай усі предмети. Один зникне — обери, який саме.',
+  },
+  relaxed: {
+    note: 'Предмети видно вдвічі довше, щоб устигнути їх запамʼятати.',
+    level: (level) => ({ ...level, showMs: slower(level.showMs, 2) }),
+  },
   levels: [
     { id: 'four', label: '4 предмети', trialCount: 6, setSize: 4, showMs: 2600 },
     { id: 'six', label: '6 предметів', trialCount: 8, setSize: 6, showMs: 3200 },

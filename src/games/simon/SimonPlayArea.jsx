@@ -40,8 +40,8 @@ function SimonPlayArea({ level, onFinish }) {
           if (cancelled) return
           index += 1
           showStep()
-        }, GAP_MS)
-      }, SHOW_STEP_MS)
+        }, level.gapMs ?? GAP_MS)
+      }, level.stepMs ?? SHOW_STEP_MS)
     }
 
     timeoutId = setTimeout(showStep, START_DELAY_MS)
@@ -50,7 +50,7 @@ function SimonPlayArea({ level, onFinish }) {
       cancelled = true
       clearTimeout(timeoutId)
     }
-  }, [mode, sequence])
+  }, [mode, sequence, level.stepMs, level.gapMs])
 
   function handlePadClick(padId) {
     if (mode !== 'waiting') return

@@ -1,4 +1,5 @@
 import { trialMetrics } from '../engine/metrics'
+import { slower } from '../engine/adapt'
 export const config = {
   id: 'go-no-go',
   title: 'Go / No-Go',
@@ -10,6 +11,16 @@ export const config = {
     'Якщо зʼявився червоний квадрат — не тисни нічого, просто дочекайся наступної фігури.',
   ],
   keyHint: { keys: 'Пробіл', text: 'натиснути на зелене коло' },
+  practice: {
+    hint: 'Зелене коло — тисни. Червоний квадрат — не тисни нічого, просто чекай.',
+    // Шість, а не три: заборонений сигнал випадає рідше, і на трьох фігурах
+    // дитина могла б жодного разу не побачити, що буває, коли треба стриматися.
+    level: (level) => ({ ...level, trialCount: 6 }),
+  },
+  relaxed: {
+    note: 'Фігура стоїть на екрані вдвічі з половиною довше — є час вирішити, тиснути чи ні.',
+    level: (level) => ({ ...level, windowMs: slower(level.windowMs, 2.5) }),
+  },
   levels: [
     { id: 'short', label: '15 фігур', trialCount: 15, windowMs: 1000 },
     { id: 'classic', label: '25 фігур', trialCount: 25, windowMs: 850 },

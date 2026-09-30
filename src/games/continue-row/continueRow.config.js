@@ -23,6 +23,9 @@ export const config = {
     'Обери серед варіантів фігуру, яка продовжує ряд.',
   ],
   keyHint: { keys: '1–4', text: 'вибрати фігуру' },
+  practice: {
+    hint: 'Подивись, як чергуються фігури в ряду. Обери ту, що має стояти наступною.',
+  },
   levels: [
     { id: 'easy', label: 'Чергування', trialCount: 6, rules: ['color-cycle', 'shape-cycle'], length: 5 },
     {

@@ -91,7 +91,10 @@ function SchultePlayArea({ level, onFinish }) {
           Шукай: <strong>{target}</strong> з {total}
           {typed && <span className="schulte__typed">набрано: {typed}</span>}
         </span>
-        <span className="schulte__timer">{seconds} с</span>
+        {/* Без поспіху секундомір не показується: цифри, що біжать, — це той
+            самий тиск часу, від якого цей темп і звільняє. Час однаково
+            міряється — для вчителя. */}
+        {!level.relaxed && <span className="schulte__timer">{seconds} с</span>}
       </div>
       <div
         className="schulte__grid"

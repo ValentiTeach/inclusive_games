@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { getSettings, saveSettings, applySettings } from '../lib/settings'
+import { isSpeechSupported, speak, useUkrainianVoice } from '../lib/speech'
 import './Settings.css'
 
 function Settings() {
   const [settings, setSettings] = useState(() => getSettings())
+  const voice = useUkrainianVoice()
 
   function update(patch) {
     const next = { ...settings, ...patch }
@@ -44,6 +46,86 @@ function Settings() {
               }
               onClick={() => update({ sound: value })}
               aria-pressed={settings.sound === value}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/*
+        Окремо від звуку: «Тихо» знімає сигнали й музику, але дитині, яка не
+        читає, голос інструкції потрібен і в тиші.
+      */}
+      <div className="settings__row settings__row--stacked">
+        <div>
+          <h2>Озвучення інструкцій</h2>
+          <p>
+            Голос пристрою читає опис гри і підказки пробної гри. «Автоматично» —
+            читає сам, щойно відкрито гру; «На кнопку» — лише після «Послухати».
+          </p>
+          {voice ? (
+            <button
+              type="button"
+              className="settings__option settings__voice-test"
+              onClick={() => speak('Привіт! Так звучатимуть інструкції до ігор.')}
+            >
+              Перевірити голос
+            </button>
+          ) : (
+            <p className="settings__voice-missing" role="status">
+              {isSpeechSupported()
+                ? 'На цьому пристрої немає українського голосу, тож озвучення не працюватиме. Його можна додати в налаштуваннях системи: Windows — «Час і мова → Мовлення», Android — «Синтез мовлення» (Google), iPhone і iPad — «Універсальний доступ → Усний контент → Голоси».'
+                : 'Цей браузер не вміє озвучувати текст.'}
+            </p>
+          )}
+        </div>
+        <div className="settings__options">
+          {[
+            ['off', 'Не озвучувати'],
+            ['button', 'На кнопку'],
+            ['auto', 'Автоматично'],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={
+                settings.voice === value ? 'settings__option is-active' : 'settings__option'
+              }
+              onClick={() => update({ voice: value })}
+              aria-pressed={settings.voice === value}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/*
+        Для дитини з повільним темпом чи моторними труднощами звичайний таймер
+        міряє руку, а не увагу. Те саме перемикається й просто перед грою.
+      */}
+      <div className="settings__row">
+        <div>
+          <h2>Темп ігор</h2>
+          <p>
+            «Без поспіху» — довше показ і ширше вікно для відповіді, а бал не
+            знижується за час. Такі спроби позначаються у звіті вчителя.
+          </p>
+        </div>
+        <div className="settings__options">
+          {[
+            ['normal', 'Звичайний темп'],
+            ['relaxed', 'Без поспіху'],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={
+                settings.pace === value ? 'settings__option is-active' : 'settings__option'
+              }
+              onClick={() => update({ pace: value })}
+              aria-pressed={settings.pace === value}
             >
               {label}
             </button>

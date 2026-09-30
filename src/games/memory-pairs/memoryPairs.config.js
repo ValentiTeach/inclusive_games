@@ -28,6 +28,10 @@ export const config = {
     'Якщо фігури різні, обидві картки перевернуться назад. Запамʼятовуй, де що лежить.',
   ],
   keyHint: { keys: '← ↑ ↓ → та Enter', text: 'вибрати картку' },
+  practice: {
+    hint: 'Відкривай по дві картки. Однакові лишаються відкритими. Різні закриються — запамʼятай, де вони лежать.',
+    level: (level) => ({ ...level, pairs: 3, columns: 3 }),
+  },
   levels: [
     { id: 'small', label: '6 пар', pairs: 6, columns: 4 },
     { id: 'classic', label: '8 пар', pairs: 8, columns: 4 },

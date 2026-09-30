@@ -348,3 +348,89 @@
   text-align: center;
   color: var(--text-muted);
 }
+
+/* ─── Озвучення, темп і пробна гра ─── */
+
+.game-shell__speak {
+  margin: 0 0 var(--space-5);
+}
+
+.game-shell__pace {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.game-shell__pace-toggle {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+/* Увімкнений стан видно не лише кольором: галочка перед словом читається і
+   тим, хто не розрізняє відтінків. */
+.game-shell__pace-toggle.is-on {
+  border-color: var(--accent);
+  background: var(--surface-muted);
+  color: var(--accent-strong);
+}
+
+.game-shell__pace-toggle.is-on::before {
+  content: '✓ ';
+}
+
+.game-shell__pace-note {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.game-shell__start {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.game-shell__practice-offer {
+  margin: var(--space-3) 0 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.game-shell__practice {
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.game-shell__practice-title {
+  margin: 0 0 var(--space-1);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.game-shell__practice-title strong {
+  color: var(--accent-strong);
+}
+
+.game-shell__practice-hint {
+  margin: 0 0 var(--space-3);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.game-shell__practice-done {
+  text-align: center;
+}

@@ -12,6 +12,9 @@ export const config = {
     'Що швидше й точніше вирішуєш приклади — то кращий результат.',
   ],
   keyHint: { keys: '1–4', text: 'вибрати відповідь' },
+  practice: {
+    hint: 'Розвʼяжи приклад і натисни правильну відповідь.',
+  },
   levels: [
     { id: 'easy', label: 'Легкий (+ −, до 20)', trialCount: 10, maxValue: 20, operations: ['+', '-'] },
     {

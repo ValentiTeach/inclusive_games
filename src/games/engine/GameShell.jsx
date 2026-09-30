@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { LogOut } from 'lucide-react'
 import Badge from '../../components/ui/Badge'
 import { CATEGORIES, GAMES } from '../../data/games'
@@ -10,10 +10,14 @@ import { getResults, saveResult, rateLastResult } from './storage'
 import { suggestLevel } from './suggestLevel'
 import { pushResult, pushRating } from '../../lib/cloudSync'
 import { playVictory, playClick, startAmbient, stopAmbient } from '../../lib/sound'
+import { getSettings, updateSettings } from '../../lib/settings'
+import { paceLevel, paceResult, practiceHint, practiceLevel } from './adapt'
 import IntroScreen from './IntroScreen'
 import CountdownScreen from './CountdownScreen'
 import ResultsScreen from './ResultsScreen'
 import KeyHint from './KeyHint'
+import PracticeBanner from './PracticeBanner'
+import PracticeDoneScreen from './PracticeDoneScreen'
 import './GameShell.css'
 
 function achievementStatsExcluding(gameId, overrideHistory) {
@@ -54,8 +58,23 @@ function GameShell({ config, renderPlay }) {
   const [newAchievements, setNewAchievements] = useState([])
   const [felt, setFelt] = useState(null)
   const [leaving, setLeaving] = useState(false)
+  const [pace, setPace] = useState(() => getSettings().pace)
+  // Пробна гра — та сама гра на скороченому рівні, тож окремої фази «гри» для
+  // неї немає: є лише позначка, чим закінчиться ця гра.
+  const [practice, setPractice] = useState(false)
+  const [practiceResult, setPracticeResult] = useState(null)
 
-  const level = config.levels.find((item) => item.id === levelState.levelId)
+  /*
+   * Рівень, який отримує поле, — перетворений: темп і пробна гра. Мемоізація тут
+   * не для швидкості: поле генерує пробу з `useMemo` за рівнем, і новий об'єкт
+   * на кожен рендер оболонки (скажімо, коли відкрилось питання про вихід)
+   * перемішав би таблицю Шульте просто посеред гри.
+   */
+  const level = useMemo(() => {
+    const base = config.levels.find((item) => item.id === levelState.levelId)
+    const paced = paceLevel(config, base, pace)
+    return practice ? practiceLevel(config, paced) : paced
+  }, [config, levelState.levelId, pace, practice])
   const categoryInfo = CATEGORIES[config.category]
 
   useEffect(() => {
@@ -92,8 +111,26 @@ function GameShell({ config, renderPlay }) {
   }
 
   function handleStart() {
+    setPractice(false)
     setCountdown(COUNTDOWN_START)
     setPhase('countdown')
+  }
+
+  /*
+   * Пробна гра. Досі перша спроба одразу йшла в залік, а для дитини з
+   * особливими освітніми потребами вона часто міряє, чи зрозуміла вона
+   * інструкцію, а не саму навичку. Гірше: цей бал потім добирав рівень.
+   */
+  function handlePractice() {
+    setPractice(true)
+    setPracticeResult(null)
+    setCountdown(COUNTDOWN_START)
+    setPhase('countdown')
+  }
+
+  function handlePaceChange(next) {
+    updateSettings({ pace: next })
+    setPace(next)
   }
 
   /*
@@ -109,12 +146,22 @@ function GameShell({ config, renderPlay }) {
     if (updated[0]) pushRating(config.id, updated[0].date, value)
   }
 
-  function handleFinish(finishResult) {
-    setResult(finishResult)
-    setFelt(null)
+  function handleFinish(rawResult) {
     // Гра могла дограти, поки дитина думала над питанням про вихід: лишити
     // його поверх результату означало б питати про те, чого вже немає.
     setLeaving(false)
+
+    // Пробна гра нікуди не пишеться: ні в історію, ні в хмару, ні в досягнення,
+    // ні в добір рівня. Вона для того, щоб зрозуміти правило, а не для заліку.
+    if (practice) {
+      setPracticeResult(rawResult)
+      setPhase('practice-done')
+      return
+    }
+
+    const finishResult = paceResult(config, rawResult, pace)
+    setResult(finishResult)
+    setFelt(null)
 
     const previousBest = history.length ? Math.max(...history.map((entry) => entry.score)) : null
     const statsBefore = achievementStatsExcluding(config.id, history)
@@ -156,7 +203,8 @@ function GameShell({ config, renderPlay }) {
    */
   function handleLeaveRequest() {
     playClick()
-    if (phase === 'countdown') {
+    // У пробній грі нічого не втрачається, тож і питати нема про що.
+    if (phase === 'countdown' || practice) {
       leaveNow()
       return
     }
@@ -165,6 +213,8 @@ function GameShell({ config, renderPlay }) {
 
   function leaveNow() {
     setLeaving(false)
+    setPractice(false)
+    setPracticeResult(null)
     setResult(null)
     setIsNewBest(false)
     setNewAchievements([])
@@ -188,13 +238,13 @@ function GameShell({ config, renderPlay }) {
         setLeaving(false)
         return
       }
-      if (phase === 'countdown') leaveNow()
+      if (phase === 'countdown' || practice) leaveNow()
       else setLeaving(true)
     }
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [inPlay, leaving, phase])
+  }, [inPlay, leaving, phase, practice])
 
   return (
     <div className="game-shell">
@@ -244,9 +294,16 @@ function GameShell({ config, renderPlay }) {
           isAutoSuggested={levelState.isAutoSuggested}
           onLevelChange={handleLevelChange}
           onStart={handleStart}
+          onPractice={handlePractice}
+          pace={pace}
+          onPaceChange={handlePaceChange}
           history={history}
         />
       )}
+
+      {/* Над відліком і над грою — один і той самий елемент, тож підказка,
+          яку почали читати під час відліку, не обривається на старті. */}
+      {practice && inPlay && <PracticeBanner hint={practiceHint(config, level)} />}
 
       {phase === 'countdown' && <CountdownScreen value={countdown} />}
 
@@ -255,6 +312,15 @@ function GameShell({ config, renderPlay }) {
           {renderPlay(level, handleFinish)}
           <KeyHint hint={config.keyHint} />
         </>
+      )}
+
+      {phase === 'practice-done' && practiceResult && (
+        <PracticeDoneScreen
+          entries={practiceResult.entries}
+          onStart={handleStart}
+          onPracticeAgain={handlePractice}
+          onBack={leaveNow}
+        />
       )}
 
       {phase === 'results' && result && (

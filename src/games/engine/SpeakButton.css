@@ -1,0 +1,21 @@
+.speak-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--accent-strong);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.speak-button:hover,
+.speak-button[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--surface-muted);
+}

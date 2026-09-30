@@ -1,5 +1,6 @@
 import { pickRandom } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
+import { slower } from '../engine/adapt'
 
 const LETTERS = ['Б', 'Г', 'Д', 'Ж', 'К', 'Л', 'П', 'Р']
 const MATCH_RATE = 0.35
@@ -15,6 +16,19 @@ export const config = {
     'Якщо не збігається — просто чекай наступну, нічого не тискай.',
   ],
   keyHint: { keys: 'Пробіл', text: 'позначити збіг' },
+  practice: {
+    hint: (level) =>
+      level.n === 1
+        ? 'Тисни, коли літера така сама, як попередня. Якщо інша — нічого не тисни.'
+        : `Тисни, коли літера така сама, як ${level.n} літери тому. Якщо інша — нічого не тисни.`,
+    // Перші N літер не мають із чим порівнюватися, тож проб має бути помітно
+    // більше за N, інакше пробна гра скінчиться, не давши жодного збігу.
+    level: (level) => ({ ...level, trialCount: level.n + 6 }),
+  },
+  relaxed: {
+    note: 'Кожна літера показується майже вдвічі довше.',
+    level: (level) => ({ ...level, stimulusMs: slower(level.stimulusMs, 1.75) }),
+  },
   levels: [
     { id: 'one-back', label: '1-back', n: 1, trialCount: 20, stimulusMs: 2200 },
     { id: 'two-back', label: '2-back', n: 2, trialCount: 24, stimulusMs: 2000 },

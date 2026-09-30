@@ -16,6 +16,9 @@ export const config = {
     'Знайди правило й обери правильний варіант для клітинки зі знаком питання.',
   ],
   keyHint: { keys: '1–4', text: 'вибрати фігуру' },
+  practice: {
+    hint: 'Подивись, як фігури змінюються в рядках і стовпцях. Обери ту, що має стояти в порожній клітинці.',
+  },
   levels: [
     { id: 'easy', label: 'Легкий', trialCount: 6, templates: ['color-shift', 'size-progress'] },
     {

@@ -1,6 +1,7 @@
 import { randomInt } from '../engine/random'
 import { defineMetrics } from '../engine/metrics'
 import { clampScore } from '../engine/score'
+import { slower } from '../engine/adapt'
 
 /**
  * Обсяг пам'яті на цифри — вправа зі шкільних і клінічних батарей.
@@ -25,6 +26,21 @@ export const config = {
     'На рівні «Назад» ряд треба повторити з кінця.',
   ],
   keyHint: { keys: 'Цифри', text: 'набрати ряд, Enter — підтвердити' },
+  practice: {
+    hint: (level) =>
+      level.direction === 'forward'
+        ? 'Запамʼятай цифри і набери їх у тому самому порядку.'
+        : level.direction === 'backward'
+          ? 'Запамʼятай цифри і набери їх задом наперед — з останньої до першої.'
+          : 'Дивись на підказку над рядом: іноді набирати треба в тому самому порядку, іноді — задом наперед.',
+    // Два ряди, і на цьому все: після першого правильного довжина росте на
+    // одиницю, а на ній пробна гра вже впирається в стелю.
+    level: (level) => ({ ...level, maxLength: level.startLength + 1 }),
+  },
+  relaxed: {
+    note: 'Кожну цифру видно довше.',
+    level: (level) => ({ ...level, digitMs: slower(DIGIT_MS, 1.6) }),
+  },
   levels: [
     { id: 'forward', label: 'Вперед', direction: 'forward', startLength: 3, maxLength: 9 },
     { id: 'backward', label: 'Назад', direction: 'backward', startLength: 2, maxLength: 8 },

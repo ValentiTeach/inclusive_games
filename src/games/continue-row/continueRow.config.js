@@ -1,5 +1,6 @@
 import { pickRandom, shuffle } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
+import { gameInfo } from '../../data/games'
 
 /**
  * Продовж ряд: знайти правило послідовності й назвати наступний елемент.
@@ -13,10 +14,7 @@ const COLORS = ['#2d6bd6', '#2e8b57', '#c8862b', '#7c5cd9', '#c0392b', '#1c9099'
 const SIZES = [22, 30, 38, 46]
 
 export const config = {
-  id: 'continue-row',
-  title: 'Продовж ряд',
-  category: 'thinking',
-  description: 'Фігури стоять за правилом — обери ту, що має бути наступною.',
+  ...gameInfo('continue-row'),
   instructions: [
     'Подивись на ряд і знайди, за яким правилом він побудований.',
     'Це може бути чергування кольорів, форм або зростання розміру.',

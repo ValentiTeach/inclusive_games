@@ -1,5 +1,6 @@
 import { pickRandom, shuffle } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
+import { gameInfo } from '../../data/games'
 
 /**
  * Зайвий предмет: три фігури мають спільну ознаку, четверта — ні.
@@ -21,10 +22,7 @@ const SIZES = [22, 30, 38, 46]
 export const DIMENSIONS = ['shape', 'color', 'size']
 
 export const config = {
-  id: 'odd-one-out',
-  title: 'Зайвий предмет',
-  category: 'thinking',
-  description: 'Три фігури схожі за однією ознакою, а одна — ні. Знайди зайву.',
+  ...gameInfo('odd-one-out'),
   instructions: [
     'На екрані чотири фігури.',
     'Три з них мають спільну ознаку: форму, колір або розмір.',

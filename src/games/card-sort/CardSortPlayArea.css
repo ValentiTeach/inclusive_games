@@ -1,0 +1,83 @@
+.card-sort {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.card-sort__progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.card-sort__rule {
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  text-align: center;
+  color: var(--text);
+  border-radius: var(--radius-pill);
+  background: var(--surface-muted);
+}
+
+.card-sort__rule.is-new {
+  color: var(--cat-attention);
+  background: var(--cat-attention-bg);
+  outline: 2px solid var(--cat-attention);
+}
+
+.card-sort__card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 170px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  transition: opacity 0.2s ease;
+}
+
+/* Рамка — товста й подвійна, щоб її не можна було сплутати зі звичайним
+   контуром картки. */
+.card-sort__card.has-border {
+  border: 8px double var(--text);
+}
+
+.card-sort__card.is-right {
+  box-shadow: 0 0 0 4px var(--cat-speech);
+}
+
+.card-sort__card.is-wrong {
+  box-shadow: 0 0 0 4px var(--cat-reaction);
+}
+
+.card-sort__card.is-waiting {
+  opacity: 0.35;
+}
+
+.card-sort__targets {
+  display: flex;
+  gap: var(--space-5);
+}
+
+.card-sort__target {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 128px;
+  height: 104px;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  border: 2px solid var(--border);
+  border-top-width: 6px;
+  background: var(--surface-muted);
+  cursor: pointer;
+}
+
+.card-sort__target:hover {
+  border-color: var(--accent);
+}

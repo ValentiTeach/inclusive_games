@@ -1,6 +1,7 @@
 import { shuffle } from '../engine/random'
 import { clampScore } from '../engine/score'
 import { defineMetrics } from '../engine/metrics'
+import { gameInfo } from '../../data/games'
 
 export const SYMBOLS = [
   { id: 'circle-blue', shape: 'circle', color: '#2d6bd6' },
@@ -18,10 +19,7 @@ export const SYMBOLS = [
 ]
 
 export const config = {
-  id: 'memory-pairs',
-  title: 'Знайди пару',
-  category: 'memory',
-  description: 'Відкривай картки по дві й запам’ятовуй, де яка фігура — знайди всі пари.',
+  ...gameInfo('memory-pairs'),
   instructions: [
     'Натисни на картку, щоб перевернути її.',
     'Відкрий другу картку — якщо фігури однакові, пара залишиться відкритою.',

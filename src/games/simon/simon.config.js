@@ -1,6 +1,7 @@
 import { pickRandom } from '../engine/random'
 import { clampScore } from '../engine/score'
 import { defineMetrics } from '../engine/metrics'
+import { gameInfo } from '../../data/games'
 
 export const PADS = [
   { id: 'red', label: 'Червона', hex: '#c0392b' },
@@ -10,10 +11,7 @@ export const PADS = [
 ]
 
 export const config = {
-  id: 'simon',
-  title: 'Simon / Корсі',
-  category: 'memory',
-  description: 'Запам’ятай і повтори послідовність спалахів — щоразу вона стає на крок довшою.',
+  ...gameInfo('simon'),
   instructions: [
     'Дивись, які кнопки спалахують по черзі.',
     'Коли показ закінчиться, повтори послідовність у тому самому порядку.',

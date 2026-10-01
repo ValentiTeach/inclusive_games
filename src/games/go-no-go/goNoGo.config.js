@@ -1,10 +1,8 @@
 import { trialMetrics } from '../engine/metrics'
 import { slower } from '../engine/adapt'
+import { gameInfo } from '../../data/games'
 export const config = {
-  id: 'go-no-go',
-  title: 'Go / No-Go',
-  category: 'attention',
-  description: 'Тисни на зелене коло, але стримайся, якщо з’явиться червоний квадрат.',
+  ...gameInfo('go-no-go'),
   instructions: [
     'На екрані по черзі з’являтимуться фігури.',
     'Тисни на кнопку, тільки коли бачиш зелене коло.',

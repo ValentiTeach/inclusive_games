@@ -21,6 +21,7 @@ const PAGE_LOADERS = {
   Join: () => import('./pages/Join'),
   Login: () => import('./pages/Login'),
   Admin: () => import('./pages/Admin'),
+  Privacy: () => import('./pages/Privacy'),
   NotFound: () => import('./pages/NotFound'),
 }
 

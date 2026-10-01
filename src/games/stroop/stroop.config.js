@@ -1,5 +1,6 @@
 import { pickRandom } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
+import { gameInfo } from '../../data/games'
 
 export const COLORS = [
   { id: 'red', label: 'Червоний', hex: '#c0392b' },
@@ -9,10 +10,7 @@ export const COLORS = [
 ]
 
 export const config = {
-  id: 'stroop',
-  title: 'Тест Струпа',
-  category: 'attention',
-  description: 'Обери колір, яким написано слово, — а не те, що воно означає.',
+  ...gameInfo('stroop'),
   instructions: [
     'На екрані зʼявиться слово-назва кольору, написане певним кольором шрифту.',
     'Натисни кнопку з кольором шрифту слова, а не з тим кольором, який слово називає.',

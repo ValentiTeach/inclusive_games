@@ -1,11 +1,9 @@
 import { clampScore } from '../engine/score'
 import { timingMetrics } from '../engine/metrics'
+import { gameInfo } from '../../data/games'
 
 export const config = {
-  id: 'reaction-time',
-  title: 'Швидкість реакції',
-  category: 'reaction',
-  description: 'Натисни, щойно екран стане зеленим. Не поспішай — передчасний клік не рахується.',
+  ...gameInfo('reaction-time'),
   instructions: [
     'Чекай, поки з’явиться зелений сигнал «Тисни!».',
     'Натисни на нього якомога швидше.',

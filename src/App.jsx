@@ -27,6 +27,7 @@ const {
   Join,
   Login,
   Admin,
+  Privacy,
   NotFound,
 } = PAGES
 
@@ -53,6 +54,7 @@ function App() {
             <Route path="/groups" element={<Groups />} />
             <Route path="/groups/:groupId" element={<GroupDetail />} />
             <Route path="/join" element={<Join />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

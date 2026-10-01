@@ -2,6 +2,7 @@ import { randomInt } from '../engine/random'
 import { defineMetrics } from '../engine/metrics'
 import { clampScore } from '../engine/score'
 import { slower } from '../engine/adapt'
+import { gameInfo } from '../../data/games'
 
 /**
  * Обсяг пам'яті на цифри — вправа зі шкільних і клінічних батарей.
@@ -16,10 +17,7 @@ import { slower } from '../engine/adapt'
  * і «назад» — те, на що дивляться насамперед.
  */
 export const config = {
-  id: 'digit-span',
-  title: 'Послідовність цифр',
-  category: 'memory',
-  description: 'Запам’ятай ряд цифр і повтори його — у тому самому або у зворотному порядку.',
+  ...gameInfo('digit-span'),
   instructions: [
     'Цифри з’являються по одній — запам’ятовуй їх.',
     'Потім набери той самий ряд: на клавіатурі або кнопками на екрані.',

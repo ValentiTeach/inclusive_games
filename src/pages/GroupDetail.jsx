@@ -12,10 +12,17 @@ import {
   Copy,
   UserRoundPlus,
   Printer,
+  Trash2,
 } from 'lucide-react'
 import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
-import { getGroupDetails, renameStudent, removeStudentFromGroup } from '../lib/groups'
+import {
+  DeletionUnavailableError,
+  deleteStudentForever,
+  getGroupDetails,
+  renameStudent,
+  removeStudentFromGroup,
+} from '../lib/groups'
 import { buildGroupCsv, csvFileName, downloadCsv } from '../lib/csv'
 import ParentAccess from '../components/teacher/ParentAccess'
 import GameBreakdown from '../components/teacher/GameBreakdown'
@@ -107,6 +114,33 @@ function GroupDetail() {
       await reload()
     } catch {
       setActionError('Не вдалося прибрати учня. Спробуй ще раз.')
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  /*
+   * Видалення на запит батьків. Окремо від «Прибрати»: прибрана дитина зберігає
+   * все й може повернутися, а тут зникає назавжди. Тому й питання інше — без
+   * жодного «збережуться».
+   */
+  async function handleDelete(student) {
+    const confirmed = window.confirm(
+      `Видалити «${student.displayName}» назавжди? Зникнуть усі результати, доступ батьків і обліковий запис дитини. Скасувати це неможливо.`,
+    )
+    if (!confirmed) return
+
+    setBusyId(student.id)
+    setActionError(null)
+    try {
+      await deleteStudentForever(student.id)
+      await reload()
+    } catch (error) {
+      setActionError(
+        error instanceof DeletionUnavailableError
+          ? 'Видалення ще не ввімкнене на сервері: адміністраторові треба застосувати міграцію 20261001_delete_student_data.sql.'
+          : 'Не вдалося видалити дані учня. Спробуй ще раз.',
+      )
     } finally {
       setBusyId(null)
     }
@@ -386,6 +420,15 @@ function GroupDetail() {
                             onClick={() => handleRemove(student)}
                           >
                             <UserMinus size={16} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            className="group-detail__icon-btn group-detail__icon-btn--danger"
+                            aria-label={`Видалити дані ${student.displayName} назавжди`}
+                            disabled={busyId === student.id}
+                            onClick={() => handleDelete(student)}
+                          >
+                            <Trash2 size={16} aria-hidden="true" />
                           </button>
                         </>
                       )}

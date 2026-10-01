@@ -114,6 +114,15 @@ export const METRIC_LABELS = {
   set_size: 'Предметів у наборі',
   target_length: 'Ціль рівня',
   reached_target: 'Ціль досягнута',
+  switch_trials: 'Проб після зміни правила',
+  switch_errors: 'Помилок одразу після зміни',
+  perseverations: 'Помилок за старим правилом',
+  rhythm_error_pct: 'Сер. відхилення ритму, %',
+  estimate_error_pct: 'Сер. похибка, % прямої',
+  inside_pct: 'У межах доріжки, % часу',
+  exits: 'Виходів за край',
+  rule_breaks: 'Порушень правила',
+  planning_ms: 'Обдумування до 1-го ходу, мс',
   relaxed_pace: 'Без поспіху',
 }
 
@@ -167,6 +176,15 @@ export const METRIC_AGGREGATION = {
   avg_offset_pct: 'mean',
   best_offset_pct: 'min',
   target_length: 'max',
+  switch_trials: 'sum',
+  switch_errors: 'sum',
+  perseverations: 'sum',
+  rhythm_error_pct: 'mean',
+  estimate_error_pct: 'mean',
+  inside_pct: 'mean',
+  exits: 'sum',
+  rule_breaks: 'sum',
+  planning_ms: 'mean',
 }
 
 /**

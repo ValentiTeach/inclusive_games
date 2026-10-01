@@ -1,12 +1,10 @@
 import { randomInt, shuffle } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
 import { slower } from '../engine/adapt'
+import { gameInfo } from '../../data/games'
 
 export const config = {
-  id: 'subitizing',
-  title: 'Субітизація',
-  category: 'attention',
-  description: 'За частку секунди оціни, скільки крапок з’явилось на екрані.',
+  ...gameInfo('subitizing'),
   instructions: [
     'На мить з’являться крапки — рахувати їх не встигнеш, лише оцінити «на око».',
     'Обери правильну кількість серед варіантів відповіді.',

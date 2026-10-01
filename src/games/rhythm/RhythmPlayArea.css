@@ -1,0 +1,97 @@
+.rhythm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.rhythm__progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.rhythm__note {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.rhythm__status {
+  margin: 0;
+  min-height: 1.6em;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.rhythm__lamp {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--cat-speech);
+  transition: background 0.08s ease;
+}
+
+.rhythm__lamp.is-on {
+  background: var(--cat-speech);
+  border-color: var(--cat-speech);
+}
+
+.rhythm__lamp.is-listening {
+  border-color: var(--cat-speech);
+}
+
+.rhythm__lamp.is-right {
+  border-color: var(--cat-speech);
+  box-shadow: 0 0 0 6px var(--cat-speech-bg);
+}
+
+.rhythm__lamp.is-wrong {
+  border-color: var(--cat-reaction);
+  box-shadow: 0 0 0 6px var(--cat-reaction-bg);
+}
+
+.rhythm__taps {
+  display: flex;
+  gap: var(--space-2);
+  min-height: 14px;
+}
+
+.rhythm__tap-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--cat-speech);
+}
+
+.rhythm__drum {
+  width: 180px;
+  height: 120px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface);
+  border: 3px solid var(--cat-speech);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.rhythm__drum:active {
+  background: var(--cat-speech-bg);
+}
+
+.rhythm__drum[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: default;
+}

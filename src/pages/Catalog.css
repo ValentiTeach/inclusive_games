@@ -100,6 +100,16 @@
   border-color: var(--cat-reaction);
 }
 
+.catalog-filter--speech.is-active {
+  background: color-mix(in srgb, var(--cat-speech) 14%, var(--surface));
+  border-color: var(--cat-speech);
+}
+
+.catalog-filter--space.is-active {
+  background: color-mix(in srgb, var(--cat-space) 14%, var(--surface));
+  border-color: var(--cat-space);
+}
+
 /* Колір категорії лишається там, де він нічого не мусить нести — в іконці. */
 .catalog-filter--attention.is-active svg {
   color: var(--cat-attention);
@@ -115,6 +125,14 @@
 
 .catalog-filter--reaction.is-active svg {
   color: var(--cat-reaction);
+}
+
+.catalog-filter--speech.is-active svg {
+  color: var(--cat-speech);
+}
+
+.catalog-filter--space.is-active svg {
+  color: var(--cat-space);
 }
 
 @media (pointer: coarse) {

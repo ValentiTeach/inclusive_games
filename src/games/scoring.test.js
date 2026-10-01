@@ -18,6 +18,16 @@ import { scoring as whatVanished } from './what-vanished/whatVanished.config'
 import { scoring as digitSpan } from './digit-span/digitSpan.config'
 import { scoring as oddOneOut } from './odd-one-out/oddOneOut.config'
 import { scoring as continueRow } from './continue-row/continueRow.config'
+import { scoring as dayNight } from './day-night/dayNight.config'
+import { scoring as cardSort } from './card-sort/cardSort.config'
+import { scoring as rhythm } from './rhythm/rhythm.config'
+import { scoring as firstSound } from './first-sound/firstSound.config'
+import { scoring as wordGroups } from './word-groups/wordGroups.config'
+import { scoring as graphicDictation } from './graphic-dictation/graphicDictation.config'
+import { scoring as tracePath } from './trace-path/tracePath.config'
+import { scoring as tower } from './tower/tower.config'
+import { scoring as numberLine } from './number-line/numberLine.config'
+import { scoring as emotions } from './emotions/emotions.config'
 import { GAME_REGISTRY } from './registry'
 
 // 3 правильні з 4, часи 400/600/500/300 — точність 75%, середнє 450, найкраще 300.
@@ -96,6 +106,59 @@ const SCENARIOS = [
   },
   { id: 'odd-one-out', run: () => oddOneOut(TRIALS) },
   { id: 'continue-row', run: () => continueRow(TRIALS) },
+  { id: 'day-night', run: () => dayNight(TRIALS) },
+  {
+    id: 'card-sort',
+    run: () =>
+      cardSort([
+        { correct: true, rule: 'color', switched: false, afterSwitch: false, reactionTimeMs: 700 },
+        { correct: true, rule: 'color', switched: false, afterSwitch: false, reactionTimeMs: 650 },
+        { correct: false, rule: 'shape', switched: true, afterSwitch: true, reactionTimeMs: 900 },
+        { correct: true, rule: 'shape', switched: false, afterSwitch: true, reactionTimeMs: 800 },
+      ]),
+  },
+  {
+    id: 'rhythm',
+    run: () =>
+      rhythm([
+        { correct: true, errorPct: 12 },
+        { correct: false, errorPct: 48 },
+        { correct: false, errorPct: undefined },
+      ]),
+  },
+  { id: 'first-sound', run: () => firstSound(TRIALS) },
+  { id: 'word-groups', run: () => wordGroups(TRIALS) },
+  { id: 'graphic-dictation', run: () => graphicDictation({ steps: 20, errors: 3, elapsedMs: 41_000 }) },
+  {
+    id: 'trace-path',
+    run: () =>
+      tracePath(
+        [
+          { insideMs: 9000, outsideMs: 1000, exits: 2 },
+          { insideMs: 7000, outsideMs: 3000, exits: 4 },
+        ],
+        24_000,
+      ),
+  },
+  {
+    id: 'tower',
+    run: () =>
+      tower([
+        { solved: true, moves: 3, minMoves: 3, planningMs: 4200, ruleBreaks: 0 },
+        { solved: true, moves: 6, minMoves: 4, planningMs: 1500, ruleBreaks: 1 },
+        { solved: false, moves: 10, minMoves: 4, planningMs: 900, ruleBreaks: 2 },
+      ]),
+  },
+  {
+    id: 'number-line',
+    run: () =>
+      numberLine([
+        { correct: true, errorPct: 2 },
+        { correct: false, errorPct: 11 },
+        { correct: true, errorPct: 4.5 },
+      ]),
+  },
+  { id: 'emotions', run: () => emotions(TRIALS) },
   {
     id: 'keyboard-trainer',
     run: () =>

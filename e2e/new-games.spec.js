@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { signInAsTeacher } from './support/teacher'
+import { GAMES as CATALOG } from '../src/data/games.js'
 
 /*
  * Десять ігор нових напрямів — у справжньому браузері, з тим самим підмінним
@@ -131,11 +132,14 @@ test('доріжка, пройдена по центру, — це 100% у ме�
   expect(attempt.metrics.exits).toBe(0)
 })
 
-test('у каталозі шість навичок, і нові відфільтровуються', async ({ page }) => {
-  await page.goto('/games?category=speech')
-  await expect(page.locator('.game-card')).toHaveCount(3)
-  await page.goto('/games?category=space')
-  await expect(page.locator('.game-card')).toHaveCount(2)
+test('нові навички відфільтровуються в каталозі', async ({ page }) => {
+  // Кількість — з даних, а не числом: інакше кожна нова гра ламала б тест.
+  for (const category of ['speech', 'space', 'regulation']) {
+    await page.goto(`/games?category=${category}`)
+    await expect(page.locator('.game-card')).toHaveCount(
+      CATALOG.filter((game) => game.category === category).length,
+    )
+  }
 })
 
 test('сторінка про дані дітей доступна з підвалу', async ({ page }) => {

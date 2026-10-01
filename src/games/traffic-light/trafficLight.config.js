@@ -30,6 +30,13 @@ export const config = {
   // обіцяла б те, чого на екрані не існує. Номер кожної кнопки й так написано
   // в її кутку (OptionKey).
   keyHint: { keys: 'Цифри', text: 'вибрати вогонь' },
+  practice: {
+    hint: 'Чекай, поки загориться вогник. Тоді натисни кнопку того самого кольору.',
+  },
+  relaxed: {
+    note: 'Бал рахується лише за правильністю, а не за швидкістю.',
+    rescore: (result) => ({ ...result, score: result.metrics.accuracy_pct ?? 0 }),
+  },
   levels: [
     { id: 'two', label: 'Два вогні', rounds: 8, signalCount: 2 },
     { id: 'three', label: 'Три вогні', rounds: 10, signalCount: 3 },

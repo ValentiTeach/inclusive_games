@@ -15,6 +15,9 @@ export const config = {
     'Чим більше фігур навколо, тим складніше — уважно порівнюй форму й колір.',
   ],
   keyHint: { keys: '← ↑ ↓ → та Enter', text: 'вибрати фігуру' },
+  practice: {
+    hint: 'Подивись на ціль зверху. Знайди серед фігур точно таку саму — і форму, і колір — та натисни на неї.',
+  },
   levels: [
     { id: 'easy', label: '8 фігур', distractors: 7, trialCount: 6 },
     { id: 'classic', label: '14 фігур', distractors: 13, trialCount: 8 },

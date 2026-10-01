@@ -48,10 +48,10 @@ function DigitSpanPlayArea({ level, onFinish }) {
         if (isLastBlank) setPhase('answer')
         else setShownIndex((value) => value + 1)
       },
-      isBlank ? BLANK_MS : DIGIT_MS,
+      isBlank ? BLANK_MS : (level.digitMs ?? DIGIT_MS),
     )
     return () => clearTimeout(timer)
-  }, [phase, shownIndex, sequence.length])
+  }, [phase, shownIndex, sequence.length, level.digitMs])
 
   function submit() {
     if (phase !== 'answer' || feedback || typed.length === 0) return

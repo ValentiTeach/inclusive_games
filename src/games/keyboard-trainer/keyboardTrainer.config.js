@@ -88,6 +88,9 @@ export const config = {
     'Спершу домашній ряд, далі всі літери, а тоді цілі слова.',
   ],
   keyHint: { keys: 'Літери', text: 'набрати те, що світиться' },
+  practice: {
+    hint: 'Знайди на клавіатурі літеру, яку показано. Підсвічена клавіша на екранній клавіатурі підкаже, де вона.',
+  },
   levels: [
     { id: 'home', label: 'Домашній ряд', trialCount: 12, source: 'home' },
     { id: 'letters', label: 'Усі літери', trialCount: 18, source: 'letters' },

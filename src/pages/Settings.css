@@ -65,6 +65,31 @@
   color: var(--accent-strong);
 }
 
+/* Рядок, де пояснення довге, а кнопки широкі: поруч текст стискався до
+   вузької колонки, тож тут керування завжди під текстом. */
+.settings__row--stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.settings__row--stacked p {
+  max-width: none;
+}
+
+.settings__options {
+  flex-wrap: wrap;
+}
+
+.settings__voice-test {
+  margin-top: var(--space-3);
+}
+
+.settings__row p.settings__voice-missing {
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+}
+
 /* Група з трьох кнопок — 274 px, і поруч із текстом вона не влазила: рядок
    давав горизонтальний скрол на телефоні (48 px при ширині 360). Нижче цієї
    межі керування стає під текстом, а не поруч. */

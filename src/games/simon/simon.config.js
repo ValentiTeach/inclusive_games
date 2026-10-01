@@ -20,6 +20,14 @@ export const config = {
     'З кожним успішним раундом послідовність стає на один крок довшою.',
   ],
   keyHint: { keys: '1–4', text: 'натиснути плитку' },
+  practice: {
+    hint: 'Дивись, які плитки засвітяться. Потім натисни їх у тому самому порядку.',
+    level: (level) => ({ ...level, targetLength: 3 }),
+  },
+  relaxed: {
+    note: 'Плитки світяться довше, а паузи між ними більші.',
+    level: (level) => ({ ...level, stepMs: 900, gapMs: 450 }),
+  },
   levels: [
     { id: 'short', label: 'До 6 кроків', targetLength: 6 },
     { id: 'classic', label: 'До 10 кроків', targetLength: 10 },

@@ -66,3 +66,48 @@ describe('Settings — theme switch', () => {
     expect(saved.theme).toBe('dark')
   })
 })
+
+describe('Settings — озвучення і темп', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    window.matchMedia = vi.fn().mockReturnValue({
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })
+  })
+
+  it('за замовчуванням голос — на кнопку, а темп звичайний', () => {
+    render(<Settings />)
+
+    expect(screen.getByRole('button', { name: 'На кнопку' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: 'Звичайний темп' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+  })
+
+  it('запам’ятовує автоматичне озвучення', async () => {
+    const user = userEvent.setup()
+    render(<Settings />)
+
+    await user.click(screen.getByRole('button', { name: 'Автоматично' }))
+
+    expect(getSettings().voice).toBe('auto')
+  })
+
+  it('запам’ятовує «без поспіху»', async () => {
+    const user = userEvent.setup()
+    render(<Settings />)
+
+    await user.click(screen.getByRole('button', { name: 'Без поспіху' }))
+
+    expect(getSettings().pace).toBe('relaxed')
+  })
+
+  it('чесно каже, коли озвучувати нічим', () => {
+    render(<Settings />)
+
+    expect(screen.getByRole('status')).toHaveTextContent(/не вміє озвучувати/)
+  })
+})

@@ -1,6 +1,7 @@
 import { randomInt } from '../engine/random'
 import { defineMetrics } from '../engine/metrics'
 import { clampScore } from '../engine/score'
+import { slower } from '../engine/adapt'
 
 /**
  * Влучність у часі, а не швидкість.
@@ -21,6 +22,13 @@ export const config = {
     'Чим ближче до середини зони — тим більше балів.',
   ],
   keyHint: { keys: 'Пробіл', text: 'зупинити бігунець' },
+  practice: {
+    hint: 'Бігунець їздить смугою туди-сюди. Натисни, коли він буде в зеленій зоні.',
+  },
+  relaxed: {
+    note: 'Бігунець рухається повільніше.',
+    level: (level) => ({ ...level, periodMs: slower(level.periodMs, 1.6) }),
+  },
   levels: [
     { id: 'wide', label: 'Широка зона', rounds: 6, zoneWidth: 26, periodMs: 2400 },
     { id: 'classic', label: 'Звичайна', rounds: 8, zoneWidth: 16, periodMs: 1900 },

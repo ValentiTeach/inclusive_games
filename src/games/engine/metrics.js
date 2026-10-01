@@ -114,6 +114,7 @@ export const METRIC_LABELS = {
   set_size: 'Предметів у наборі',
   target_length: 'Ціль рівня',
   reached_target: 'Ціль досягнута',
+  relaxed_pace: 'Без поспіху',
 }
 
 /**

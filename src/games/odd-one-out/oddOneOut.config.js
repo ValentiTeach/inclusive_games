@@ -31,6 +31,9 @@ export const config = {
     'Обери ту, що з цієї трійки випадає.',
   ],
   keyHint: { keys: '1–4', text: 'вибрати фігуру' },
+  practice: {
+    hint: 'Три фігури схожі між собою, а одна — ні. Натисни на ту, що відрізняється.',
+  },
   levels: [
     { id: 'color', label: 'За кольором', trialCount: 6, dimensions: ['color'] },
     { id: 'shape', label: 'Колір і форма', trialCount: 8, dimensions: ['color', 'shape'] },

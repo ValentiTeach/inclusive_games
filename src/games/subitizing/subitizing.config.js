@@ -1,5 +1,6 @@
 import { randomInt, shuffle } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
+import { slower } from '../engine/adapt'
 
 export const config = {
   id: 'subitizing',
@@ -11,6 +12,13 @@ export const config = {
     'Обери правильну кількість серед варіантів відповіді.',
   ],
   keyHint: { keys: '1–4', text: 'вибрати відповідь' },
+  practice: {
+    hint: 'Точки блимнуть на мить. Не рахуй по одній — скажи, скільки їх, одним поглядом.',
+  },
+  relaxed: {
+    note: 'Точки видно вдвічі довше.',
+    level: (level) => ({ ...level, flashMs: slower(level.flashMs, 2) }),
+  },
   levels: [
     { id: 'easy', label: 'До 6, 700 мс', maxCount: 6, flashMs: 700, trialCount: 8 },
     { id: 'classic', label: 'До 9, 500 мс', maxCount: 9, flashMs: 500, trialCount: 10 },

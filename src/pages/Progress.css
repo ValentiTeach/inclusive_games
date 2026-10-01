@@ -88,6 +88,14 @@
   background: var(--cat-reaction);
 }
 
+.progress-category__fill[data-tone='speech'] {
+  background: var(--cat-speech);
+}
+
+.progress-category__fill[data-tone='space'] {
+  background: var(--cat-space);
+}
+
 .progress-category__value {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

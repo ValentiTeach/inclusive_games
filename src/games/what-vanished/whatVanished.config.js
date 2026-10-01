@@ -1,6 +1,7 @@
 import { pickRandom, shuffle } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
 import { slower } from '../engine/adapt'
+import { gameInfo } from '../../data/games'
 
 /**
  * Зорова робоча пам'ять: що саме зникло з набору.
@@ -16,10 +17,7 @@ const COLORS = ['#2d6bd6', '#2e8b57', '#c8862b', '#7c5cd9', '#c0392b', '#1c9099'
 export const OPTION_COUNT = 4
 
 export const config = {
-  id: 'what-vanished',
-  title: 'Що зникло',
-  category: 'memory',
-  description: 'Запам’ятай предмети — один зникне, і треба сказати, який саме.',
+  ...gameInfo('what-vanished'),
   instructions: [
     'Спершу покажуть кілька предметів — запам’ятай їх.',
     'Потім вони зникнуть на мить і повернуться, але одного вже не буде.',

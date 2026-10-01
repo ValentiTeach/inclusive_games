@@ -1,13 +1,10 @@
 import { shuffle } from '../engine/random'
 import { clampScore } from '../engine/score'
 import { defineMetrics } from '../engine/metrics'
+import { gameInfo } from '../../data/games'
 
 export const config = {
-  id: 'schulte',
-  title: 'Таблиці Шульте',
-  category: 'attention',
-  description:
-    'Знайди числа від 1 до N по порядку якнайшвидше, не відриваючи погляд від центру таблиці.',
+  ...gameInfo('schulte'),
   instructions: [
     'На екрані зʼявиться таблиця з переплутаними числами.',
     'Натискай на числа по порядку: 1, 2, 3 і так далі.',

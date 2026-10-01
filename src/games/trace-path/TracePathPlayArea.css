@@ -1,0 +1,79 @@
+.trace {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.trace__progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.trace__status {
+  margin: 0;
+  min-height: 1.5em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--cat-reaction);
+  text-align: center;
+}
+
+.trace__field {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  /* Інакше на телефоні палець, що веде доріжкою, гортав би сторінку. */
+  touch-action: none;
+  user-select: none;
+  cursor: crosshair;
+}
+
+.trace__field.is-outside {
+  border-color: var(--cat-reaction);
+}
+
+.trace__edge,
+.trace__road,
+.trace__guide,
+.trace__passed {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trace__edge {
+  stroke: var(--cat-space);
+}
+
+.trace__road {
+  stroke: var(--surface-muted);
+}
+
+.trace__guide {
+  stroke: var(--border);
+  stroke-width: 2;
+  stroke-dasharray: 6 8;
+}
+
+.trace__passed {
+  stroke: var(--cat-space);
+  stroke-width: 6;
+}
+
+.trace__start {
+  fill: var(--cat-speech);
+}
+
+.trace__finish {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 4;
+}
+
+.trace__cursor {
+  fill: var(--text);
+}

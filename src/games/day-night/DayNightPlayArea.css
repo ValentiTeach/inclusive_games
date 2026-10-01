@@ -1,0 +1,97 @@
+.day-night {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.day-night__progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.day-night__rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  border-radius: var(--radius-pill);
+  border: 2px solid currentColor;
+}
+
+/* Знак правила розрізняється і формою, і кольором: стрілки проти рівності. */
+.day-night__rule--inverse {
+  color: var(--cat-memory);
+  background: var(--cat-memory-bg);
+}
+
+.day-night__rule--same {
+  color: var(--cat-speech);
+  background: var(--cat-speech-bg);
+}
+
+.day-night__picture {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+  height: 180px;
+  border-radius: var(--radius-lg);
+  border: 2px solid var(--border);
+  background: var(--surface);
+}
+
+.day-night__picture--sun {
+  color: #d99a14;
+  background: color-mix(in srgb, #ffd257 22%, var(--surface));
+}
+
+.day-night__picture--moon {
+  color: #6a6fd8;
+  background: color-mix(in srgb, #1d2350 18%, var(--surface));
+}
+
+.day-night__picture.is-right {
+  border-color: var(--cat-speech);
+}
+
+.day-night__picture.is-wrong {
+  border-color: var(--cat-reaction);
+}
+
+.day-night__answers {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.day-night__answer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 128px;
+  padding: var(--space-4) var(--space-5);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.day-night__answer:hover {
+  border-color: var(--accent);
+}
+
+@media (max-width: 400px) {
+  .day-night__answer {
+    min-width: 0;
+    flex: 1;
+  }
+}

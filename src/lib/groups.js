@@ -126,6 +126,26 @@ export async function removeStudentFromGroup(studentId) {
 }
 
 /**
+ * Видаляє дитину назавжди: спроби, доступ батьків, профіль і обліковий запис
+ * (supabase/migrations/20261001_delete_student_data.sql).
+ *
+ * Міграція застосовується окремо від викладки коду. Поки її немає, PostgREST
+ * відповідає, що функції не знайдено, — і вчитель має почути саме це, а не
+ * «щось пішло не так»: він нічого не зламав, просто дія ще не ввімкнена.
+ */
+export class DeletionUnavailableError extends Error {}
+
+export async function deleteStudentForever(studentId) {
+  const { error } = await supabase.rpc('teacher_delete_student', {
+    p_student_id: studentId,
+  })
+  if (error && (error.code === 'PGRST202' || error.code === '42883')) {
+    throw new DeletionUnavailableError(error.message)
+  }
+  if (error) throw error
+}
+
+/**
  * Why a join can fail, as a machine-readable token. The server raises exactly
  * these strings (supabase/migrations/20260909_shared_computer_identity.sql);
  * the Ukrainian wording lives in the UI, so both sides only have to agree on

@@ -1,16 +1,13 @@
 import { pickRandom, shuffle } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
+import { gameInfo } from '../../data/games'
 
 const SHAPES = ['circle', 'square', 'triangle', 'diamond', 'star', 'hexagon', 'cross', 'pentagon']
 const COLORS = ['#2d6bd6', '#2e8b57', '#c8862b', '#7c5cd9', '#c0392b', '#1c9099', '#d24b64', '#8a5a34']
 const SIZES = [22, 32, 44]
 
 export const config = {
-  id: 'matrices',
-  title: 'Матриці',
-  category: 'thinking',
-  description:
-    'Знайди закономірність у сітці 3×3 і вибери фігуру, яка має стояти замість знака питання.',
+  ...gameInfo('matrices'),
   instructions: [
     'У сітці є правило — колір, форма чи розмір змінюються за певним патерном.',
     'Знайди правило й обери правильний варіант для клітинки зі знаком питання.',

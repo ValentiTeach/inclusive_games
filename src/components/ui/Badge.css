@@ -39,3 +39,13 @@
   background: var(--cat-reaction-bg);
   color: var(--cat-reaction);
 }
+
+.badge--speech {
+  background: var(--cat-speech-bg);
+  color: var(--cat-speech);
+}
+
+.badge--space {
+  background: var(--cat-space-bg);
+  color: var(--cat-space);
+}

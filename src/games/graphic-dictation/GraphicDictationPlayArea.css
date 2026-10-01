@@ -1,0 +1,134 @@
+.dictation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.dictation__progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.dictation__commands {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dictation__command {
+  padding: 4px 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 17px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.dictation__command.is-done {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.dictation__command.is-current {
+  border: 2px solid var(--cat-space);
+  background: var(--cat-space-bg);
+  color: var(--cat-space);
+}
+
+.dictation__sample {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.dictation__sample-label {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.dictation__board {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.dictation__grid {
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+
+.dictation__grid--sample {
+  max-width: 260px;
+}
+
+.dictation__cell-line {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.dictation__path {
+  fill: none;
+  stroke: var(--cat-space);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dictation__start {
+  fill: var(--cat-speech);
+}
+
+.dictation__head {
+  fill: var(--text);
+}
+
+.dictation__board.is-shaking {
+  animation: dictation-shake 0.26s ease;
+}
+
+@keyframes dictation-shake {
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+.dictation__pad {
+  display: grid;
+  grid-template-columns: repeat(3, 64px);
+  grid-template-rows: repeat(2, 56px);
+  gap: var(--space-2);
+}
+
+.dictation__key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.dictation__key:hover {
+  border-color: var(--cat-space);
+}

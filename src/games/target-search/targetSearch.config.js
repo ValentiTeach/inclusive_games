@@ -1,14 +1,12 @@
 import { pickRandom, shuffle } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
+import { gameInfo } from '../../data/games'
 
 const SHAPES = ['circle', 'square', 'triangle', 'diamond', 'star', 'hexagon']
 const COLORS = ['#2d6bd6', '#2e8b57', '#c8862b', '#7c5cd9', '#c0392b', '#1c9099']
 
 export const config = {
-  id: 'target-search',
-  title: 'Пошук цілі',
-  category: 'attention',
-  description: 'Знайди серед фігур саме ту, що показана зверху як ціль.',
+  ...gameInfo('target-search'),
   instructions: [
     'Зверху показана ціль — форма й колір, які треба знайти.',
     'Натисни на фігуру в сцені, яка точно збігається з ціллю.',

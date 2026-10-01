@@ -12,6 +12,8 @@ import {
   Sunrise,
   Layers,
   TrendingUp,
+  Ear,
+  Move,
 } from 'lucide-react'
 import { GAMES } from './games'
 
@@ -23,6 +25,17 @@ import { GAMES } from './games'
  * межа, а «здобуто» виводиться з тих самих чисел — одне визначення замість
  * двох, які рано чи пізно розійшлися б і лишили значок замкненим при 10 із 10.
  */
+/* «у всі 4 гри», «у всі 7 ігор»: з новими категоріями кількість ігор стала
+   різною, і одне слово «ігор» на всі випадки читалося б як помилка. */
+function games(count) {
+  const lastTwo = count % 100
+  const last = count % 10
+  if (lastTwo >= 11 && lastTwo <= 14) return `${count} ігор`
+  if (last === 1) return `${count} гру`
+  if (last >= 2 && last <= 4) return `${count} гри`
+  return `${count} ігор`
+}
+
 const GAMES_PER_CATEGORY = GAMES.reduce((counts, game) => {
   counts[game.category] = (counts[game.category] ?? 0) + 1
   return counts
@@ -86,6 +99,20 @@ export const ACHIEVEMENTS = [
     progress: (s) => ({ current: (s.categoryCounts ?? {}).reaction ?? 0, target: 10 }),
   },
   {
+    id: 'category-speech',
+    title: 'Знавець звуків',
+    description: '10 спроб у категорії «Слух і мовлення»',
+    icon: Ear,
+    progress: (s) => ({ current: (s.categoryCounts ?? {}).speech ?? 0, target: 10 }),
+  },
+  {
+    id: 'category-space',
+    title: 'Знавець простору',
+    description: '10 спроб у категорії «Простір і рух»',
+    icon: Move,
+    progress: (s) => ({ current: (s.categoryCounts ?? {}).space ?? 0, target: 10 }),
+  },
+  {
     id: 'perfect',
     title: 'Ідеально!',
     description: 'Здобудь 100% результат в будь-якій грі',
@@ -95,7 +122,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'explorer',
     title: 'Дослідник',
-    description: `Зіграй у всі ${GAMES.length} ігор хоч раз`,
+    description: `Зіграй у всі ${games(GAMES.length)} хоч раз`,
     icon: Compass,
     progress: (s) => ({ current: s.distinctGamesPlayed, target: GAMES.length }),
   },
@@ -121,14 +148,16 @@ export const ACHIEVEMENTS = [
   {
     id: 'all-skills-one-day',
     title: 'Усе за день',
-    description: 'Усі чотири навички за один день',
+    // Навичок тепер шість, але мета лишилась чотири: шість за день — це вже
+    // не досягнення, а повинність для дитини, якій вистачає трьох ігор на день.
+    description: 'Чотири різні навички за один день',
     icon: Sunrise,
     progress: (s) => ({ current: s.mostCategoriesInADay ?? 0, target: 4 }),
   },
   {
     id: 'attention-complete',
     title: 'Уся увага',
-    description: `Зіграй у всі ${GAMES_PER_CATEGORY.attention} ігор категорії «Увага»`,
+    description: `Зіграй у всі ${games(GAMES_PER_CATEGORY.attention)} категорії «Увага»`,
     icon: Target,
     progress: (s) => ({
       current: (s.distinctGamesByCategory ?? {}).attention ?? 0,
@@ -138,7 +167,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'memory-complete',
     title: "Уся пам'ять",
-    description: `Зіграй у всі ${GAMES_PER_CATEGORY.memory} ігор категорії «Пам'ять»`,
+    description: `Зіграй у всі ${games(GAMES_PER_CATEGORY.memory)} категорії «Пам'ять»`,
     icon: Puzzle,
     progress: (s) => ({
       current: (s.distinctGamesByCategory ?? {}).memory ?? 0,
@@ -148,7 +177,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'thinking-complete',
     title: 'Усе мислення',
-    description: `Зіграй у всі ${GAMES_PER_CATEGORY.thinking} ігор категорії «Мислення»`,
+    description: `Зіграй у всі ${games(GAMES_PER_CATEGORY.thinking)} категорії «Мислення»`,
     icon: Brain,
     progress: (s) => ({
       current: (s.distinctGamesByCategory ?? {}).thinking ?? 0,
@@ -158,11 +187,31 @@ export const ACHIEVEMENTS = [
   {
     id: 'reaction-complete',
     title: 'Уся реакція',
-    description: `Зіграй у всі ${GAMES_PER_CATEGORY.reaction} ігор категорії «Реакція»`,
+    description: `Зіграй у всі ${games(GAMES_PER_CATEGORY.reaction)} категорії «Реакція»`,
     icon: Zap,
     progress: (s) => ({
       current: (s.distinctGamesByCategory ?? {}).reaction ?? 0,
       target: GAMES_PER_CATEGORY.reaction,
+    }),
+  },
+  {
+    id: 'speech-complete',
+    title: 'Увесь слух',
+    description: `Зіграй у всі ${games(GAMES_PER_CATEGORY.speech)} категорії «Слух і мовлення»`,
+    icon: Ear,
+    progress: (s) => ({
+      current: (s.distinctGamesByCategory ?? {}).speech ?? 0,
+      target: GAMES_PER_CATEGORY.speech,
+    }),
+  },
+  {
+    id: 'space-complete',
+    title: 'Увесь простір',
+    description: `Зіграй у всі ${games(GAMES_PER_CATEGORY.space)} категорії «Простір і рух»`,
+    icon: Move,
+    progress: (s) => ({
+      current: (s.distinctGamesByCategory ?? {}).space ?? 0,
+      target: GAMES_PER_CATEGORY.space,
     }),
   },
   {

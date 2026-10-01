@@ -1,11 +1,9 @@
 import { pickRandom } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
+import { gameInfo } from '../../data/games'
 
 export const config = {
-  id: 'mental-rotation',
-  title: 'Обертання фігур',
-  category: 'thinking',
-  description: 'Визнач, чи друга фігура — це та сама, повернута під кутом, чи її дзеркальне відображення.',
+  ...gameInfo('mental-rotation'),
   instructions: [
     'Зліва — еталонна фігура. Справа — та сама фігура, повернута на певний кут.',
     'Якщо праву фігуру можна отримати простим поворотом лівої — тисни «Однакова».',

@@ -62,6 +62,26 @@ export function playWrong() {
   safePlay({ frequency: 170, duration: 0.16, type: 'sawtooth', volume: 0.06 })
 }
 
+/**
+ * Удар ритму. Звучить окремо від «клацань»: для гри «Ритм» звук — це сам
+ * стимул, а не прикраса, тож гра сама вирішує, що робити, коли звук вимкнено
+ * (див. isSoundOn), а тут лише граємо, якщо можна.
+ *
+ * `own` — удар самої дитини: нижчий і коротший, щоб її простукування не
+ * зливалося з тим, що вона слухала.
+ */
+export function playBeat({ own = false } = {}) {
+  safePlay(
+    own
+      ? { frequency: 520, duration: 0.08, type: 'triangle', volume: 0.07 }
+      : { frequency: 880, duration: 0.12, type: 'triangle', volume: 0.09 },
+  )
+}
+
+export function isSoundOn() {
+  return soundOn()
+}
+
 // A short major-chord arpeggio (C5-E5-G5-C6), distinct from the plain
 // correct/click tones — reserved for personal bests and new achievements.
 export function playVictory() {

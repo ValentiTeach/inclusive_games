@@ -1,15 +1,13 @@
 import { pickRandom } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
 import { slower } from '../engine/adapt'
+import { gameInfo } from '../../data/games'
 
 const LETTERS = ['Б', 'Г', 'Д', 'Ж', 'К', 'Л', 'П', 'Р']
 const MATCH_RATE = 0.35
 
 export const config = {
-  id: 'n-back',
-  title: 'N-back',
-  category: 'memory',
-  description: 'Натискай «Збіг!», коли поточна літера повторює ту, що була N кроків тому.',
+  ...gameInfo('n-back'),
   instructions: [
     'Літери зʼявлятимуться одна за одною.',
     'Якщо поточна літера збігається з тією, що була N кроків тому — тисни «Збіг!».',

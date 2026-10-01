@@ -14,8 +14,11 @@ test.describe('онбординг вчителя', () => {
 
     // Було: «У тебе ще немає жодної групи» — констатація без підказки.
     const steps = page.locator('.groups__steps li')
-    await expect(steps).toHaveCount(3)
+    await expect(steps).toHaveCount(4)
     await expect(steps.first()).toContainText('Створи групу')
+    // Згода батьків — до коду, а не після: дати код і означає почати збирати дані.
+    await expect(steps.nth(1)).toContainText('згоду батьків')
+    await expect(steps.nth(1).getByRole('link', { name: /Дані та приватність/ })).toBeVisible()
     await expect(page.locator('.groups__steps')).toContainText('/join')
   })
 

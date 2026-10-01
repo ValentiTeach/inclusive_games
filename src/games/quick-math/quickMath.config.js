@@ -1,11 +1,9 @@
 import { pickRandom, randomInt, shuffle } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
+import { gameInfo } from '../../data/games'
 
 export const config = {
-  id: 'quick-math',
-  title: 'Швидкий рахунок',
-  category: 'thinking',
-  description: 'Розв’яжи якомога більше прикладів на час — обери правильну відповідь.',
+  ...gameInfo('quick-math'),
   instructions: [
     'На екрані зʼявиться приклад.',
     'Обери правильну відповідь серед чотирьох варіантів.',

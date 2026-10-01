@@ -38,3 +38,13 @@
   font-size: 14px;
   color: var(--text-muted);
 }
+
+.site-footer__link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.site-footer__link:hover {
+  color: var(--text);
+}

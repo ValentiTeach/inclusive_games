@@ -1,0 +1,128 @@
+.tower {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.tower__progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.tower__goal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--surface-muted);
+}
+
+.tower__label {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tower__status {
+  margin: 0;
+  min-height: 1.6em;
+  font-family: var(--font-display);
+  font-size: 17px;
+  text-align: center;
+}
+
+.tower__stand {
+  --ball: 44px;
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  padding-bottom: 10px;
+  border-bottom: 8px solid var(--border);
+}
+
+.tower__stand--small {
+  --ball: 24px;
+  gap: var(--space-2);
+  padding-bottom: 4px;
+  border-bottom-width: 4px;
+}
+
+.tower__peg {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: calc(var(--ball) + 40px);
+  /* Висота стрижня видна одразу: на короткий влазить одна кулька. Ще одне місце
+     зверху — для піднятої кульки. */
+  height: calc(var(--ball) * (var(--slots) + 1) + 16px);
+  padding: 0;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.tower__stand--small .tower__peg {
+  width: calc(var(--ball) + 16px);
+  height: calc(var(--ball) * var(--slots) + 8px);
+  cursor: default;
+}
+
+.tower__peg:hover,
+.tower__peg.is-active {
+  border-color: var(--cat-thinking);
+}
+
+.tower__rod {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 8px;
+  height: calc(var(--ball) * var(--slots) + 8px);
+  transform: translateX(-50%);
+  border-radius: 4px 4px 0 0;
+  background: var(--text-muted);
+  opacity: 0.45;
+}
+
+.tower__stand--small .tower__rod {
+  width: 4px;
+}
+
+.tower__stack {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+}
+
+.tower__ball {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.2);
+}
+
+.tower__ball.is-lifted {
+  transform: translateY(calc(var(--ball) * -1 - 6px));
+}
+
+.tower__work.is-shaking {
+  animation: tower-shake 0.26s ease;
+}
+
+@keyframes tower-shake {
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}

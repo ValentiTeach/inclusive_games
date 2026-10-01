@@ -1,6 +1,7 @@
 import { pickRandom } from '../engine/random'
 import { trialMetrics } from '../engine/metrics'
 import { clampScore } from '../engine/score'
+import { gameInfo } from '../../data/games'
 
 /**
  * Реакція вибору, на відміну від простої реакції в грі «Швидкість реакції».
@@ -17,10 +18,7 @@ export const SIGNALS = [
 ]
 
 export const config = {
-  id: 'traffic-light',
-  title: 'Світлофор',
-  category: 'reaction',
-  description: 'Загоряється один із вогнів — натисни саме ту кнопку, що йому відповідає.',
+  ...gameInfo('traffic-light'),
   instructions: [
     'Світлофор загоряється несподівано — одним із кольорів.',
     'Натисни кнопку того самого кольору якнайшвидше.',

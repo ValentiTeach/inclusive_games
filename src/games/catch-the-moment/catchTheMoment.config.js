@@ -2,6 +2,7 @@ import { randomInt } from '../engine/random'
 import { defineMetrics } from '../engine/metrics'
 import { clampScore } from '../engine/score'
 import { slower } from '../engine/adapt'
+import { gameInfo } from '../../data/games'
 
 /**
  * Влучність у часі, а не швидкість.
@@ -12,10 +13,7 @@ import { slower } from '../engine/adapt'
  * не вигукнути відповідь раніше за питання.
  */
 export const config = {
-  id: 'catch-the-moment',
-  title: 'Лови момент',
-  category: 'reaction',
-  description: 'Бігунець мчить по смузі — зупини його точно в зеленій зоні.',
+  ...gameInfo('catch-the-moment'),
   instructions: [
     'Бігунець рухається туди-сюди по смузі.',
     'Натисни пробіл або кнопку, коли він буде в зеленій зоні.',

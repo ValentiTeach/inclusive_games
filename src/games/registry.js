@@ -19,16 +19,26 @@ import { config as whatVanishedConfig } from './what-vanished/whatVanished.confi
 import { config as digitSpanConfig } from './digit-span/digitSpan.config'
 import { config as oddOneOutConfig } from './odd-one-out/oddOneOut.config'
 import { config as continueRowConfig } from './continue-row/continueRow.config'
+import { config as dayNightConfig } from './day-night/dayNight.config'
+import { config as cardSortConfig } from './card-sort/cardSort.config'
+import { config as rhythmConfig } from './rhythm/rhythm.config'
+import { config as firstSoundConfig } from './first-sound/firstSound.config'
+import { config as wordGroupsConfig } from './word-groups/wordGroups.config'
+import { config as graphicDictationConfig } from './graphic-dictation/graphicDictation.config'
+import { config as tracePathConfig } from './trace-path/tracePath.config'
+import { config as towerConfig } from './tower/tower.config'
+import { config as numberLineConfig } from './number-line/numberLine.config'
+import { config as emotionsConfig } from './emotions/emotions.config'
 
 /*
  * Ігрові поля вантажаться окремими шматками, конфіги — ні.
  *
- * Конфіг потрібен синхронно і не одній сторінці: GameShell перебирає всі 19,
+ * Конфіг потрібен синхронно і не одній сторінці: GameShell перебирає всі,
  * щоб дібрати рівень за спробами в сусідніх іграх тієї ж категорії, а список
  * завдань учителя бере з них рівні. Разом конфіги важать небагато.
  *
  * Важать поля — розмітка, стилі й логіка кожної гри. Дитина за раз грає в одну,
- * а завантажувала досі всі дев'ятнадцять. Тепер приходить тільки та, яку
+ * а завантажувала досі всі. Тепер приходить тільки та, яку
  * відкрили.
  *
  * Завантажувачі лежать окремою мапою, а не тільки всередині lazy(): дістати
@@ -56,6 +66,16 @@ const LOADERS = {
   'digit-span': () => import('./digit-span/DigitSpanPlayArea'),
   'odd-one-out': () => import('./odd-one-out/OddOneOutPlayArea'),
   'continue-row': () => import('./continue-row/ContinueRowPlayArea'),
+  'day-night': () => import('./day-night/DayNightPlayArea'),
+  'card-sort': () => import('./card-sort/CardSortPlayArea'),
+  rhythm: () => import('./rhythm/RhythmPlayArea'),
+  'first-sound': () => import('./first-sound/FirstSoundPlayArea'),
+  'word-groups': () => import('./word-groups/WordGroupsPlayArea'),
+  'graphic-dictation': () => import('./graphic-dictation/GraphicDictationPlayArea'),
+  'trace-path': () => import('./trace-path/TracePathPlayArea'),
+  tower: () => import('./tower/TowerPlayArea'),
+  'number-line': () => import('./number-line/NumberLinePlayArea'),
+  emotions: () => import('./emotions/EmotionsPlayArea'),
 }
 
 export const GAME_REGISTRY = {
@@ -78,6 +98,16 @@ export const GAME_REGISTRY = {
   'digit-span': { config: digitSpanConfig, PlayArea: lazy(LOADERS['digit-span']) },
   'odd-one-out': { config: oddOneOutConfig, PlayArea: lazy(LOADERS['odd-one-out']) },
   'continue-row': { config: continueRowConfig, PlayArea: lazy(LOADERS['continue-row']) },
+  'day-night': { config: dayNightConfig, PlayArea: lazy(LOADERS['day-night']) },
+  'card-sort': { config: cardSortConfig, PlayArea: lazy(LOADERS['card-sort']) },
+  rhythm: { config: rhythmConfig, PlayArea: lazy(LOADERS['rhythm']) },
+  'first-sound': { config: firstSoundConfig, PlayArea: lazy(LOADERS['first-sound']) },
+  'word-groups': { config: wordGroupsConfig, PlayArea: lazy(LOADERS['word-groups']) },
+  'graphic-dictation': { config: graphicDictationConfig, PlayArea: lazy(LOADERS['graphic-dictation']) },
+  'trace-path': { config: tracePathConfig, PlayArea: lazy(LOADERS['trace-path']) },
+  tower: { config: towerConfig, PlayArea: lazy(LOADERS['tower']) },
+  'number-line': { config: numberLineConfig, PlayArea: lazy(LOADERS['number-line']) },
+  emotions: { config: emotionsConfig, PlayArea: lazy(LOADERS['emotions']) },
 }
 
 /*

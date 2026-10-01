@@ -6,11 +6,14 @@ const level = config.levels[1]
 
 describe('доріжки', () => {
   it('точки лягають рівномірно — без стрибків прогресу', () => {
-    for (const shape of ['line', 'wave', 'double-wave', 'zigzag', 'meander']) {
+    for (const shape of ['line', 'wave', 'double-wave', 'zigzag', 'meander', 'spiral']) {
       const { points } = generateTrial({ ...level, shapes: [shape] })
       for (let i = 1; i < points.length; i++) {
         const gap = Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y)
-        expect(gap, shape).toBeLessThan(6)
+        // STEP (4) уздовж лінії. Навпростець відстань буває меншою лише там,
+        // де крок зрізає кут зигзагу, — але не вдвічі.
+        expect(gap, shape).toBeLessThanOrEqual(4.01)
+        if (i < points.length - 1) expect(gap, shape).toBeGreaterThan(2)
       }
     }
   })
@@ -50,5 +53,26 @@ describe('ведення', () => {
     for (let x = 40; x <= 560; x += 8) state = advance(state, trial, { x, y: 150 }, 50)
     expect(isFinished(state, trial)).toBe(true)
     expect(insidePct(state)).toBe(100)
+  })
+})
+
+describe('спіраль', () => {
+  it('вміщається в поле і має витки, далі один від одного, ніж ширина доріжки', () => {
+    const { points } = generateTrial({ ...config.levels[2], shapes: ['spiral'] })
+    for (const p of points) {
+      expect(p.x).toBeGreaterThan(0)
+      expect(p.x).toBeLessThan(600)
+      expect(p.y).toBeGreaterThan(0)
+      expect(p.y).toBeLessThan(300)
+    }
+    // Дві точки, далекі одна від одної вздовж доріжки (понад 30 кроків), але
+    // близькі на полі, — це сусідні витки. Між ними має вміститися доріжка.
+    let closest = Infinity
+    for (let i = 0; i < points.length; i += 3) {
+      for (let j = i + 30; j < points.length; j += 3) {
+        closest = Math.min(closest, Math.hypot(points[j].x - points[i].x, points[j].y - points[i].y))
+      }
+    }
+    expect(closest).toBeGreaterThan(config.levels[2].width)
   })
 })

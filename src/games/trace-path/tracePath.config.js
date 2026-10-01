@@ -20,6 +20,14 @@ const SHAPES = {
   line: () => polyline([[40, 150], [560, 150]]),
   wave: () => curve((t) => [40 + 520 * t, 150 + 70 * Math.sin(t * Math.PI * 2)]),
   'double-wave': () => curve((t) => [40 + 520 * t, 150 + 90 * Math.sin(t * Math.PI * 4)]),
+  // Спіраль від краю до центру. Між витками 50 одиниць — більше, ніж
+  // найширша доріжка цього рівня, тож сусідні витки не зливаються.
+  spiral: () =>
+    curve((t) => {
+      const angle = t * 1.9 * Math.PI * 2
+      const r = 125 - t * 95
+      return [300 + r * Math.cos(angle), 150 + r * Math.sin(angle)]
+    }),
   zigzag: () =>
     polyline([
       [40, 220],
@@ -44,27 +52,42 @@ const SHAPES = {
     ]),
 }
 
-function polyline(corners) {
-  const points = []
-  for (let i = 0; i < corners.length - 1; i++) {
-    const [x1, y1] = corners[i]
-    const [x2, y2] = corners[i + 1]
+/**
+ * Точки центральної лінії рівно через STEP одиниць довжини.
+ *
+ * Рівномірність тут не косметика: пошук найближчої точки дивиться на сорок
+ * точок уперед, і це має означати однакову відстань на будь-якій доріжці.
+ * Досі криві лишали всі дві тисячі густих точок по пів одиниці, і «сорок
+ * уперед» на хвилі було вісімнадцять одиниць — швидкий, але рівний рух
+ * зараховувався як вихід за край.
+ */
+function resample(path) {
+  const points = [{ x: path[0][0], y: path[0][1] }]
+  let carried = 0
+  for (let i = 0; i < path.length - 1; i++) {
+    const [x1, y1] = path[i]
+    const [x2, y2] = path[i + 1]
     const length = Math.hypot(x2 - x1, y2 - y1)
-    const count = Math.max(1, Math.round(length / STEP))
-    for (let k = 0; k < count; k++) {
-      points.push({ x: x1 + ((x2 - x1) * k) / count, y: y1 + ((y2 - y1) * k) / count })
+    let along = STEP - carried
+    while (along <= length) {
+      const t = along / length
+      points.push({ x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t })
+      along += STEP
     }
+    carried = length - (along - STEP)
   }
-  const [x, y] = corners.at(-1)
-  points.push({ x, y })
+  const [x, y] = path.at(-1)
+  const last = points.at(-1)
+  if (Math.hypot(last.x - x, last.y - y) > STEP / 4) points.push({ x, y })
   return points
 }
 
+function polyline(corners) {
+  return resample(corners)
+}
+
 function curve(at) {
-  // Густо, а потім рівномірно за довжиною: інакше на крутих ділянках точки
-  // лягали б рідше, і прогрес стрибав би.
-  const dense = Array.from({ length: 2001 }, (_, i) => at(i / 2000))
-  return polyline(dense)
+  return resample(Array.from({ length: 2001 }, (_, i) => at(i / 2000)))
 }
 
 export const config = {
@@ -82,7 +105,7 @@ export const config = {
   levels: [
     { id: 'wide', label: 'Широка', trialCount: 2, width: 64, shapes: ['wave', 'zigzag'] },
     { id: 'classic', label: 'Звичайна', trialCount: 3, width: 46, shapes: ['wave', 'zigzag', 'meander'] },
-    { id: 'narrow', label: 'Вузька', trialCount: 3, width: 30, shapes: ['double-wave', 'meander', 'zigzag'] },
+    { id: 'narrow', label: 'Вузька', trialCount: 3, width: 30, shapes: ['double-wave', 'meander', 'spiral'] },
   ],
 }
 

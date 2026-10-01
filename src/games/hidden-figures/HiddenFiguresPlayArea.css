@@ -1,0 +1,86 @@
+.hidden-figures {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.hidden-figures__progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.hidden-figures__frame {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Усі контури — один колір, як у бланку: розрізняти їх за кольором було б
+   підказкою, якої в пробі немає. */
+.hidden-figures__layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hidden-figures__prompt {
+  margin: 0;
+  min-height: 1.6em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-align: center;
+}
+
+.hidden-figures__options {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 480px;
+}
+
+.hidden-figures__option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-3) var(--space-1);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.hidden-figures__option.is-picked {
+  border-color: var(--accent);
+  background: var(--surface-muted);
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.hidden-figures__option.is-answer {
+  border-color: var(--cat-speech);
+  background: var(--cat-speech-bg);
+}
+
+.hidden-figures__option.is-wrong {
+  border-color: var(--cat-reaction);
+  background: var(--cat-reaction-bg);
+}
+
+@media (max-width: 420px) {
+  .hidden-figures__options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

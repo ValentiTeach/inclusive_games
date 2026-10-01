@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Ear,
   Move,
+  Hourglass,
 } from 'lucide-react'
 import { GAMES } from './games'
 
@@ -113,6 +114,13 @@ export const ACHIEVEMENTS = [
     progress: (s) => ({ current: (s.categoryCounts ?? {}).space ?? 0, target: 10 }),
   },
   {
+    id: 'category-regulation',
+    title: 'Знавець витримки',
+    description: '10 спроб у категорії «Саморегуляція»',
+    icon: Hourglass,
+    progress: (s) => ({ current: (s.categoryCounts ?? {}).regulation ?? 0, target: 10 }),
+  },
+  {
     id: 'perfect',
     title: 'Ідеально!',
     description: 'Здобудь 100% результат в будь-якій грі',
@@ -148,7 +156,7 @@ export const ACHIEVEMENTS = [
   {
     id: 'all-skills-one-day',
     title: 'Усе за день',
-    // Навичок тепер шість, але мета лишилась чотири: шість за день — це вже
+    // Навичок тепер сім, але мета лишилась чотири: сім за день — це вже
     // не досягнення, а повинність для дитини, якій вистачає трьох ігор на день.
     description: 'Чотири різні навички за один день',
     icon: Sunrise,
@@ -212,6 +220,16 @@ export const ACHIEVEMENTS = [
     progress: (s) => ({
       current: (s.distinctGamesByCategory ?? {}).space ?? 0,
       target: GAMES_PER_CATEGORY.space,
+    }),
+  },
+  {
+    id: 'regulation-complete',
+    title: 'Уся витримка',
+    description: `Зіграй у всі ${games(GAMES_PER_CATEGORY.regulation)} категорії «Саморегуляція»`,
+    icon: Hourglass,
+    progress: (s) => ({
+      current: (s.distinctGamesByCategory ?? {}).regulation ?? 0,
+      target: GAMES_PER_CATEGORY.regulation,
     }),
   },
   {

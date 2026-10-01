@@ -49,3 +49,8 @@
   background: var(--cat-space-bg);
   color: var(--cat-space);
 }
+
+.badge--regulation {
+  background: var(--cat-regulation-bg);
+  color: var(--cat-regulation);
+}

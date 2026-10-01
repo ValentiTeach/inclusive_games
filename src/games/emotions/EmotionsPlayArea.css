@@ -73,6 +73,18 @@
   color: var(--text);
 }
 
+.emotions__option--action {
+  width: 100%;
+  max-width: 440px;
+  min-height: 56px;
+  padding: var(--space-3) var(--space-5);
+  font-size: 16px;
+  font-weight: 600;
+  text-align: left;
+  justify-content: flex-start;
+  color: var(--text);
+}
+
 .emotions__option:hover {
   border-color: var(--accent);
 }

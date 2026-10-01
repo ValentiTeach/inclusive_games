@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { CARDS, config, expectedTarget, ruleAt, scoring } from './cardSort.config'
+import { CARDS, config, expectedTarget, nextHiddenRule, ruleAt, scoring } from './cardSort.config'
 
 const [oneSwitch, blocks, border] = config.levels
 
@@ -44,5 +44,19 @@ describe('показники', () => {
     ])
     expect(metrics.perseverations).toBeUndefined()
     expect(metrics.switch_errors).toBe(1)
+  })
+})
+
+describe('прихована зміна правила', () => {
+  const hidden = config.levels.find((level) => level.mode === 'hidden')
+
+  it('правило змінюється лише після серії правильних відповідей', () => {
+    expect(nextHiddenRule('color', hidden.streak - 1, hidden)).toBe('color')
+    expect(nextHiddenRule('color', hidden.streak, hidden)).toBe('shape')
+    expect(nextHiddenRule('shape', hidden.streak, hidden)).toBe('color')
+  })
+
+  it('у прихованому режимі правило бере те, яке веде поле', () => {
+    expect(ruleAt(hidden, 0, false, 'shape')).toBe('shape')
   })
 })

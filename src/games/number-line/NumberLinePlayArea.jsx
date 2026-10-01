@@ -47,18 +47,23 @@ function NumberLinePlayArea({ level, onFinish }) {
    * не підказує. Крок — одна одиниця, а на 0–100 — п'ять, інакше до краю
    * довелося б тиснути п'ятдесят разів.
    */
-  const keyStep = level.max > 20 ? 5 : 1
+  const keyStep = level.fractions ? 0.05 : level.max > 20 ? 5 : 1
   useGameKeys({
     enabled: !feedback,
     onArrow: (dir) => {
       const delta = dir === 'right' || dir === 'up' ? keyStep : -keyStep
-      setMarker((value) => Math.min(level.max, Math.max(0, (value ?? level.max / 2) + delta)))
+      setMarker((value) => {
+        const next = Math.min(level.max, Math.max(0, (value ?? level.max / 2) + delta))
+        return Math.round(next * 100) / 100
+      })
     },
     onEnter: () => answer(marker ?? level.max / 2),
   })
 
   const ticks = Array.from({ length: level.max / level.tick + 1 }, (_, i) => i * level.tick)
   const percent = (value) => `${(value / level.max) * 100}%`
+  const targetLabel = trial.label ?? trial.target
+  const show = (value) => String(value).replace('.', ',')
 
   return (
     <div className="number-line">
@@ -66,7 +71,7 @@ function NumberLinePlayArea({ level, onFinish }) {
         {trialIndex + 1} / {level.trialCount}
       </p>
       <p className="number-line__prompt">Де стоїть число</p>
-      <p className="number-line__target">{trial.target}</p>
+      <p className="number-line__target">{targetLabel}</p>
 
       <div className="number-line__area">
         <div
@@ -98,7 +103,7 @@ function NumberLinePlayArea({ level, onFinish }) {
               знала б лише «не влучив», а не «куди саме». */}
           {feedback && (
             <span className="number-line__truth" style={{ left: percent(trial.target) }}>
-              {trial.target}
+              {targetLabel}
             </span>
           )}
         </div>
@@ -112,7 +117,7 @@ function NumberLinePlayArea({ level, onFinish }) {
         {feedback
           ? feedback.correct
             ? 'Влучно!'
-            : `Число ${trial.target} — ось тут. Твоя позначка — ${marker}.`
+            : `Число ${targetLabel} — ось тут. Твоя позначка — ${show(marker)}.`
           : ''}
       </p>
     </div>

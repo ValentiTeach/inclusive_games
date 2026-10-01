@@ -32,3 +32,20 @@ describe('числова пряма', () => {
     expect(scoring([{ correct: true, errorPct: 5 }]).score).toBe(80)
   })
 })
+
+describe('дроби', () => {
+  const fractions = config.levels.find((level) => level.fractions)
+
+  it('питає дріб і показує його знаком, а не десятковим', () => {
+    for (let i = 0; i < 30; i++) {
+      const trial = generateTrial(fractions)
+      expect(trial.target).toBeGreaterThan(0)
+      expect(trial.target).toBeLessThan(1)
+      expect(trial.label).toMatch(/[½¼¾⅓⅔⅕⅒⅘]/)
+    }
+  })
+
+  it('на прямій 0–1 точність до сотих: ¼ не стає 0,3', () => {
+    expect(valueAt(fractions, 0.25)).toBe(0.25)
+  })
+})

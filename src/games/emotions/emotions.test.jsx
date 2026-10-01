@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
-import { EMOTIONS, PEOPLE, SITUATIONS, config, generateTrial, optionEmotion } from './emotions.config'
+import { ACTIONS, EMOTIONS, PEOPLE, SITUATIONS, config, generateTrial, optionEmotion } from './emotions.config'
 import Face from './Face'
 
 describe('проби', () => {
@@ -35,6 +35,15 @@ describe('обличчя', () => {
         expect(container.querySelector('svg')).toBeTruthy()
         unmount()
       }
+    }
+  })
+})
+
+describe('що можна зробити', () => {
+  it('кожна ситуація має одну корисну дію і дві шкідливі', () => {
+    for (const action of ACTIONS) {
+      expect(action.bad).toHaveLength(2)
+      expect(action.bad).not.toContain(action.good)
     }
   })
 })

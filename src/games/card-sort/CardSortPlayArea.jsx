@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { RULE_LABELS, TARGETS, checkAnswer, generateTrial, scoring } from './cardSort.config'
+import { RULE_LABELS, TARGETS, checkAnswer, generateTrial, nextHiddenRule, scoring } from './cardSort.config'
 import { now } from '../engine/time'
 import { playCorrect, playWrong } from '../../lib/sound'
 import ShapeIcon from '../engine/ShapeIcon'
@@ -20,6 +20,8 @@ function CardSortPlayArea({ level, onFinish }) {
   const resultsRef = useRef([])
   const shownAtRef = useRef(null)
   const sawSwitchRef = useRef(false)
+  const hiddenRuleRef = useRef('color')
+  const streakRef = useRef(0)
 
   useEffect(() => {
     shownAtRef.current = now()
@@ -36,19 +38,29 @@ function CardSortPlayArea({ level, onFinish }) {
 
     const previous = resultsRef.current.at(-1)
     const switched = Boolean(previous) && previous.rule !== trial.rule
-    if (switched && level.mode === 'blocks') sawSwitchRef.current = true
+    const tracksSwitch = level.mode === 'blocks' || level.mode === 'hidden'
+    if (switched && tracksSwitch) sawSwitchRef.current = true
 
     const { correct } = checkAnswer(trial, targetId)
     resultsRef.current.push({
       correct,
       rule: trial.rule,
       switched,
-      ...(level.mode === 'blocks' ? { afterSwitch: sawSwitchRef.current } : {}),
+      ...(tracksSwitch ? { afterSwitch: sawSwitchRef.current } : {}),
       reactionTimeMs: Math.round(now() - shownAtRef.current),
     })
     setFeedback(correct ? 'right' : 'wrong')
     if (correct) playCorrect()
     else playWrong()
+
+    if (level.mode === 'hidden') {
+      streakRef.current = correct ? streakRef.current + 1 : 0
+      const rule = nextHiddenRule(hiddenRuleRef.current, streakRef.current, level)
+      if (rule !== hiddenRuleRef.current) {
+        hiddenRuleRef.current = rule
+        streakRef.current = 0
+      }
+    }
 
     setTimeout(() => {
       const next = trialIndex + 1
@@ -56,7 +68,7 @@ function CardSortPlayArea({ level, onFinish }) {
         onFinish(scoring(resultsRef.current))
         return
       }
-      const nextTrial = generateTrial(level, next)
+      const nextTrial = generateTrial(level, next, hiddenRuleRef.current)
       setFeedback(null)
       setTrialIndex(next)
       setTrial(nextTrial)
@@ -90,7 +102,10 @@ function CardSortPlayArea({ level, onFinish }) {
             : RULE_LABELS[trial.rule]}
         </p>
       )}
-      {!showRule && <p className="card-sort__rule">Рамка — за формою, без рамки — за кольором</p>}
+      {level.mode === 'border' && (
+        <p className="card-sort__rule">Рамка — за формою, без рамки — за кольором</p>
+      )}
+      {level.mode === 'hidden' && <p className="card-sort__rule">Здогадайся, за яким правилом</p>}
 
       <div
         className={[

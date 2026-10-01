@@ -96,6 +96,10 @@
   background: var(--cat-space);
 }
 
+.progress-category__fill[data-tone='regulation'] {
+  background: var(--cat-regulation);
+}
+
 .progress-category__value {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;

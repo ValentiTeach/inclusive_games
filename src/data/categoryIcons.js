@@ -1,4 +1,4 @@
-import { Target, Puzzle, Brain, Zap, Ear, Move } from 'lucide-react'
+import { Target, Puzzle, Brain, Zap, Ear, Move, Hourglass } from 'lucide-react'
 
 export const CATEGORY_ICONS = {
   attention: Target,
@@ -7,4 +7,5 @@ export const CATEGORY_ICONS = {
   reaction: Zap,
   speech: Ear,
   space: Move,
+  regulation: Hourglass,
 }

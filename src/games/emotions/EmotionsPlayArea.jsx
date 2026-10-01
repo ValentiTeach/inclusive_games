@@ -14,6 +14,7 @@ const PROMPTS = {
   match: 'Знайди обличчя з таким самим настроєм',
   name: 'Що відчуває ця людина?',
   situation: 'Що відчуває дитина?',
+  action: 'Що краще зробити?',
 }
 
 function EmotionsPlayArea({ level, onFinish }) {
@@ -57,6 +58,7 @@ function EmotionsPlayArea({ level, onFinish }) {
     return [
       'emotions__option',
       trial.mode === 'name' ? 'emotions__option--word' : '',
+      trial.mode === 'action' ? 'emotions__option--action' : '',
       feedback && emotion === trial.answer ? 'is-answer' : '',
       feedback && !feedback.correct && emotion === feedback.emotion ? 'is-wrong' : '',
     ]
@@ -71,10 +73,18 @@ function EmotionsPlayArea({ level, onFinish }) {
       </p>
       <p className="emotions__prompt">{PROMPTS[trial.mode]}</p>
 
-      {trial.mode === 'situation' ? (
+      {trial.mode === 'situation' || trial.mode === 'action' ? (
         <div className="emotions__situation">
           <p>{trial.text}</p>
-          <SpeakButton text={trial.text} auto label="Послухати" />
+          <SpeakButton
+            text={
+              trial.mode === 'action'
+                ? `${trial.text} Що краще зробити? ${trial.options.map((o, i) => `${i + 1}: ${o}.`).join(' ')}`
+                : trial.text
+            }
+            auto
+            label="Послухати"
+          />
         </div>
       ) : (
         <div className="emotions__target">
@@ -93,10 +103,12 @@ function EmotionsPlayArea({ level, onFinish }) {
               className={optionClass(emotion)}
               onClick={() => handleAnswer(emotion)}
               aria-disabled={Boolean(feedback)}
-              aria-label={trial.mode === 'name' ? undefined : EMOTIONS[emotion].name}
+              aria-label={trial.mode === 'name' || trial.mode === 'action' ? undefined : EMOTIONS[emotion].name}
             >
               <OptionKey n={index + 1} />
-              {trial.mode === 'name' ? (
+              {trial.mode === 'action' ? (
+                emotion
+              ) : trial.mode === 'name' ? (
                 EMOTIONS[emotion].name
               ) : (
                 <Face emotion={emotion} person={person} size={96} />
@@ -107,7 +119,12 @@ function EmotionsPlayArea({ level, onFinish }) {
       </div>
 
       <p className="emotions__status" aria-live="polite">
-        {feedback && `Це ${EMOTIONS[trial.answer].name.toLowerCase()}.`}
+        {feedback &&
+          (trial.mode === 'action'
+            ? feedback.correct
+              ? 'Так, це допоможе.'
+              : 'Краще — те, що підсвічено зеленим.'
+            : `Це ${EMOTIONS[trial.answer].name.toLowerCase()}.`)}
       </p>
     </div>
   )

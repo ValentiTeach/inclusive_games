@@ -28,6 +28,17 @@ import { scoring as tracePath } from './trace-path/tracePath.config'
 import { scoring as tower } from './tower/tower.config'
 import { scoring as numberLine } from './number-line/numberLine.config'
 import { scoring as emotions } from './emotions/emotions.config'
+import { scoring as flanker } from './flanker/flanker.config'
+import { scoring as hiddenFigures } from './hidden-figures/hiddenFigures.config'
+import { scoring as moreDots } from './more-dots/moreDots.config'
+import { scoring as seriation } from './seriation/seriation.config'
+import { scoring as listenCatch } from './listen-catch/listenCatch.config'
+import { scoring as storyOrder } from './story-order/storyOrder.config'
+import { scoring as tenWords } from './ten-words/tenWords.config'
+import { scoring as objectPlace } from './object-place/objectPlace.config'
+import { scoring as maze } from './maze/maze.config'
+import { scoring as timeSense } from './time-sense/timeSense.config'
+import { scoring as symmetry } from './symmetry/symmetry.config'
 import { GAME_REGISTRY } from './registry'
 
 // 3 правильні з 4, часи 400/600/500/300 — точність 75%, середнє 450, найкраще 300.
@@ -159,6 +170,70 @@ const SCENARIOS = [
       ]),
   },
   { id: 'emotions', run: () => emotions(TRIALS) },
+  {
+    id: 'flanker',
+    run: () =>
+      flanker([
+        { correct: true, congruent: true, reactionTimeMs: 500 },
+        { correct: true, congruent: false, reactionTimeMs: 620 },
+        { correct: false, congruent: false, reactionTimeMs: 400 },
+        { correct: true, congruent: true, reactionTimeMs: 480 },
+      ]),
+  },
+  {
+    id: 'hidden-figures',
+    run: () =>
+      hiddenFigures([
+        { correct: true, hits: 2, falseAlarms: 0, misses: 0 },
+        { correct: false, hits: 2, falseAlarms: 1, misses: 1 },
+      ]),
+  },
+  { id: 'more-dots', run: () => moreDots(TRIALS) },
+  { id: 'seriation', run: () => seriation(TRIALS) },
+  {
+    id: 'listen-catch',
+    run: () =>
+      listenCatch([
+        { correct: true, outcome: 'hit', reactionTimeMs: 700 },
+        { correct: false, outcome: 'miss' },
+        { correct: false, outcome: 'false-alarm', reactionTimeMs: 500 },
+        { correct: true, outcome: 'correct-reject' },
+      ]),
+  },
+  { id: 'story-order', run: () => storyOrder(TRIALS) },
+  {
+    id: 'ten-words',
+    run: () =>
+      tenWords(
+        [
+          { hits: 4, falseAlarms: 1 },
+          { hits: 6, falseAlarms: 0 },
+          { hits: 7, falseAlarms: 0 },
+        ],
+        8,
+      ),
+  },
+  { id: 'object-place', run: () => objectPlace(TRIALS) },
+  {
+    id: 'maze',
+    run: () =>
+      maze([
+        { moves: 12, shortest: 12, bumps: 0, planningMs: 2400 },
+        { moves: 20, shortest: 14, bumps: 3, planningMs: 600 },
+      ]),
+  },
+  {
+    id: 'time-sense',
+    run: () => timeSense([{ elapsedMs: 4200 }, { elapsedMs: 5300 }, { elapsedMs: 3100 }], 5000),
+  },
+  {
+    id: 'symmetry',
+    run: () =>
+      symmetry([
+        { correct: true, hits: 4, extra: 0, missed: 0 },
+        { correct: false, hits: 5, extra: 1, missed: 2 },
+      ]),
+  },
   {
     id: 'keyboard-trainer',
     run: () =>

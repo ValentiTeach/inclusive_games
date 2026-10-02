@@ -110,6 +110,11 @@
   border-color: var(--cat-space);
 }
 
+.catalog-filter--regulation.is-active {
+  background: color-mix(in srgb, var(--cat-regulation) 14%, var(--surface));
+  border-color: var(--cat-regulation);
+}
+
 /* Колір категорії лишається там, де він нічого не мусить нести — в іконці. */
 .catalog-filter--attention.is-active svg {
   color: var(--cat-attention);
@@ -133,6 +138,10 @@
 
 .catalog-filter--space.is-active svg {
   color: var(--cat-space);
+}
+
+.catalog-filter--regulation.is-active svg {
+  color: var(--cat-regulation);
 }
 
 @media (pointer: coarse) {

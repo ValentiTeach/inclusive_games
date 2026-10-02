@@ -123,6 +123,11 @@ export const METRIC_LABELS = {
   exits: 'Виходів за край',
   rule_breaks: 'Порушень правила',
   planning_ms: 'Обдумування до 1-го ходу, мс',
+  conflict_ms: 'Ефект конфлікту, мс',
+  first_recall: 'Згадано з першого разу',
+  best_recall: 'Найкраща спроба, слів',
+  time_error_pct: 'Похибка відліку часу, %',
+  time_bias_pct: 'Поспіх (−) / затримка (+), %',
   relaxed_pace: 'Без поспіху',
 }
 
@@ -185,6 +190,11 @@ export const METRIC_AGGREGATION = {
   exits: 'sum',
   rule_breaks: 'sum',
   planning_ms: 'mean',
+  conflict_ms: 'mean',
+  first_recall: 'mean',
+  best_recall: 'max',
+  time_error_pct: 'mean',
+  time_bias_pct: 'mean',
 }
 
 /**

@@ -26,11 +26,30 @@ export const config = {
     { id: 'ten', label: '0–10', trialCount: 8, max: 10, tick: 1 },
     { id: 'twenty', label: '0–20', trialCount: 10, max: 20, tick: 5 },
     { id: 'hundred', label: '0–100', trialCount: 10, max: 100, tick: 10 },
+    // Дроби — та сама пряма, тільки від 0 до 1. Саме тут видно, чи розуміє
+    // дитина, що ⅓ менша за ½, хоча «три» більше за «два».
+    { id: 'fractions', label: 'Дроби 0–1', trialCount: 8, max: 1, tick: 0.5, fractions: true },
   ],
 }
 
+export const FRACTIONS = [
+  { value: 1 / 2, label: '½' },
+  { value: 1 / 4, label: '¼' },
+  { value: 3 / 4, label: '¾' },
+  { value: 1 / 3, label: '⅓' },
+  { value: 2 / 3, label: '⅔' },
+  { value: 1 / 5, label: '⅕' },
+  { value: 1 / 10, label: '⅒' },
+  { value: 4 / 5, label: '⅘' },
+]
+
 /* Кінці прямої підписані, тож питати про них — значить перевіряти читання. */
 export function generateTrial(level, previous) {
+  if (level.fractions) {
+    const options = FRACTIONS.filter((fraction) => fraction.label !== previous?.label)
+    const fraction = options[Math.floor(Math.random() * options.length)]
+    return { target: fraction.value, label: fraction.label }
+  }
   let target
   do {
     target = randomInt(1, level.max - 1)
@@ -54,10 +73,12 @@ export function checkAnswer(level, trial, answer) {
   return { correct: error <= HIT_PCT, errorPct: error }
 }
 
-/** Значення, яке відповідає точці на прямій (частка від 0 до 1), з кроком 0.1 поділки. */
+/** Значення, яке відповідає точці на прямій (частка від 0 до 1). */
 export function valueAt(level, fraction) {
   const clamped = Math.min(1, Math.max(0, fraction))
-  return Math.round(clamped * level.max * 10) / 10
+  // На прямій 0–1 крок у десяту частину заокруглив би ¼ до 0,3 — тому сота.
+  const precision = level.max <= 1 ? 100 : 10
+  return Math.round(clamped * level.max * precision) / precision
 }
 
 export function scoring(results) {

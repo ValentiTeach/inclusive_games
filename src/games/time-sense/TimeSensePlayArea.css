@@ -1,0 +1,76 @@
+.time-sense {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.time-sense__progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.time-sense__task {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+}
+
+.time-sense__task strong {
+  color: var(--cat-regulation);
+  font-size: 30px;
+}
+
+.time-sense__glass {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: var(--cat-regulation-bg);
+  color: var(--cat-regulation);
+}
+
+/* Пісочний годинник повертається, але не відмірює: його ритм — 4 с на оберт,
+   і він навмисно не збігається з жодним із завдань, щоб не стати лічильником. */
+.time-sense__glass.is-running svg {
+  animation: time-sense-turn 4.3s linear infinite;
+}
+
+@keyframes time-sense-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.time-sense__status {
+  margin: 0;
+  min-height: 1.6em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-align: center;
+}
+
+.time-sense__button {
+  width: 200px;
+  height: 80px;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--surface);
+  background: var(--cat-regulation);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.time-sense__button.is-stop {
+  background: var(--cat-reaction);
+}
+
+.time-sense__button[aria-disabled='true'] {
+  opacity: 0.5;
+}

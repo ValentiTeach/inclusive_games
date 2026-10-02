@@ -29,6 +29,17 @@ import { config as tracePathConfig } from './trace-path/tracePath.config'
 import { config as towerConfig } from './tower/tower.config'
 import { config as numberLineConfig } from './number-line/numberLine.config'
 import { config as emotionsConfig } from './emotions/emotions.config'
+import { config as flankerConfig } from './flanker/flanker.config'
+import { config as hiddenFiguresConfig } from './hidden-figures/hiddenFigures.config'
+import { config as moreDotsConfig } from './more-dots/moreDots.config'
+import { config as seriationConfig } from './seriation/seriation.config'
+import { config as listenCatchConfig } from './listen-catch/listenCatch.config'
+import { config as storyOrderConfig } from './story-order/storyOrder.config'
+import { config as tenWordsConfig } from './ten-words/tenWords.config'
+import { config as objectPlaceConfig } from './object-place/objectPlace.config'
+import { config as mazeConfig } from './maze/maze.config'
+import { config as timeSenseConfig } from './time-sense/timeSense.config'
+import { config as symmetryConfig } from './symmetry/symmetry.config'
 
 /*
  * Ігрові поля вантажаться окремими шматками, конфіги — ні.
@@ -76,6 +87,17 @@ const LOADERS = {
   tower: () => import('./tower/TowerPlayArea'),
   'number-line': () => import('./number-line/NumberLinePlayArea'),
   emotions: () => import('./emotions/EmotionsPlayArea'),
+  flanker: () => import('./flanker/FlankerPlayArea'),
+  'hidden-figures': () => import('./hidden-figures/HiddenFiguresPlayArea'),
+  'more-dots': () => import('./more-dots/MoreDotsPlayArea'),
+  seriation: () => import('./seriation/SeriationPlayArea'),
+  'listen-catch': () => import('./listen-catch/ListenCatchPlayArea'),
+  'story-order': () => import('./story-order/StoryOrderPlayArea'),
+  'ten-words': () => import('./ten-words/TenWordsPlayArea'),
+  'object-place': () => import('./object-place/ObjectPlacePlayArea'),
+  maze: () => import('./maze/MazePlayArea'),
+  'time-sense': () => import('./time-sense/TimeSensePlayArea'),
+  symmetry: () => import('./symmetry/SymmetryPlayArea'),
 }
 
 export const GAME_REGISTRY = {
@@ -108,6 +130,17 @@ export const GAME_REGISTRY = {
   tower: { config: towerConfig, PlayArea: lazy(LOADERS['tower']) },
   'number-line': { config: numberLineConfig, PlayArea: lazy(LOADERS['number-line']) },
   emotions: { config: emotionsConfig, PlayArea: lazy(LOADERS['emotions']) },
+  flanker: { config: flankerConfig, PlayArea: lazy(LOADERS['flanker']) },
+  'hidden-figures': { config: hiddenFiguresConfig, PlayArea: lazy(LOADERS['hidden-figures']) },
+  'more-dots': { config: moreDotsConfig, PlayArea: lazy(LOADERS['more-dots']) },
+  seriation: { config: seriationConfig, PlayArea: lazy(LOADERS['seriation']) },
+  'listen-catch': { config: listenCatchConfig, PlayArea: lazy(LOADERS['listen-catch']) },
+  'story-order': { config: storyOrderConfig, PlayArea: lazy(LOADERS['story-order']) },
+  'ten-words': { config: tenWordsConfig, PlayArea: lazy(LOADERS['ten-words']) },
+  'object-place': { config: objectPlaceConfig, PlayArea: lazy(LOADERS['object-place']) },
+  maze: { config: mazeConfig, PlayArea: lazy(LOADERS['maze']) },
+  'time-sense': { config: timeSenseConfig, PlayArea: lazy(LOADERS['time-sense']) },
+  symmetry: { config: symmetryConfig, PlayArea: lazy(LOADERS['symmetry']) },
 }
 
 /*

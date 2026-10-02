@@ -1,0 +1,84 @@
+.maze {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.maze__progress {
+  margin: 0;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.maze__field {
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1;
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+
+.maze__field.is-bump {
+  animation: maze-bump 0.22s ease;
+}
+
+@keyframes maze-bump {
+  50% {
+    transform: scale(0.98);
+  }
+}
+
+.maze__cell {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.maze__wall line {
+  stroke: var(--text);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.maze__trail {
+  fill: none;
+  stroke: var(--cat-regulation-bg);
+  stroke: color-mix(in srgb, var(--cat-regulation) 35%, transparent);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.maze__exit {
+  fill: var(--cat-speech-bg);
+  stroke: var(--cat-speech);
+  stroke-width: 2;
+  rx: 6;
+}
+
+.maze__ball {
+  fill: var(--cat-regulation);
+}
+
+.maze__pad {
+  display: grid;
+  grid-template-columns: repeat(3, 64px);
+  grid-template-rows: repeat(2, 56px);
+  gap: var(--space-2);
+}
+
+.maze__key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.maze__key:hover {
+  border-color: var(--cat-regulation);
+}

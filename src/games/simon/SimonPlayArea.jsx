@@ -3,6 +3,8 @@ import { PADS, extendSequence, checkAnswer, scoring } from './simon.config'
 import { playClick, playCorrect, playWrong } from '../../lib/sound'
 import { useGameKeys } from '../engine/useGameKeys'
 import OptionKey from '../engine/OptionKey'
+import ShapeIcon from '../engine/ShapeIcon'
+import { gameColor, isColorSafe } from '../../lib/palette'
 import './SimonPlayArea.css'
 
 const SHOW_STEP_MS = 550
@@ -100,6 +102,7 @@ function SimonPlayArea({ level, onFinish }) {
   // так і не побачила б підтвердження власного ходу. Стани не конфліктують:
   // pressedPad гасне за 160 мс, а новий показ починається лише через 400 мс.
   const litPad = pressedPad ?? activePad
+  const colorSafe = isColorSafe()
 
   return (
     <div className="simon">
@@ -112,12 +115,19 @@ function SimonPlayArea({ level, onFinish }) {
             key={pad.id}
             type="button"
             className={litPad === pad.id ? 'simon__pad is-active' : 'simon__pad'}
-            style={{ '--pad-color': pad.hex }}
+            style={{ '--pad-color': gameColor(pad.hex) }}
             onClick={() => handlePadClick(pad.id)}
             disabled={mode !== 'waiting'}
             aria-label={`${pad.label} кнопка`}
           >
             <OptionKey n={index + 1} />
+            {/* Форма — друга ознака для дитини, яка не розрізняє кольори:
+                «повтори червону-зелену» інакше нерозв'язне. */}
+            {colorSafe && (
+              <span className="simon__pad-shape" aria-hidden="true">
+                <ShapeIcon shape={pad.shape} color="#ffffff" size={40} />
+              </span>
+            )}
           </button>
         ))}
       </div>

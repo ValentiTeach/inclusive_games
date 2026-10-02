@@ -434,3 +434,14 @@
 .game-shell__practice-done {
   text-align: center;
 }
+
+.game-shell__helper {
+  justify-content: center;
+  margin: var(--space-3) 0 var(--space-4);
+}
+
+.game-shell__helper .helper-say__bubble {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

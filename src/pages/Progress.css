@@ -247,3 +247,12 @@
     transition: none;
   }
 }
+
+.progress-garden {
+  margin: var(--space-5) 0;
+}
+
+.progress-garden__note {
+  margin-top: var(--space-3);
+  font-size: 15px;
+}

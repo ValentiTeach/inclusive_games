@@ -117,3 +117,16 @@
     font-size: 15px;
   }
 }
+
+.traffic__lamp-shape {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.traffic__lamp.is-lit .traffic__lamp-shape {
+  opacity: 1;
+}

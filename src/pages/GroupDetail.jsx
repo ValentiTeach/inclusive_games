@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
-  Trophy,
-  Medal,
-  Award,
   Download,
   Pencil,
   UserMinus,
@@ -27,10 +24,9 @@ import { buildGroupCsv, csvFileName, downloadCsv } from '../lib/csv'
 import ParentAccess from '../components/teacher/ParentAccess'
 import GameBreakdown from '../components/teacher/GameBreakdown'
 import Assignments from '../components/teacher/Assignments'
+import SessionPlans from '../components/teacher/SessionPlans'
 import { GAMES } from '../data/games'
 import './GroupDetail.css'
-
-const RANK_ICONS = [Trophy, Medal, Award]
 
 const GAME_TITLES = Object.fromEntries(GAMES.map((game) => [game.id, game.title]))
 
@@ -274,6 +270,8 @@ function GroupDetail() {
         </button>
       )}
 
+      <SessionPlans groupId={groupId} students={data.students} results={data.results ?? []} />
+
       <Assignments
         groupId={groupId}
         students={data.students}
@@ -291,38 +289,11 @@ function GroupDetail() {
         </p>
       ) : (
         <>
-          {(() => {
-            const ranked = data.students
-              .filter((student) => student.attempts > 0)
-              .sort((a, b) => b.avgScore - a.avgScore)
-              .slice(0, 5)
-
-            if (ranked.length === 0) return null
-
-            return (
-              <div className="group-detail__leaderboard">
-                <h2>Рейтинг групи</h2>
-                <ol className="group-detail__leaderboard-list">
-                  {ranked.map((student, index) => {
-                    const RankIcon = RANK_ICONS[index]
-                    return (
-                      <li key={student.id} className="group-detail__leaderboard-item">
-                        <span className="group-detail__leaderboard-rank">
-                          {RankIcon ? (
-                            <RankIcon size={18} aria-hidden="true" />
-                          ) : (
-                            <span className="group-detail__leaderboard-rank-num">{index + 1}</span>
-                          )}
-                        </span>
-                        <span className="group-detail__leaderboard-name">{student.displayName}</span>
-                        <span className="group-detail__leaderboard-score">{student.avgScore}%</span>
-                      </li>
-                    )
-                  })}
-                </ol>
-              </div>
-            )
-          })()}
+          {/*
+            Рейтингу групи тут більше немає. Порівняння — лише з собою: місце в
+            рейтингу класу для дитини, яка тільки вчиться утримувати увагу, — це
+            тиск, а не мотивація, і роздрукований звіт поніс би його й далі.
+          */}
 
           {actionError && <p className="group-detail__error">{actionError}</p>}
 
@@ -359,7 +330,13 @@ function GroupDetail() {
                         }}
                       />
                     ) : (
-                      student.displayName
+                      <Link
+                        to={`/groups/${groupId}/students/${student.id}`}
+                        className="group-detail__student-link"
+                        title="Картка дитини: адаптації, цілі ІПР, щоденник"
+                      >
+                        {student.displayName}
+                      </Link>
                     )}
                   </td>
                   <td data-label="Приєднався">{formatDate(student.joinedAt)}</td>

@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient'
 import { clearAllResults } from '../games/engine/storage'
+import { clearActiveAdaptations } from './adaptations'
 
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'
 const CODE_LENGTH = 6
@@ -243,6 +244,8 @@ export async function getSessionIdentity() {
 export async function startFreshStudentSession() {
   await supabase.auth.signOut()
   clearAllResults()
+  // Затримка активації чи шрифт попередньої дитини — теж її, а не наступної.
+  clearActiveAdaptations()
   const { error } = await supabase.auth.signInAnonymously()
   if (error) throw error
 }

@@ -115,3 +115,17 @@
     min-height: 44px;
   }
 }
+
+.settings__specialist {
+  border-color: var(--accent);
+}
+
+.settings__specialist-list {
+  margin: 0;
+  padding-left: 1.2em;
+  color: var(--text);
+}
+
+.settings__options .helper {
+  align-self: center;
+}

@@ -1,6 +1,15 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+/*
+ * Шрифт для дислексії. Підключено лише кирилицю й латиницю, 400 і 700: браузер
+ * завантажує файли шрифту тільки тоді, коли шрифт справді використано, тобто
+ * лише в дитини з цим профілем.
+ */
+import '@fontsource/andika/cyrillic-400.css'
+import '@fontsource/andika/cyrillic-700.css'
+import '@fontsource/andika/latin-400.css'
+import '@fontsource/andika/latin-700.css'
 import './index.css'
 import './styles/print.css'
 import App from './App.jsx'

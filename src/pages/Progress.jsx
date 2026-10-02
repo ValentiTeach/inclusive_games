@@ -17,6 +17,9 @@ import Sparkline from '../components/ui/Sparkline'
 import Button from '../components/ui/Button'
 import AchievementBadge from '../components/ui/AchievementBadge'
 import CountUpNumber from '../components/ui/CountUpNumber'
+import Garden from '../components/ui/Garden'
+import { buildGarden, GARDEN_SIZE } from '../lib/garden'
+import { listMyRuns } from '../lib/sessions'
 import './Progress.css'
 
 function average(numbers) {
@@ -27,6 +30,21 @@ function Progress() {
   const { user } = useAuth()
   const [cloudHistory, setCloudHistory] = useState(null)
   const [barsVisible, setBarsVisible] = useState(false)
+  const [sessionDates, setSessionDates] = useState([])
+
+  useEffect(() => {
+    if (!user) return undefined
+    let cancelled = false
+    listMyRuns(user.id)
+      .then((runs) => {
+        if (!cancelled) setSessionDates(runs.filter((run) => run.finished_at).map((run) => run.finished_at))
+      })
+      // Сад без занять — теж сад: дні гри садять його й без мережі.
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [user])
 
   useEffect(() => {
     if (!user) return undefined
@@ -82,6 +100,7 @@ function Progress() {
   const { current, longest } = computeStreak(baseStats.dates)
   const achievementStats = { ...baseStats, longestStreak: longest }
   const goal = dailyGoal(baseStats.attemptsToday)
+  const garden = buildGarden({ days: baseStats.dates, sessionDates })
 
   return (
     <section className="progress-page">
@@ -100,6 +119,21 @@ function Progress() {
           <CountUpNumber value={longest} className="progress-summary__value" />
           <span className="progress-summary__label">найдовша серія</span>
         </div>
+      </div>
+
+      {/*
+        Сад — нагорода за участь, а не за бал: кожен день гри і кожне
+        завершене заняття додають рослину, і нічого не забирається.
+      */}
+      <div className="progress-garden">
+        <h2>Мій сад</h2>
+        <Garden garden={garden} />
+        <p className="progress-garden__note">
+          Кожен день, коли ти тренуєшся, у саду проростає травинка, а кожне
+          завершене заняття — квітка.
+          {garden.gardensDone > 0 &&
+            ` Уже ${garden.gardensDone === 1 ? 'один сад виріс' : `${garden.gardensDone} садів виросло`} повністю — цей новий, на ${GARDEN_SIZE} місць.`}
+        </p>
       </div>
 
       {/*

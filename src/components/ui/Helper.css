@@ -1,0 +1,73 @@
+.helper {
+  --helper-body: #5b7fc7;
+  --helper-wing: #46689f;
+  --helper-belly: #e7eefb;
+  --helper-ink: #1b2a44;
+  --helper-beak: #e69f00;
+  flex: none;
+  overflow: visible;
+}
+
+:root[data-theme='dark'] .helper {
+  --helper-body: #7b9de0;
+  --helper-wing: #5f82c4;
+  --helper-belly: #dfe8fa;
+}
+
+.helper__body {
+  fill: var(--helper-body);
+}
+
+.helper__wing {
+  fill: var(--helper-wing);
+  transition: transform 0.35s ease;
+}
+
+.helper__belly {
+  fill: var(--helper-belly);
+}
+
+.helper__feather,
+.helper__smile {
+  stroke: var(--helper-wing);
+}
+
+.helper__eye {
+  fill: #ffffff;
+  stroke: var(--helper-ink);
+  stroke-width: 1.5;
+}
+
+.helper__pupil {
+  fill: var(--helper-ink);
+}
+
+.helper__lid {
+  stroke: var(--helper-ink);
+}
+
+.helper__beak {
+  fill: var(--helper-beak);
+}
+
+.helper__feet {
+  stroke: var(--helper-beak);
+}
+
+/* Мовна бульбашка поруч із персонажем. */
+.helper-say {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.helper-say__bubble {
+  position: relative;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  color: var(--text);
+  font-weight: 600;
+  margin: 0;
+}

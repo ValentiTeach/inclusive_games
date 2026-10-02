@@ -1,0 +1,158 @@
+.schedule {
+  margin: 0 0 var(--space-5);
+}
+
+.schedule__first-then {
+  margin: 0 0 var(--space-3);
+  color: var(--text);
+  font-size: 18px;
+}
+
+.schedule__label {
+  color: var(--text-muted);
+}
+
+.schedule__cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.schedule__card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.schedule__card.is-current {
+  border-color: var(--accent);
+  color: var(--text);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.schedule__card.is-done {
+  background: var(--surface-muted);
+}
+
+.schedule__card.is-done .schedule__icon {
+  color: var(--accent);
+}
+
+.schedule__card.is-skipped {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+.schedule__icon {
+  display: inline-flex;
+}
+
+.mood-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.mood-picker__option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 96px;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mood-picker__option.is-chosen {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.mood-face--good {
+  fill: #f6d55c;
+}
+
+.mood-face--okay {
+  fill: #cfd6e2;
+}
+
+.mood-face--sad {
+  fill: #9cc3ea;
+}
+
+.mood-face__ink {
+  fill: #1b2a44;
+}
+
+.mood-face__line {
+  stroke: #1b2a44;
+}
+
+.breathing,
+.movement,
+.session-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+}
+
+.breathing__circle {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+  border: 3px solid var(--accent);
+  transform: scale(0.6);
+  transition: transform 4s ease-in-out;
+}
+
+.breathing__circle.is-in {
+  transform: scale(1);
+}
+
+.breathing__phase {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+}
+
+.breathing__left,
+.movement__count {
+  margin: 0;
+}
+
+.movement__text {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+  max-width: 28ch;
+}
+
+.session-run__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+}

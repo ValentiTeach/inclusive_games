@@ -1,7 +1,12 @@
 import { describe, it, expect } from 'vitest'
 import {
+  METRIC_AGGREGATION,
+  METRIC_LABELS,
   defineMetrics,
+  halvesMetrics,
   metricLabel,
+  postErrorSlowing,
+  spreadMetrics,
   orderMetricKeys,
   timingMetrics,
   trialMetrics,
@@ -112,6 +117,8 @@ describe('timingMetrics', () => {
       avg_rt_ms: 337,
       best_rt_ms: 280,
       worst_rt_ms: 410,
+      rt_sd_ms: 67,
+      rt_cv_pct: 20,
     })
   })
 
@@ -138,5 +145,43 @@ describe('orderMetricKeys / metricLabel', () => {
 
   it('labels the shared keys in Ukrainian', () => {
     expect(metricLabel('avg_rt_ms')).toBe('Сер. час, мс')
+  })
+})
+
+describe('variability, fatigue and post-error metrics', () => {
+  const trial = (correct, reactionTimeMs) => ({ correct, reactionTimeMs })
+
+  it('reports RT spread only from three measurements up', () => {
+    expect(spreadMetrics([400, 500])).toEqual({})
+    expect(spreadMetrics([400, 500, 600])).toEqual({ rt_sd_ms: 100, rt_cv_pct: 20 })
+  })
+
+  it('splits accuracy into halves, the odd trial going to the second', () => {
+    const results = [true, true, true, false, false, true, false].map((c) => trial(c, 500))
+    expect(halvesMetrics(results)).toEqual({
+      accuracy_first_half_pct: 100,
+      accuracy_second_half_pct: 25,
+    })
+    expect(halvesMetrics(results.slice(0, 5))).toEqual({})
+  })
+
+  it('measures slowing after an error against slowing after a correct answer', () => {
+    const results = [trial(true, 400), trial(false, 420), trial(true, 700), trial(true, 440)]
+    // Після помилки: 700. Після правильної: 420 і 440 → 430.
+    expect(postErrorSlowing(results)).toEqual({ post_error_slowing_ms: 270 })
+    expect(postErrorSlowing([trial(true, 400), trial(true, 500)])).toEqual({})
+  })
+
+  it('keeps every new key labelled and aggregated', () => {
+    for (const key of [
+      'rt_sd_ms',
+      'rt_cv_pct',
+      'accuracy_first_half_pct',
+      'accuracy_second_half_pct',
+      'post_error_slowing_ms',
+    ]) {
+      expect(METRIC_LABELS[key]).toBeTruthy()
+      expect(METRIC_AGGREGATION[key]).toBe('mean')
+    }
   })
 })

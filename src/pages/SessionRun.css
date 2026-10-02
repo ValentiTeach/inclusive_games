@@ -1,0 +1,35 @@
+.session-run {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.session-run__preview {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+.session-run__felt {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.session-run__skip {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--space-5);
+}
+
+.session-run__skip-button {
+  font: inherit;
+  font-size: 15px;
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+  min-height: 44px;
+}

@@ -1,3 +1,5 @@
+import { getActiveAdaptations } from './adaptations'
+
 const KEY = 'inclusive-games:settings'
 
 const DEFAULTS = {
@@ -7,6 +9,7 @@ const DEFAULTS = {
   theme: 'system',
   voice: 'button',
   pace: 'normal',
+  errorFeedback: 'standard',
 }
 
 export const SOUND_MODES = ['off', 'clicks', 'music']
@@ -24,6 +27,14 @@ export const VOICE_MODES = ['off', 'button', 'auto']
  * чи моторними труднощами звичайний таймер міряє руку, а не увагу.
  */
 export const PACE_MODES = ['normal', 'relaxed']
+
+/**
+ * Реакція на помилку. 'standard' — колір помилки й різкий сигнал, як було.
+ * 'gentle' — нейтральний колір, тихий тон і спокійне «Спробуй ще» від
+ * Совеняти: червоний хрестик і зумер для тривожної дитини читаються як
+ * покарання, а не як підказка.
+ */
+export const ERROR_FEEDBACK_MODES = ['standard', 'gentle']
 
 /**
  * Раніше звук був перемикачем «увімк./вимк.». Той, хто його вимкнув, зробив це
@@ -90,9 +101,19 @@ export function systemPrefersDark() {
   return Boolean(window.matchMedia?.('(prefers-color-scheme: dark)').matches)
 }
 
+/**
+ * Сенсорно-безпечний профіль від фахівця вмикає м'яку реакцію завжди: дитина
+ * чи хтось поруч не має змоги випадково повернути їй зумер у налаштуваннях.
+ */
+export function errorFeedbackMode() {
+  if (getActiveAdaptations().sensorySafe) return 'gentle'
+  return getSettings().errorFeedback === 'gentle' ? 'gentle' : 'standard'
+}
+
 export function applySettings(settings) {
   const root = document.documentElement
   root.dataset.textSize = settings.textSize
+  root.dataset.errorFeedback = settings.errorFeedback === 'gentle' ? 'gentle' : 'standard'
   root.classList.toggle('force-reduced-motion', settings.reducedMotion)
 
   const resolved = resolveTheme(settings.theme, systemPrefersDark())
@@ -118,5 +139,5 @@ export function watchSystemTheme(onChange) {
 }
 
 export function prefersReducedMotion() {
-  return getSettings().reducedMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  return getSettings().reducedMotion || getActiveAdaptations().sensorySafe || window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }

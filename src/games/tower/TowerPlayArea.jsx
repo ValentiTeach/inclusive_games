@@ -11,6 +11,7 @@ import {
 } from './tower.config'
 import { now } from '../engine/time'
 import { playClick, playCorrect, playWrong } from '../../lib/sound'
+import { gameColor } from '../../lib/palette'
 import { useGameKeys } from '../engine/useGameKeys'
 import ShapeIcon from '../engine/ShapeIcon'
 import OptionKey from '../engine/OptionKey'
@@ -28,7 +29,7 @@ function Ball({ id, lifted = false, size = 44 }) {
   return (
     <span
       className={lifted ? 'tower__ball is-lifted' : 'tower__ball'}
-      style={{ background: ball.color, width: size, height: size }}
+      style={{ background: gameColor(ball.color), width: size, height: size }}
     >
       {/* Знак усередині — щоб кульки розрізнялися не лише кольором. */}
       <ShapeIcon shape={ball.shape} color="#fff" size={size * 0.42} />

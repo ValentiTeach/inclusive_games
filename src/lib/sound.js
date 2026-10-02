@@ -1,4 +1,5 @@
-import { getSettings } from './settings'
+import { getSettings, errorFeedbackMode } from './settings'
+import { getActiveAdaptations } from './adaptations'
 
 let audioContext = null
 
@@ -38,16 +39,38 @@ function soundOn() {
   return getSettings().sound !== 'off'
 }
 
+/*
+ * Сенсорно-безпечний режим (профіль від фахівця): жодного різкого тембру.
+ * Квадрат і пилка звучать як зумер — їх замінює синусоїда, і все тихіше
+ * вдвічі. Звук не зникає зовсім: тиша — це окремий вибір «Тихо».
+ */
+function soften(tone) {
+  if (!getActiveAdaptations().sensorySafe) return tone
+  return { ...tone, type: 'sine', volume: tone.volume * 0.5 }
+}
+
 // Web Audio can throw in unsupported/locked-down environments (e.g. no user
 // gesture yet). Sound is a non-essential enhancement, so failures are ignored.
 function safePlay(tone) {
   if (!soundOn()) return
 
   try {
-    playTone(tone)
+    playTone(soften(tone))
   } catch {
     // ignore
   }
+}
+
+/*
+ * Помилка — це подія, яку бачить не лише динамік. Оболонка гри слухає її, щоб
+ * у м'якому режимі показати спокійне «Спробуй ще» замість самого червоного.
+ * Усі ігри вже кличуть playWrong на помилці, тож жодну не довелося правити.
+ */
+const wrongListeners = new Set()
+
+export function onWrongAnswer(listener) {
+  wrongListeners.add(listener)
+  return () => wrongListeners.delete(listener)
 }
 
 export function playClick() {
@@ -59,6 +82,20 @@ export function playCorrect() {
 }
 
 export function playWrong() {
+  wrongListeners.forEach((listener) => {
+    try {
+      listener()
+    } catch {
+      // Слухач — прикраса; гра не має падати через нього.
+    }
+  })
+
+  // М'яка реакція: замість зумера — тихий низький тон, який каже «ні», але
+  // не лякає. Неприємний звук за помилку для тривожної дитини — покарання.
+  if (errorFeedbackMode() === 'gentle') {
+    safePlay({ frequency: 330, duration: 0.14, type: 'sine', volume: 0.035 })
+    return
+  }
   safePlay({ frequency: 170, duration: 0.16, type: 'sawtooth', volume: 0.06 })
 }
 
@@ -86,6 +123,8 @@ export function isSoundOn() {
 // correct/click tones — reserved for personal bests and new achievements.
 export function playVictory() {
   if (!soundOn()) return
+  // Арпеджіо — саме той раптовий звук, від якого сенсорний режим береже.
+  if (getActiveAdaptations().sensorySafe) return
 
   const ctx = getContext()
   if (!ctx) return

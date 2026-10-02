@@ -11,7 +11,17 @@ import { suggestLevel } from './suggestLevel'
 import { pushResult, pushRating } from '../../lib/cloudSync'
 import { playVictory, playClick, startAmbient, stopAmbient } from '../../lib/sound'
 import { getSettings, updateSettings } from '../../lib/settings'
-import { paceLevel, paceResult, practiceHint, practiceLevel } from './adapt'
+import {
+  paceLevel,
+  paceResult,
+  practiceHint,
+  practiceLevel,
+  shortLevel,
+  shortResult,
+} from './adapt'
+import { useAdaptations } from '../../lib/adaptations'
+import { compareWithPast } from '../../lib/selfCompare'
+import AdaptivePlay from './AdaptivePlay'
 import IntroScreen from './IntroScreen'
 import CountdownScreen from './CountdownScreen'
 import ResultsScreen from './ResultsScreen'
@@ -46,15 +56,34 @@ function categoryHistoryFor(config) {
 const COUNTDOWN_START = 3
 const COUNTDOWN_STEP_MS = 700
 
-function GameShell({ config, renderPlay }) {
+/*
+ * Рівень, заданий у кроці заняття, — якщо такий у гри справді є. Рівень, якого
+ * немає (гру оновили, а заняття лишилося старе), не має ламати заняття:
+ * тоді рівень добирається, як завжди.
+ */
+function initialLevel(config, history, session) {
+  if (session?.levelId && config.levels.some((level) => level.id === session.levelId)) {
+    return { levelId: session.levelId, isAutoSuggested: false }
+  }
+  return suggestLevel(config, history, categoryHistoryFor(config))
+}
+
+/**
+ * @param session крок заняття або зрізу, якщо гра відкрита з нього:
+ *   - levelId — рівень, заданий фахівцем (дитина його не змінює);
+ *   - battery — зріз «до/після»: однакові параметри щоразу, тож ні рівень, ні
+ *     темп, ні довжину тут не підлаштовано (крім «без обмеження часу» з
+ *     профілю: той діє на кожному зрізі цієї дитини однаково);
+ *   - onDone(result) — дитина натиснула «Далі» на екрані результату.
+ */
+function GameShell({ config, renderPlay, session = null }) {
+  const adaptations = useAdaptations()
   const [phase, setPhase] = useState('intro')
   const [history, setHistory] = useState(() => getResults(config.id))
-  const [levelState, setLevelState] = useState(() =>
-    suggestLevel(config, history, categoryHistoryFor(config)),
-  )
+  const [levelState, setLevelState] = useState(() => initialLevel(config, history, session))
   const [countdown, setCountdown] = useState(COUNTDOWN_START)
   const [result, setResult] = useState(null)
-  const [isNewBest, setIsNewBest] = useState(false)
+  const [comparison, setComparison] = useState(null)
   const [newAchievements, setNewAchievements] = useState([])
   const [felt, setFelt] = useState(null)
   const [leaving, setLeaving] = useState(false)
@@ -70,11 +99,22 @@ function GameShell({ config, renderPlay }) {
    * на кожен рендер оболонки (скажімо, коли відкрилось питання про вихід)
    * перемішав би таблицю Шульте просто посеред гри.
    */
+  /*
+   * Темп, що діє насправді. «Без обмеження часу» з профілю фахівця сильніше за
+   * перемикач перед грою: дитина чи випадковий дорослий поруч не мають
+   * повернути таймер тому, кому його зняли свідомо. На зрізі темп
+   * фіксований — звичайний, якщо профіль не каже інакше.
+   */
+  const forcedPace = adaptations.noTimeLimit ? 'relaxed' : session?.battery ? 'normal' : null
+  const effectivePace = forcedPace ?? pace
+  const shortTrials = session?.battery ? 0 : adaptations.shortTrials
+
   const level = useMemo(() => {
     const base = config.levels.find((item) => item.id === levelState.levelId)
-    const paced = paceLevel(config, base, pace)
-    return practice ? practiceLevel(config, paced) : paced
-  }, [config, levelState.levelId, pace, practice])
+    const paced = paceLevel(config, base, effectivePace)
+    if (practice) return practiceLevel(config, paced)
+    return shortLevel(config, paced, shortTrials)
+  }, [config, levelState.levelId, effectivePace, practice, shortTrials])
   const categoryInfo = CATEGORIES[config.category]
 
   useEffect(() => {
@@ -159,11 +199,17 @@ function GameShell({ config, renderPlay }) {
       return
     }
 
-    const finishResult = paceResult(config, rawResult, pace)
+    let finishResult = shortResult(level, paceResult(config, rawResult, effectivePace))
+    if (session?.battery) {
+      finishResult = {
+        ...finishResult,
+        entries: [...finishResult.entries, { label: 'Режим', value: 'Зріз' }],
+        metrics: { ...finishResult.metrics, battery: true },
+      }
+    }
     setResult(finishResult)
     setFelt(null)
 
-    const previousBest = history.length ? Math.max(...history.map((entry) => entry.score)) : null
     const statsBefore = achievementStatsExcluding(config.id, history)
 
     const updated = saveResult(config.id, { ...finishResult, levelId: levelState.levelId })
@@ -174,20 +220,20 @@ function GameShell({ config, renderPlay }) {
       (achievement) => !isUnlocked(achievement, statsBefore) && isUnlocked(achievement, statsAfter),
     )
 
-    const isBest = previousBest !== null && finishResult.score > previousBest
-    setIsNewBest(isBest)
+    const compared = compareWithPast(history, updated[0])
+    setComparison(compared)
     setNewAchievements(unlocked)
     setPhase('results')
     pushResult(config.id, updated[0])
 
-    if (isBest || unlocked.length > 0) {
+    if (compared?.improved || unlocked.length > 0) {
       playVictory()
     }
   }
 
   function handleRestart() {
     setResult(null)
-    setIsNewBest(false)
+    setComparison(null)
     setNewAchievements([])
     setPhase('intro')
   }
@@ -216,7 +262,7 @@ function GameShell({ config, renderPlay }) {
     setPractice(false)
     setPracticeResult(null)
     setResult(null)
-    setIsNewBest(false)
+    setComparison(null)
     setNewAchievements([])
     setPhase('intro')
   }
@@ -292,11 +338,12 @@ function GameShell({ config, renderPlay }) {
           config={config}
           levelId={levelState.levelId}
           isAutoSuggested={levelState.isAutoSuggested}
-          onLevelChange={handleLevelChange}
+          onLevelChange={session?.levelId || session?.battery ? null : handleLevelChange}
           onStart={handleStart}
-          onPractice={handlePractice}
-          pace={pace}
-          onPaceChange={handlePaceChange}
+          onPractice={session?.battery ? null : handlePractice}
+          pace={effectivePace}
+          onPaceChange={forcedPace ? null : handlePaceChange}
+          paceLockedBy={forcedPace ? (adaptations.noTimeLimit ? 'profile' : 'battery') : null}
           history={history}
         />
       )}
@@ -309,7 +356,9 @@ function GameShell({ config, renderPlay }) {
 
       {phase === 'playing' && (
         <>
-          {renderPlay(level, handleFinish)}
+          <AdaptivePlay config={config} profile={adaptations}>
+            {renderPlay(level, handleFinish)}
+          </AdaptivePlay>
           <KeyHint hint={config.keyHint} />
         </>
       )}
@@ -327,9 +376,10 @@ function GameShell({ config, renderPlay }) {
         <ResultsScreen
           score={result.score}
           entries={result.entries}
-          isNewBest={isNewBest}
+          comparison={comparison}
           newAchievements={newAchievements}
           onRestart={handleRestart}
+          onNext={session ? () => session.onDone?.(result) : null}
           felt={felt}
           onFelt={handleFelt}
         />

@@ -377,6 +377,8 @@ describe('рядки на екрані збігаються з числами в
       avg_rt_ms: 337,
       best_rt_ms: 280,
       worst_rt_ms: 410,
+      rt_sd_ms: 67,
+      rt_cv_pct: 20,
     })
     expect(byLabel['Середній час']).toBe('337 мс')
     expect(byLabel['Найкращий час']).toBe('280 мс')

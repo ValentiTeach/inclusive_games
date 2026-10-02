@@ -1,11 +1,15 @@
 import { useState } from 'react'
 import { getSettings, saveSettings, applySettings } from '../lib/settings'
 import { isSpeechSupported, speak, useUkrainianVoice } from '../lib/speech'
+import { activeAdaptations, describeAdaptation, useAdaptations } from '../lib/adaptations'
+import Helper from '../components/ui/Helper'
 import './Settings.css'
 
 function Settings() {
   const [settings, setSettings] = useState(() => getSettings())
   const voice = useUkrainianVoice()
+  const adaptations = useAdaptations()
+  const fromSpecialist = activeAdaptations(adaptations)
 
   function update(patch) {
     const next = { ...settings, ...patch }
@@ -18,6 +22,28 @@ function Settings() {
     <section className="settings">
       <h1>Налаштування</h1>
       <p>Зберігаються лише в цьому браузері, на цьому пристрої.</p>
+
+      {/*
+        Профіль від фахівця показується, а не редагується: дитина має знати,
+        чому, скажімо, кнопку треба тримати, — але вимкнути це сама не може.
+        Він діє на всіх її пристроях, бо лежить у хмарі.
+      */}
+      {fromSpecialist.length > 0 && (
+        <div className="settings__row settings__row--stacked settings__specialist">
+          <div>
+            <h2>Налаштував фахівець</h2>
+            <p>
+              Діє на всіх твоїх пристроях. Змінити це може лише вчитель або
+              фахівець, який із тобою займається.
+            </p>
+            <ul className="settings__specialist-list">
+              {fromSpecialist.map((item) => (
+                <li key={item.id}>{describeAdaptation(item, adaptations)}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/*
         Три режими, а не перемикач: для частини дітей тиша — умова, за якої
@@ -126,6 +152,43 @@ function Settings() {
               }
               onClick={() => update({ pace: value })}
               aria-pressed={settings.pace === value}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/*
+        Червоний хрестик і зумер для тривожної дитини читаються як покарання.
+        М'який варіант каже те саме — «не те» — без страху.
+      */}
+      <div className="settings__row">
+        <div>
+          <h2>Коли помиляюсь</h2>
+          <p>
+            «Звичайно» — колір помилки й короткий сигнал. «М’яко» — спокійний
+            колір, тихий звук і Совеня каже «Спробуй ще».
+            {adaptations.sensorySafe && ' Зараз увімкнено фахівцем — завжди м’яко.'}
+          </p>
+        </div>
+        <div className="settings__options">
+          <Helper pose="calm" size={40} />
+          {[
+            ['standard', 'Звичайно'],
+            ['gentle', 'М’яко'],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={
+                (adaptations.sensorySafe ? 'gentle' : settings.errorFeedback) === value
+                  ? 'settings__option is-active'
+                  : 'settings__option'
+              }
+              onClick={() => update({ errorFeedback: value })}
+              aria-pressed={(adaptations.sensorySafe ? 'gentle' : settings.errorFeedback) === value}
+              disabled={adaptations.sensorySafe}
             >
               {label}
             </button>

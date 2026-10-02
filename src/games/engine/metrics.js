@@ -23,6 +23,74 @@ function mean(numbers) {
   return Math.round(numbers.reduce((sum, value) => sum + value, 0) / numbers.length)
 }
 
+/*
+ * Менше трьох вимірів — це не розкид, а випадковість: два числа завжди
+ * «розходяться» рівно настільки, наскільки розійшлися.
+ */
+const MIN_FOR_SPREAD = 3
+
+/*
+ * Половини спроби порівнюються лише тоді, коли в кожній є хоч три проби:
+ * «перша половина 100%, друга 0%» на двох пробах — це одна помилка, а не втома.
+ */
+const MIN_FOR_HALVES = 6
+
+/**
+ * Розкид часу реакції: стандартне відхилення (вибіркове) і коефіцієнт варіації.
+ *
+ * Середній час каже, наскільки дитина швидка, а розкид — наскільки рівно вона
+ * тримає увагу. Дві дитини з тим самим середнім 600 мс можуть відповідати
+ * рівно або то за 300, то за 1200, — і саме друге часто важливіше для
+ * фахівця. CV (розкид, поділений на середнє) дає порівнювати дітей і дні з
+ * різним темпом: 100 мс розкиду при 400 і при 1200 мс — різні речі.
+ */
+export function spreadMetrics(times) {
+  if (times.length < MIN_FOR_SPREAD) return {}
+  const average = times.reduce((sum, value) => sum + value, 0) / times.length
+  const variance =
+    times.reduce((sum, value) => sum + (value - average) ** 2, 0) / (times.length - 1)
+  const sd = Math.sqrt(variance)
+  return {
+    rt_sd_ms: Math.round(sd),
+    rt_cv_pct: average > 0 ? Math.round((sd / average) * 100) : undefined,
+  }
+}
+
+/**
+ * Точність першої і другої половини спроби — найпростіший слід втоми.
+ * Непарна проба йде в другу половину: кінець спроби цікавіший за початок.
+ */
+export function halvesMetrics(results) {
+  if (results.length < MIN_FOR_HALVES) return {}
+  const middle = Math.floor(results.length / 2)
+  const pct = (part) =>
+    Math.round((part.filter((result) => result.correct).length / part.length) * 100)
+  return {
+    accuracy_first_half_pct: pct(results.slice(0, middle)),
+    accuracy_second_half_pct: pct(results.slice(middle)),
+  }
+}
+
+/**
+ * Сповільнення після помилки: середній час проб одразу після помилки мінус
+ * середній час проб одразу після правильної відповіді.
+ *
+ * Додатне число — дитина помітила помилку й пригальмувала (це добре: контроль
+ * працює). Близьке до нуля або від'ємне при багатьох помилках — помилки
+ * проходять повз неї. Рахується лише тоді, коли є обидва види попередників.
+ */
+export function postErrorSlowing(results) {
+  const afterError = []
+  const afterCorrect = []
+  for (let i = 1; i < results.length; i += 1) {
+    const time = results[i].reactionTimeMs
+    if (!Number.isFinite(time)) continue
+    ;(results[i - 1].correct ? afterCorrect : afterError).push(time)
+  }
+  if (afterError.length === 0 || afterCorrect.length === 0) return {}
+  return { post_error_slowing_ms: mean(afterError) - mean(afterCorrect) }
+}
+
 /**
  * Збирає об'єкт показників, викидаючи все, що гра не поміряла. Приймає числа
  * й булеві значення; `undefined`, `null` і NaN не доходять до бази.
@@ -58,6 +126,9 @@ export function trialMetrics(results, extra = {}) {
     rt_count: times.length ? times.length : undefined,
     avg_rt_ms: times.length ? mean(times) : undefined,
     best_rt_ms: times.length ? Math.min(...times) : undefined,
+    ...spreadMetrics(times),
+    ...halvesMetrics(results),
+    ...postErrorSlowing(results),
     ...extra,
   })
 }
@@ -72,6 +143,7 @@ export function timingMetrics(reactionTimes) {
     avg_rt_ms: times.length ? mean(times) : undefined,
     best_rt_ms: times.length ? Math.min(...times) : undefined,
     worst_rt_ms: times.length ? Math.max(...times) : undefined,
+    ...spreadMetrics(times),
   })
 }
 
@@ -92,6 +164,11 @@ export const METRIC_LABELS = {
   best_rt_ms: 'Найкращий час, мс',
   worst_rt_ms: 'Найгірший час, мс',
   rt_count: 'Проб із часом',
+  rt_sd_ms: 'Розкид часу (SD), мс',
+  rt_cv_pct: 'Розкид часу (CV), %',
+  accuracy_first_half_pct: 'Точність 1-ї половини, %',
+  accuracy_second_half_pct: 'Точність 2-ї половини, %',
+  post_error_slowing_ms: 'Сповільнення після помилки, мс',
   duration_ms: 'Тривалість, мс',
   cpm: 'Символів за хвилину',
   chars: 'Символів',
@@ -129,6 +206,8 @@ export const METRIC_LABELS = {
   time_error_pct: 'Похибка відліку часу, %',
   time_bias_pct: 'Поспіх (−) / затримка (+), %',
   relaxed_pace: 'Без поспіху',
+  short_attempt: 'Коротка спроба',
+  battery: 'Зріз (до/після)',
 }
 
 /**
@@ -160,6 +239,11 @@ export const METRIC_AGGREGATION = {
   best_rt_ms: 'min',
   worst_rt_ms: 'max',
   rt_count: 'sum',
+  rt_sd_ms: 'mean',
+  rt_cv_pct: 'mean',
+  accuracy_first_half_pct: 'mean',
+  accuracy_second_half_pct: 'mean',
+  post_error_slowing_ms: 'mean',
   duration_ms: 'mean',
   cpm: 'mean',
   chars: 'sum',
@@ -251,4 +335,36 @@ export function orderMetricKeys(keys) {
 
 export function metricLabel(key) {
   return METRIC_LABELS[key] ?? key
+}
+
+/**
+ * Показники, де менше — краще. Потрібні цілям ІПР («до грудня — не більше
+ * двох помилок») і порівнянню з собою: «на 40 мс швидше» — це покращення, а
+ * «на 40 мс більше» в часі — ні.
+ */
+export const LOWER_IS_BETTER = new Set([
+  'errors',
+  'avg_rt_ms',
+  'best_rt_ms',
+  'worst_rt_ms',
+  'rt_sd_ms',
+  'rt_cv_pct',
+  'duration_ms',
+  'early_presses',
+  'avg_offset_pct',
+  'best_offset_pct',
+  'misses',
+  'false_alarms',
+  'extra_moves',
+  'moves',
+  'switch_errors',
+  'perseverations',
+  'rhythm_error_pct',
+  'estimate_error_pct',
+  'exits',
+  'rule_breaks',
+])
+
+export function isLowerBetter(key) {
+  return LOWER_IS_BETTER.has(key)
 }

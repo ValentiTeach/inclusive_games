@@ -3,6 +3,7 @@ import { playClick } from '../../lib/sound'
 import KeyHint from './KeyHint'
 import SpeakButton from './SpeakButton'
 import { paceChangesGame, paceNote } from './adapt'
+import Helper, { HELPER_NAME } from '../../components/ui/Helper'
 
 function IntroScreen({
   config,
@@ -13,6 +14,7 @@ function IntroScreen({
   onPractice,
   pace,
   onPaceChange,
+  paceLockedBy = null,
   history,
 }) {
   function handleLevelChange(id) {
@@ -39,7 +41,10 @@ function IntroScreen({
         ))}
       </ol>
 
-      <div className="game-shell__speak">
+      {/* Совеня «пояснює» правила — і кнопка голосу стоїть поруч із ним:
+          той самий персонаж, той самий голос щоразу. */}
+      <div className="game-shell__speak helper-say">
+        <Helper pose="explain" size={56} label={`${HELPER_NAME} пояснює правила`} />
         <SpeakButton text={spoken} auto />
       </div>
 
@@ -48,7 +53,9 @@ function IntroScreen({
       <div className="game-shell__levels">
         <span className="game-shell__levels-label">Складність</span>
         <div className="game-shell__levels-options">
-          {config.levels.map((level) => (
+          {config.levels
+            .filter((level) => onLevelChange || level.id === levelId)
+            .map((level) => (
             <button
               key={level.id}
               type="button"
@@ -57,14 +64,17 @@ function IntroScreen({
                   ? 'game-shell__level-btn is-active'
                   : 'game-shell__level-btn'
               }
-              onClick={() => handleLevelChange(level.id)}
+              onClick={() => onLevelChange && handleLevelChange(level.id)}
               aria-pressed={level.id === levelId}
             >
               {level.label}
             </button>
-          ))}
+            ))}
         </div>
-        {isAutoSuggested && (
+        {!onLevelChange && (
+          <p className="game-shell__auto-note">Рівень задав учитель для цього заняття.</p>
+        )}
+        {onLevelChange && isAutoSuggested && (
           <p className="game-shell__auto-note">
             {history.length > 0
               ? 'Рівень підібрано автоматично за твоїм попереднім результатом.'
@@ -82,6 +92,16 @@ function IntroScreen({
         лишається тільки пояснення — і лише коли «без поспіху» вже ввімкнено,
         щоб дорослий не гадав, чому нічого не змінилося.
       */}
+      {paceLockedBy && paceMatters && (
+        <div className="game-shell__pace">
+          <p className="game-shell__pace-note">
+            {paceLockedBy === 'profile'
+              ? `Без поспіху — так налаштував фахівець. ${paceNote(config)}`
+              : 'Це зріз: темп і рівень щоразу однакові, щоб результати можна було чесно порівняти.'}
+          </p>
+        </div>
+      )}
+
       {onPaceChange && (paceMatters || relaxed) && (
         <div className="game-shell__pace">
           {paceMatters && (

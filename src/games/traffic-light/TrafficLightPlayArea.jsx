@@ -4,6 +4,8 @@ import { now } from '../engine/time'
 import { playCorrect, playWrong } from '../../lib/sound'
 import { useGameKeys } from '../engine/useGameKeys'
 import OptionKey from '../engine/OptionKey'
+import ShapeIcon from '../engine/ShapeIcon'
+import { gameColor, isColorSafe } from '../../lib/palette'
 import './TrafficLightPlayArea.css'
 
 const FEEDBACK_MS = 550
@@ -11,6 +13,7 @@ const EARLY_MS = 700
 
 function TrafficLightPlayArea({ level, onFinish }) {
   const signals = signalsOfLevel(level)
+  const colorSafe = isColorSafe()
   const [round, setRound] = useState(0)
   const [attempt, setAttempt] = useState(0)
   const [signal, setSignal] = useState(null)
@@ -104,8 +107,15 @@ function TrafficLightPlayArea({ level, onFinish }) {
             <span
               key={item.id}
               className={isLit ? 'traffic__lamp is-lit' : 'traffic__lamp'}
-              style={{ '--lamp-color': item.color }}
+              style={{ '--lamp-color': gameColor(item.color) }}
             >
+              {/* Без розрізнення кольорів світлофор упізнається за формою
+                  вогню, як дорожній знак: квадрат — стій, коло — їдь. */}
+              {colorSafe && (
+                <span className="traffic__lamp-shape" aria-hidden="true">
+                  <ShapeIcon shape={item.shape} color={isLit ? '#ffffff' : item.color} size={30} />
+                </span>
+              )}
               {/* Назва кольору читається вголос лише тоді, коли вогонь горить:
                   для того, хто не бачить екрана, це і є сигнал. */}
               {isLit && <span className="traffic__lamp-name">{item.action}</span>}
@@ -131,11 +141,12 @@ function TrafficLightPlayArea({ level, onFinish }) {
                 ? 'traffic__button is-answer'
                 : 'traffic__button'
             }
-            style={{ '--lamp-color': item.color }}
+            style={{ '--lamp-color': gameColor(item.color) }}
             onClick={() => handleAnswer(item.id)}
             aria-disabled={Boolean(feedback)}
           >
             <OptionKey n={index + 1} />
+            {colorSafe && <ShapeIcon shape={item.shape} color={item.color} size={18} />}
             {item.action}
           </button>
         ))}

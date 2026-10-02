@@ -101,6 +101,16 @@ export async function signInAsTeacher(page, fixtures = {}) {
      * запит бачить наслідок дії, а не початковий стан.
      */
     parentAccess = [],
+    /*
+     * Інструменти фахівця. `adaptations` — рядки student_adaptations;
+     * `plans` і `runs` — заняття групи та їх проходження. Усе, що сторінка
+     * записує (POST), складається в `posted`: тест перевіряє саме те, що пішло
+     * б у базу.
+     */
+    adaptations = [],
+    plans = [],
+    runs = [],
+    posted = [],
   } = fixtures
 
   await page.addInitScript((session) => {
@@ -221,13 +231,46 @@ export async function signInAsTeacher(page, fixtures = {}) {
       return
     }
 
+    const WRITABLE = [
+      'session_plans',
+      'session_templates',
+      'student_adaptations',
+      'ipr_goals',
+      'specialist_vaults',
+    ]
+    if (WRITABLE.includes(path) && request.method() === 'POST') {
+      const payload = JSON.parse(request.postData() ?? '{}')
+      posted.push({ table: path, payload })
+      const created = {
+        id: `${path}-${posted.length}`,
+        created_at: new Date().toISOString(),
+        archived_at: null,
+        student_id: null,
+        ...payload,
+      }
+      if (path === 'session_plans') plans.unshift(created)
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify(created),
+      })
+      return
+    }
+
     let body = []
     if (path === 'parent_links') body = parentLinks
     else if (path === 'profiles' && select.includes('role')) body = [profile]
-    else if (path === 'profiles') body = students
+    else if (path === 'profiles' && url.searchParams.get('id')?.startsWith('eq.')) {
+      // Картка дитини питає одного учня; maybeSingle на двох рядках — помилка.
+      const id = url.searchParams.get('id').slice(3)
+      body = students.filter((student) => student.id === id)
+    } else if (path === 'profiles') body = students
     else if (path === 'groups') body = group && url.searchParams.has('id') ? [group] : groups
     else if (path === 'results') body = results
     else if (path === 'assignments') body = assignments
+    else if (path === 'student_adaptations') body = adaptations
+    else if (path === 'session_plans') body = plans
+    else if (path === 'session_runs') body = runs
 
     // PostgREST віддає один обʼєкт замість масиву, коли клієнт просить .single();
     // supabase-js позначає це заголовком Accept.

@@ -1,0 +1,58 @@
+.garden {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.garden__sky {
+  fill: #dcecfb;
+}
+
+.garden__sun {
+  fill: #f6d55c;
+}
+
+.garden__ground {
+  fill: #bfe3a6;
+}
+
+:root[data-theme='dark'] .garden__sky {
+  fill: #1c2a48;
+}
+
+:root[data-theme='dark'] .garden__sun {
+  fill: #e8e2b0;
+}
+
+:root[data-theme='dark'] .garden__ground {
+  fill: #2f5a3a;
+}
+
+.garden__stem,
+.garden__grass {
+  stroke: #3f8f52;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+}
+
+.garden__glow {
+  fill: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.garden__item.is-new {
+  animation: garden-grow 0.6s ease-out both;
+  transform-box: fill-box;
+}
+
+@keyframes garden-grow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

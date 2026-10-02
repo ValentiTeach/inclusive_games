@@ -2,6 +2,17 @@ import { useCallback, useEffect, useState } from 'react'
 import { supabase, isCloudConfigured } from './supabaseClient'
 import { migrateLocalHistoryOnce } from './cloudSync'
 import { AuthContext } from './authContext'
+import { bindAdaptationsOwner, loadMyAdaptations } from './adaptations'
+
+/*
+ * Профіль адаптацій іде за людиною, а не за браузером: спершу застосовується
+ * копія цієї самої людини (щоб без мережі нічого не змінилося), потім — свіжий
+ * з хмари. Чужа копія знімається одразу.
+ */
+function followAdaptations(user) {
+  bindAdaptationsOwner(user?.id ?? null)
+  if (user) loadMyAdaptations(user.id).catch(() => {})
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
@@ -56,11 +67,13 @@ export function AuthProvider({ children }) {
       const sessionUser = data.session?.user ?? null
       setUser(sessionUser)
       setLoading(false)
+      followAdaptations(sessionUser)
       if (sessionUser) refreshProfile(sessionUser)
     })
 
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      followAdaptations(session?.user ?? null)
       if (session?.user) {
         migrateLocalHistoryOnce(session.user.id)
         refreshProfile(session.user)

@@ -1,24 +1,46 @@
 import { Sparkles } from 'lucide-react'
+import Helper from '../../components/ui/Helper'
 import { FELT_OPTIONS } from './felt'
 import Button from '../../components/ui/Button'
 import CountUpNumber from '../../components/ui/CountUpNumber'
 import Confetti from '../../components/ui/Confetti'
 import AchievementBadge from '../../components/ui/AchievementBadge'
 
-function ResultsScreen({ score, entries, isNewBest, newAchievements, onRestart, felt, onFelt }) {
+/*
+ * Замість «Новий особистий рекорд!» — порівняння лише з собою (lib/selfCompare):
+ * рекорд міряє дитину її найкращим днем, і для тривожної дитини кожна гра після
+ * нього стає програною. Конфеті лишилися для дня, коли справді вийшло краще, —
+ * у сенсорно-безпечному режимі їх вимикає сама Confetti.
+ *
+ * `onNext` — гра в занятті: замість «ще раз / до каталогу» одна кнопка «Далі»,
+ * бо наступний крок заняття вже відомий.
+ */
+function ResultsScreen({
+  score,
+  entries,
+  comparison,
+  newAchievements,
+  onRestart,
+  onNext,
+  felt,
+  onFelt,
+}) {
   return (
     <div className="game-shell__results">
       <h2>Результат</h2>
 
       <div className="game-shell__score">
-        {isNewBest && <Confetti />}
+        {comparison?.improved && <Confetti />}
         <CountUpNumber value={score} className="game-shell__score-value" />
         <span className="game-shell__score-unit">%</span>
-        {isNewBest && (
-          <p className="game-shell__score-best">
-            <Sparkles size={16} aria-hidden="true" /> Новий особистий рекорд!
-          </p>
-        )}
+      </div>
+
+      <div className="helper-say game-shell__helper">
+        <Helper pose="cheer" size={64} />
+        <p className="helper-say__bubble">
+          {comparison?.improved && <Sparkles size={16} aria-hidden="true" />}{' '}
+          {comparison?.text ?? 'Гру завершено. Дякую, що старався!'}
+        </p>
       </div>
 
       <dl className="game-shell__results-list">
@@ -76,10 +98,16 @@ function ResultsScreen({ score, entries, isNewBest, newAchievements, onRestart, 
       </div>
 
       <div className="game-shell__results-actions">
-        <Button onClick={onRestart}>Спробувати ще раз</Button>
-        <Button to="/games" variant="secondary">
-          До каталогу ігор
-        </Button>
+        {onNext ? (
+          <Button onClick={onNext}>Далі</Button>
+        ) : (
+          <>
+            <Button onClick={onRestart}>Спробувати ще раз</Button>
+            <Button to="/games" variant="secondary">
+              До каталогу ігор
+            </Button>
+          </>
+        )}
       </div>
     </div>
   )

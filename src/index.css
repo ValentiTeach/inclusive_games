@@ -244,3 +244,84 @@ a {
   white-space: nowrap;
   border: 0;
 }
+
+/* ─────────────── Профіль адаптацій дитини (lib/adaptations.js) ───────────────
+ * Атрибути на корені ставить фахівцевий профіль, не дитина. Тут лише те, що
+ * робиться стилем однаково для всіх ігор. */
+
+/* Шрифт для дислексії: Andika (SIL) — шрифт для тих, хто вчиться читати, з
+   розрізненими формами літер і повною кирилицею. Плюс інтервали: тісний текст
+   для дитини з дислексією «пливе» більше, ніж сам шрифт. */
+:root[data-dyslexia-font='on'] {
+  --font-body: 'Andika', -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-display: 'Andika', -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  letter-spacing: 0.04em;
+  word-spacing: 0.16em;
+  line-height: 1.8;
+}
+
+:root[data-dyslexia-font='on'] h1,
+:root[data-dyslexia-font='on'] h2 {
+  letter-spacing: 0.02em;
+}
+
+/* Сенсорно-безпечний режим: без руху й м'якші кольори категорій. */
+:root[data-sensory-safe='on'] :not(.decor):not(.decor *),
+:root[data-sensory-safe='on'] *::before,
+:root[data-sensory-safe='on'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+:root[data-sensory-safe='on'] .decor {
+  display: none;
+}
+
+:root[data-sensory-safe='on'] {
+  --cat-attention: color-mix(in srgb, #2f8fae 65%, #8a8f99);
+  --cat-memory: color-mix(in srgb, #7c5cd9 65%, #8a8f99);
+  --cat-thinking: color-mix(in srgb, #c8862b 65%, #8a8f99);
+  --cat-reaction: color-mix(in srgb, #d24b64 65%, #8a8f99);
+  --cat-speech: color-mix(in srgb, #277f50 65%, #8a8f99);
+  --cat-space: color-mix(in srgb, #5a6a10 65%, #8a8f99);
+}
+
+:root[data-theme='dark'][data-sensory-safe='on'] {
+  --cat-attention: color-mix(in srgb, #5fb7d6 65%, #8a8f99);
+  --cat-memory: color-mix(in srgb, #a892f0 65%, #8a8f99);
+  --cat-thinking: color-mix(in srgb, #e0ac52 65%, #8a8f99);
+  --cat-reaction: color-mix(in srgb, #e88096 65%, #8a8f99);
+  --cat-speech: color-mix(in srgb, #62c491 65%, #8a8f99);
+  --cat-space: color-mix(in srgb, #b3cf5a 65%, #8a8f99);
+}
+
+/* Збільшені цілі: кнопки поля щонайменше 64 px (але не ширші за шосту частину
+   вузького екрана — інакше Шульте 6×6 вилізла б за край) і ширші проміжки. */
+:root[data-large-targets='on'] .game-play button {
+  min-height: 64px;
+  min-width: min(64px, 14vw);
+}
+
+:root[data-large-targets='on'] .game-play :is(
+  [class*='__options'],
+  [class*='__grid'],
+  [class*='__buttons'],
+  [class*='__answers'],
+  [class*='__choices'],
+  [class*='__bins'],
+  [class*='__keys']
+) {
+  gap: max(var(--space-4), 1.25rem);
+}
+
+/* М'яка реакція на помилку: колір помилки стає нейтральним. Сенсорний профіль
+   вмикає її завжди, тому обидва селектори. */
+:root:is([data-error-feedback='gentle'], [data-sensory-safe='on']) .game-play :is(
+  .is-wrong,
+  [class*='--wrong']
+) {
+  --cat-reaction: var(--text-muted);
+  --cat-reaction-bg: var(--surface-muted);
+}

@@ -28,6 +28,9 @@ const {
   Login,
   Admin,
   Privacy,
+  SessionRun,
+  SessionBuilder,
+  StudentFile,
   NotFound,
 } = PAGES
 
@@ -53,6 +56,9 @@ function App() {
             <Route path="/admin" element={<Admin />} />
             <Route path="/groups" element={<Groups />} />
             <Route path="/groups/:groupId" element={<GroupDetail />} />
+            <Route path="/groups/:groupId/sessions/new" element={<SessionBuilder />} />
+            <Route path="/groups/:groupId/students/:studentId" element={<StudentFile />} />
+            <Route path="/session/:planId" element={<SessionRun />} />
             <Route path="/join" element={<Join />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<NotFound />} />

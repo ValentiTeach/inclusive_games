@@ -96,3 +96,43 @@ export function paceResult(config, result, pace) {
 export function slower(ms, factor) {
   return Math.round((ms * factor) / 10) * 10
 }
+
+/**
+ * Коротша спроба з профілю адаптацій (5–8 проб) — для дитини, яка швидко
+ * втомлюється.
+ *
+ * Рівно та сама логіка, що й у пробної гри: зменшуються проби або раунди, а гра,
+ * чию довжину задає щось інше, описує свою коротшу версію в `config.short`.
+ * Гра без жодного з цих способів лишається як є — краще повна гра, ніж
+ * вигадане скорочення, яке змінило б саму пробу.
+ */
+export function shortLevel(config, level, maxTrials) {
+  if (!maxTrials) return level
+  const custom = config.short?.level
+  if (custom) return { ...custom(level, maxTrials), short: true }
+
+  let changed = false
+  const next = { ...level }
+  if (Number.isFinite(level.trialCount) && level.trialCount > maxTrials) {
+    next.trialCount = maxTrials
+    changed = true
+  }
+  if (Number.isFinite(level.rounds) && level.rounds > maxTrials) {
+    next.rounds = maxTrials
+    changed = true
+  }
+  return changed ? { ...next, short: true } : level
+}
+
+/**
+ * Позначка на скороченій спробі: «5 з 5» і «20 з 20» — різні результати, і у
+ * звіті вони не мають зливатися, так само як темп «без поспіху».
+ */
+export function shortResult(level, result) {
+  if (!level.short) return result
+  return {
+    ...result,
+    entries: [...result.entries, { label: 'Спроба', value: 'Коротка' }],
+    metrics: { ...result.metrics, short_attempt: true },
+  }
+}

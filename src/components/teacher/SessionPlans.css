@@ -1,0 +1,21 @@
+.session-plans {
+  margin: var(--space-6) 0;
+}
+
+.session-plans h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.session-plans__new {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  margin-bottom: var(--space-4);
+}
+
+.session-plans__report {
+  margin-top: var(--space-3);
+}

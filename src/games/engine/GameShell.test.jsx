@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import GameShell from './GameShell'
 import { getResults } from './storage'
 import { getSettings, saveSettings } from '../../lib/settings'
+import { clearActiveAdaptations, setActiveAdaptations } from '../../lib/adaptations'
 
 vi.mock('../../lib/cloudSync', () => ({ pushResult: vi.fn(), pushRating: vi.fn() }))
 
@@ -173,5 +174,97 @@ describe('без поспіху', () => {
     passCountdown()
 
     expect(played.at(-1)).toMatchObject({ windowMs: 1600, trialCount: 3, practice: true })
+  })
+})
+
+describe('профіль адаптацій і заняття', () => {
+  beforeEach(() => vi.useFakeTimers())
+  afterEach(() => {
+    vi.useRealTimers()
+    clearActiveAdaptations()
+  })
+
+  it('«без обмеження часу» від фахівця вмикає темп без поспіху і не дає його вимкнути', () => {
+    setActiveAdaptations('kid', { noTimeLimit: true })
+    renderShell()
+    expect(screen.queryByRole('button', { name: 'Без поспіху' })).toBeNull()
+    expect(screen.getByText(/так налаштував фахівець/)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Почати' }))
+    passCountdown()
+    expect(played.at(-1).windowMs).toBe(1600)
+    expect(played.at(-1).relaxed).toBe(true)
+  })
+
+  it('коротші спроби скорочують гру й позначають спробу', () => {
+    setActiveAdaptations('kid', { shortTrials: 6 })
+    renderShell()
+    fireEvent.click(screen.getByRole('button', { name: 'Почати' }))
+    passCountdown()
+    expect(played.at(-1).trialCount).toBe(6)
+    fireEvent.click(screen.getByRole('button', { name: 'Дограти' }))
+    expect(getResults('fake-game')[0].metrics.short_attempt).toBe(true)
+  })
+
+  it('у занятті рівень заданий, а після гри — одна кнопка «Далі»', () => {
+    const onDone = vi.fn()
+    render(
+      <MemoryRouter>
+        <GameShell
+          config={config}
+          session={{ levelId: 'only', onDone }}
+          renderPlay={(level, onFinish) => (
+            <button type="button" onClick={() => onFinish(RESULT)}>
+              Дограти
+            </button>
+          )}
+        />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('Рівень задав учитель для цього заняття.')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Почати' }))
+    passCountdown()
+    fireEvent.click(screen.getByRole('button', { name: 'Дограти' }))
+    expect(screen.queryByRole('button', { name: 'Спробувати ще раз' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Далі' }))
+    expect(onDone).toHaveBeenCalled()
+  })
+
+  it('зріз фіксує темп і позначає спробу', () => {
+    saveSettings({ ...getSettings(), pace: 'relaxed' })
+    render(
+      <MemoryRouter>
+        <GameShell
+          config={config}
+          session={{ levelId: 'only', battery: true, onDone: vi.fn() }}
+          renderPlay={(level, onFinish) => {
+            played.push(level)
+            return (
+              <button type="button" onClick={() => onFinish(RESULT)}>
+                Дограти
+              </button>
+            )
+          }}
+        />
+      </MemoryRouter>,
+    )
+    expect(screen.queryByRole('button', { name: 'Спершу спробувати' })).toBeNull()
+    fireEvent.click(screen.getByRole('button', { name: 'Почати' }))
+    passCountdown()
+    expect(played.at(-1).windowMs).toBe(800)
+    fireEvent.click(screen.getByRole('button', { name: 'Дограти' }))
+    expect(getResults('fake-game')[0].metrics.battery).toBe(true)
+  })
+
+  it('замість «рекорду» — порівняння з собою', () => {
+    renderShell()
+    for (let i = 0; i < 2; i += 1) {
+      fireEvent.click(screen.getByRole('button', { name: i === 0 ? 'Почати' : 'Спробувати ще раз' }))
+      if (i === 1) fireEvent.click(screen.getByRole('button', { name: 'Почати' }))
+      passCountdown()
+      fireEvent.click(screen.getByRole('button', { name: 'Дограти' }))
+    }
+    expect(screen.queryByText(/рекорд/i)).toBeNull()
+    expect(screen.getByText(/Так само, як минулого разу/)).toBeInTheDocument()
   })
 })

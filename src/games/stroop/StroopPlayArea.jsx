@@ -4,6 +4,7 @@ import { now } from '../engine/time'
 import { playCorrect, playWrong } from '../../lib/sound'
 import { useGameKeys } from '../engine/useGameKeys'
 import OptionKey from '../engine/OptionKey'
+import { gameColor } from '../../lib/palette'
 import './StroopPlayArea.css'
 
 function StroopPlayArea({ level, onFinish }) {
@@ -62,7 +63,7 @@ function StroopPlayArea({ level, onFinish }) {
         ]
           .filter(Boolean)
           .join(' ')}
-        style={{ color: trial.ink.hex }}
+        style={{ color: gameColor(trial.ink.hex) }}
       >
         {trial.word.label}
       </div>
@@ -76,7 +77,7 @@ function StroopPlayArea({ level, onFinish }) {
             disabled={Boolean(feedback)}
           >
             <OptionKey n={index + 1} />
-            <span className="stroop__swatch" style={{ background: color.hex }} />
+            <span className="stroop__swatch" style={{ background: gameColor(color.hex) }} />
             {color.label}
           </button>
         ))}

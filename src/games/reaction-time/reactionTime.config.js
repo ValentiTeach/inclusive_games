@@ -4,6 +4,12 @@ import { gameInfo } from '../../data/games'
 
 export const config = {
   ...gameInfo('reaction-time'),
+  /*
+   * Як профіль адаптацій торкається вводу (див. engine/AdaptivePlay). Тут
+   * міряється сам момент натискання, тож затримка утримання зіпсувала б
+   * вимірювання; а одна кнопка в грі вже є.
+   */
+  input: { hold: false, scan: 'native' },
   instructions: [
     'Чекай, поки з’явиться зелений сигнал «Тисни!».',
     'Натисни на нього якомога швидше.',

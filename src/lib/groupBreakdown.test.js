@@ -75,7 +75,7 @@ describe('зведення одного показника', () => {
    */
   it('кожен показник зі словника підписів уміє зводитись', () => {
     // Булеві позначки — «так/ні» про спробу, а не число, яке зводять.
-    const flags = ['reached_target', 'relaxed_pace']
+    const flags = ['reached_target', 'relaxed_pace', 'short_attempt', 'battery']
     const labelled = Object.keys(METRIC_LABELS)
     const missing = labelled.filter((key) => !(key in METRIC_AGGREGATION) && !flags.includes(key))
 

@@ -4,10 +4,10 @@ import { defineMetrics } from '../engine/metrics'
 import { gameInfo } from '../../data/games'
 
 export const PADS = [
-  { id: 'red', label: 'Червона', hex: '#c0392b' },
-  { id: 'blue', label: 'Синя', hex: '#2d6bd6' },
-  { id: 'green', label: 'Зелена', hex: '#2e8b57' },
-  { id: 'yellow', label: 'Жовта', hex: '#c8862b' },
+  { id: 'red', label: 'Червона', hex: '#c0392b', shape: 'star' },
+  { id: 'blue', label: 'Синя', hex: '#2d6bd6', shape: 'circle' },
+  { id: 'green', label: 'Зелена', hex: '#2e8b57', shape: 'triangle' },
+  { id: 'yellow', label: 'Жовта', hex: '#c8862b', shape: 'square' },
 ]
 
 export const config = {

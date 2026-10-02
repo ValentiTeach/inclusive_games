@@ -12,9 +12,9 @@ import { gameInfo } from '../../data/games'
  * звичайною, — тож дві гри міряють різні речі й не замінюють одна одну.
  */
 export const SIGNALS = [
-  { id: 'red', label: 'Стій', color: '#d64545', action: 'Червоний' },
-  { id: 'yellow', label: 'Чекай', color: '#d9a227', action: 'Жовтий' },
-  { id: 'green', label: 'Їдь', color: '#2f9e5f', action: 'Зелений' },
+  { id: 'red', label: 'Стій', color: '#d64545', action: 'Червоний', shape: 'square' },
+  { id: 'yellow', label: 'Чекай', color: '#d9a227', action: 'Жовтий', shape: 'triangle' },
+  { id: 'green', label: 'Їдь', color: '#2f9e5f', action: 'Зелений', shape: 'circle' },
 ]
 
 export const config = {

@@ -1,0 +1,112 @@
+.trail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.trail__status {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 640px;
+  font-family: var(--font-display);
+  font-size: 17px;
+}
+
+.trail__timer {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+/* aspect-ratio має збігатися з ASPECT у trail.config.js. */
+.trail__field {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.trail__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.trail__lines line {
+  stroke: var(--cat-attention);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.trail__node {
+  position: absolute;
+  width: clamp(34px, 9%, 54px);
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(14px, 3.4vw, 20px);
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid var(--text-muted);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.1s ease, border-color 0.1s ease;
+}
+
+/* Квадрат відрізняється від кола формою, а не кольором: пару «коло — квадрат»
+   розрізняє і дитина з порушенням кольорового зору. */
+.trail__node--square {
+  border-radius: 6px;
+  border-style: solid;
+  border-width: 3px;
+}
+
+.trail__node:hover:not([aria-disabled='true']) {
+  border-color: var(--accent);
+}
+
+.trail__node.is-done {
+  background: var(--cat-attention-bg);
+  border-color: var(--cat-attention);
+  cursor: default;
+}
+
+.trail__node.is-last {
+  box-shadow: 0 0 0 4px var(--cat-attention-bg);
+}
+
+.trail__node.is-right {
+  background: var(--cat-attention-bg);
+  border-color: var(--cat-attention);
+}
+
+.trail__node.is-wrong {
+  background: var(--cat-reaction-bg);
+  border-color: var(--cat-reaction);
+}
+
+.trail__mark {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+  pointer-events: none;
+}

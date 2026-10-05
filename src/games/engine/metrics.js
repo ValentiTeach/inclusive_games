@@ -205,6 +205,8 @@ export const METRIC_LABELS = {
   best_recall: 'Найкраща спроба, слів',
   time_error_pct: 'Похибка відліку часу, %',
   time_bias_pct: 'Поспіх (−) / затримка (+), %',
+  mirror_errors: 'Помилок у дзеркальних пробах',
+  lure_errors: 'Обрано за асоціацією',
   relaxed_pace: 'Без поспіху',
   short_attempt: 'Коротка спроба',
   battery: 'Зріз (до/після)',
@@ -279,6 +281,8 @@ export const METRIC_AGGREGATION = {
   best_recall: 'max',
   time_error_pct: 'mean',
   time_bias_pct: 'mean',
+  mirror_errors: 'sum',
+  lure_errors: 'sum',
 }
 
 /**
@@ -363,6 +367,8 @@ export const LOWER_IS_BETTER = new Set([
   'estimate_error_pct',
   'exits',
   'rule_breaks',
+  'mirror_errors',
+  'lure_errors',
 ])
 
 export function isLowerBetter(key) {

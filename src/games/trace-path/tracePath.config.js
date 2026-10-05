@@ -10,6 +10,10 @@ import { gameInfo } from '../../data/games'
  * палець провів у межах доріжки: дитина, що веде повільно й рівно, має
  * найкращий бал. На планшеті це найцінніша вправа для дітей із моторними
  * труднощами.
+ *
+ * Рівень «Обведи фігуру» — замкнений контур (коло, квадрат, трикутник, зірка,
+ * будиночок): ті самі рухи, з яких потім складаються літери, і та сама вправа
+ * «обведи по контуру», що на папері. Рахується так само — частка часу в межах.
  */
 export const VIEW = { width: 600, height: 300 }
 
@@ -50,6 +54,57 @@ const SHAPES = {
       [500, 210],
       [560, 210],
     ]),
+
+  // ── Замкнені контури: обвести фігуру й повернутися туди, звідки почав. ──
+  // Старт посеред сторони, а не в куті: з кута незрозуміло, куди вести.
+  circle: () =>
+    curve((t) => {
+      const angle = -Math.PI / 2 + t * Math.PI * 2
+      return [300 + 120 * Math.cos(angle), 150 + 120 * Math.sin(angle)]
+    }),
+  square: () =>
+    polyline([
+      [300, 40],
+      [410, 40],
+      [410, 260],
+      [190, 260],
+      [190, 40],
+      [300, 40],
+    ]),
+  triangle: () =>
+    polyline([
+      [300, 262],
+      [435, 262],
+      [300, 36],
+      [165, 262],
+      [300, 262],
+    ]),
+  // П'ять променів: внутрішній радіус узято майже вдвічі меншим за зовнішній,
+  // щоб гострі кінці не злипалися — інакше на вершині доріжка налазила б сама
+  // на себе і її можна було б зрізати.
+  star: () => polyline(starCorners(300, 158, 128, 62)),
+  house: () =>
+    polyline([
+      [300, 30],
+      [425, 122],
+      [425, 266],
+      [175, 266],
+      [175, 122],
+      [300, 30],
+    ]),
+}
+
+/** Замкнені фігури: старт і фініш в одній точці, тож прапорця не малюємо. */
+export const CONTOURS = new Set(['circle', 'square', 'triangle', 'star', 'house'])
+
+function starCorners(cx, cy, outer, inner) {
+  const corners = []
+  for (let k = 0; k <= 10; k++) {
+    const radius = k % 2 === 0 ? outer : inner
+    const angle = -Math.PI / 2 + (k * Math.PI) / 5
+    corners.push([cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)])
+  }
+  return corners
 }
 
 /**
@@ -102,23 +157,34 @@ export const config = {
     'Постав палець або мишу на зелене коло.',
     'Не відриваючи, веди доріжкою до прапорця. Намагайся не виходити за краї.',
     'Поспішати не треба: рахується, наскільки рівно, а не наскільки швидко.',
+    'На рівні «Обведи фігуру» веди по контуру за стрілкою і повернись туди, звідки почав.',
   ],
   keyHint: { keys: '← ↑ ↓ →', text: 'вести без миші' },
   practice: {
-    hint: 'Натисни на зелене коло і, не відпускаючи, веди до прапорця. Тримайся всередині доріжки.',
-    level: (level) => ({ ...level, trialCount: 1, shapes: ['line'] }),
+    hint: (level) =>
+      level.id === 'contour'
+        ? 'Натисни на зелене коло і, не відпускаючи, обведи коло за стрілкою — аж поки не повернешся на старт.'
+        : 'Натисни на зелене коло і, не відпускаючи, веди до прапорця. Тримайся всередині доріжки.',
+    level: (level) => ({ ...level, trialCount: 1, shapes: level.id === 'contour' ? ['circle'] : ['line'] }),
   },
   levels: [
     { id: 'wide', label: 'Широка', trialCount: 2, width: 64, shapes: ['wave', 'zigzag'] },
     { id: 'classic', label: 'Звичайна', trialCount: 3, width: 46, shapes: ['wave', 'zigzag', 'meander'] },
     { id: 'narrow', label: 'Вузька', trialCount: 3, width: 30, shapes: ['double-wave', 'meander', 'spiral'] },
+    {
+      id: 'contour',
+      label: 'Обведи фігуру',
+      trialCount: 3,
+      width: 40,
+      shapes: ['circle', 'square', 'triangle', 'star', 'house'],
+    },
   ],
 }
 
 export function generateTrial(level, previous) {
   const options = level.shapes.filter((shape) => shape !== previous?.shape)
   const shape = pickRandom(options.length ? options : level.shapes)
-  return { shape, points: SHAPES[shape](), width: level.width }
+  return { shape, points: SHAPES[shape](), width: level.width, closed: CONTOURS.has(shape) }
 }
 
 /**

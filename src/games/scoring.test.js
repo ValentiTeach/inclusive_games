@@ -39,6 +39,9 @@ import { scoring as objectPlace } from './object-place/objectPlace.config'
 import { scoring as maze } from './maze/maze.config'
 import { scoring as timeSense } from './time-sense/timeSense.config'
 import { scoring as symmetry } from './symmetry/symmetry.config'
+import { config as trailConfig, scoring as trail } from './trail/trail.config'
+import { scoring as leftRight } from './left-right/leftRight.config'
+import { config as analogiesConfig, scoring as analogies } from './analogies/analogies.config'
 import { GAME_REGISTRY } from './registry'
 
 // 3 правильні з 4, часи 400/600/500/300 — точність 75%, середнє 450, найкраще 300.
@@ -233,6 +236,34 @@ const SCENARIOS = [
         { correct: true, hits: 4, extra: 0, missed: 0 },
         { correct: false, hits: 5, extra: 1, missed: 2 },
       ]),
+  },
+  {
+    id: 'trail',
+    run: () =>
+      trail({ elapsedMs: 38_500, errors: 3, perseverations: 2, level: trailConfig.levels[2] }),
+  },
+  {
+    id: 'left-right',
+    run: () =>
+      leftRight([
+        { correct: true, mode: 'back', reactionTimeMs: 900 },
+        { correct: false, mode: 'front', reactionTimeMs: 1400 },
+        { correct: true, mode: 'front', reactionTimeMs: 1600 },
+        { correct: true, mode: 'back', reactionTimeMs: 800 },
+      ]),
+  },
+  {
+    id: 'analogies',
+    run: () =>
+      analogies(
+        [
+          { correct: true, lure: false, reactionTimeMs: 3200 },
+          { correct: false, lure: true, reactionTimeMs: 2100 },
+          { correct: false, lure: false, reactionTimeMs: 4000 },
+          { correct: true, lure: false, reactionTimeMs: 2900 },
+        ],
+        analogiesConfig.levels[1],
+      ),
   },
   {
     id: 'keyboard-trainer',

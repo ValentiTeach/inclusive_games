@@ -40,6 +40,9 @@ import { config as objectPlaceConfig } from './object-place/objectPlace.config'
 import { config as mazeConfig } from './maze/maze.config'
 import { config as timeSenseConfig } from './time-sense/timeSense.config'
 import { config as symmetryConfig } from './symmetry/symmetry.config'
+import { config as trailConfig } from './trail/trail.config'
+import { config as leftRightConfig } from './left-right/leftRight.config'
+import { config as analogiesConfig } from './analogies/analogies.config'
 
 /*
  * Ігрові поля вантажаться окремими шматками, конфіги — ні.
@@ -98,6 +101,9 @@ const LOADERS = {
   maze: () => import('./maze/MazePlayArea'),
   'time-sense': () => import('./time-sense/TimeSensePlayArea'),
   symmetry: () => import('./symmetry/SymmetryPlayArea'),
+  trail: () => import('./trail/TrailPlayArea'),
+  'left-right': () => import('./left-right/LeftRightPlayArea'),
+  analogies: () => import('./analogies/AnalogiesPlayArea'),
 }
 
 export const GAME_REGISTRY = {
@@ -141,6 +147,9 @@ export const GAME_REGISTRY = {
   maze: { config: mazeConfig, PlayArea: lazy(LOADERS['maze']) },
   'time-sense': { config: timeSenseConfig, PlayArea: lazy(LOADERS['time-sense']) },
   symmetry: { config: symmetryConfig, PlayArea: lazy(LOADERS['symmetry']) },
+  trail: { config: trailConfig, PlayArea: lazy(LOADERS['trail']) },
+  'left-right': { config: leftRightConfig, PlayArea: lazy(LOADERS['left-right']) },
+  analogies: { config: analogiesConfig, PlayArea: lazy(LOADERS['analogies']) },
 }
 
 /*

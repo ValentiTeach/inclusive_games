@@ -15,6 +15,15 @@ const KEY_MOVES = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }
 
 const FRESH = { progress: 0, insideMs: 0, outsideMs: 0, exits: 0, inside: true }
 
+/** Точка на лінії й кут руху в ній — для стрілки напрямку. */
+function directionAt(points, index) {
+  const at = points[Math.min(index, points.length - 1)]
+  const before = points[Math.max(0, index - 4)]
+  const after = points[Math.min(points.length - 1, index + 4)]
+  const angle = (Math.atan2(after.y - before.y, after.x - before.x) * 180) / Math.PI
+  return { x: at.x, y: at.y, angle }
+}
+
 function TracePathPlayArea({ level, onFinish }) {
   const [trialIndex, setTrialIndex] = useState(0)
   const [trial, setTrial] = useState(() => generateTrial(level))
@@ -128,6 +137,9 @@ function TracePathPlayArea({ level, onFinish }) {
     .join(' ')
   const start = trial.points[0]
   const finish = trial.points.at(-1)
+  // На замкненій фігурі фініш збігається зі стартом, тож куди вести, каже
+  // стрілка трохи далі за стартом — інакше обидва напрямки здаються правильними.
+  const arrow = trial.closed ? directionAt(trial.points, 12) : null
 
   return (
     <div className="trace">
@@ -156,7 +168,15 @@ function TracePathPlayArea({ level, onFinish }) {
         <polyline points={centerline} className="trace__guide" />
         {state.progress > 0 && <polyline points={passed} className="trace__passed" />}
         <circle cx={start.x} cy={start.y} r={Math.min(16, trial.width / 2)} className="trace__start" />
-        <circle cx={finish.x} cy={finish.y} r={Math.min(16, trial.width / 2)} className="trace__finish" />
+        {trial.closed ? (
+          <polygon
+            points="-12,-10 12,0 -12,10"
+            className="trace__arrow"
+            transform={`translate(${arrow.x} ${arrow.y}) rotate(${arrow.angle})`}
+          />
+        ) : (
+          <circle cx={finish.x} cy={finish.y} r={Math.min(16, trial.width / 2)} className="trace__finish" />
+        )}
         {cursor && <circle cx={cursor.x} cy={cursor.y} r={7} className="trace__cursor" />}
       </svg>
     </div>

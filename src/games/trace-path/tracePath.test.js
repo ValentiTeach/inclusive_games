@@ -76,3 +76,43 @@ describe('спіраль', () => {
     expect(closest).toBeGreaterThan(config.levels[2].width)
   })
 })
+
+describe('обведи фігуру', () => {
+  const contour = config.levels.find((entry) => entry.id === 'contour')
+
+  it.each(contour.shapes)('%s: замкнена, вміщається в поле і позначена як замкнена', (shape) => {
+    const trial = generateTrial({ ...contour, shapes: [shape] })
+    expect(trial.closed).toBe(true)
+    const first = trial.points[0]
+    const last = trial.points.at(-1)
+    expect(Math.hypot(first.x - last.x, first.y - last.y)).toBeLessThan(4)
+    for (const p of trial.points) {
+      expect(p.x - contour.width / 2).toBeGreaterThan(0)
+      expect(p.x + contour.width / 2).toBeLessThan(600)
+      expect(p.y).toBeGreaterThan(0)
+      expect(p.y).toBeLessThan(300)
+    }
+  })
+
+  it.each(contour.shapes)('%s: обвести по контуру — пройдено, а «назад до старту» — ні', (shape) => {
+    const trial = generateTrial({ ...contour, shapes: [shape] })
+
+    // Крок назад від старту — туди, де лінія закінчується, — не зараховує фініш.
+    const shortcut = advance(FRESH, trial, trial.points.at(-2), 100)
+    expect(isFinished(shortcut, trial)).toBe(false)
+
+    let state = FRESH
+    for (let i = 0; i < trial.points.length; i += 3) state = advance(state, trial, trial.points[i], 50)
+    state = advance(state, trial, trial.points.at(-1), 50)
+    expect(isFinished(state, trial)).toBe(true)
+    expect(insidePct(state)).toBe(100)
+  })
+
+  it('відкриті доріжки замкненими не позначаються', () => {
+    expect(generateTrial({ ...level, shapes: ['wave'] }).closed).toBe(false)
+  })
+
+  it('пробна гра для контуру — коло, а не пряма', () => {
+    expect(config.practice.level(contour).shapes).toEqual(['circle'])
+  })
+})

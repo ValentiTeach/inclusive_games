@@ -69,6 +69,14 @@ export const GAMES = [
     status: 'available',
   },
   {
+    id: 'trail',
+    title: 'Ланцюжок',
+    category: 'attention',
+    description:
+      'З’єднай кружечки по порядку: 1, 2, 3… А потім — навперемінно: число, літера, число, літера.',
+    status: 'available',
+  },
+  {
     id: 'subitizing',
     title: 'Субітизація',
     category: 'attention',
@@ -245,10 +253,20 @@ export const GAMES = [
     freeForGuests: true,
   },
   {
+    id: 'left-right',
+    title: 'Ліво і право',
+    category: 'space',
+    description:
+      'Визнач, де ліво, а де право: від себе, у дитини, що стоїть спиною, і в тієї, що дивиться на тебе.',
+    status: 'available',
+    freeForGuests: true,
+  },
+  {
     id: 'trace-path',
     title: 'Доріжка',
     category: 'space',
-    description: 'Проведи пальцем або мишею доріжкою від старту до фінішу, не виходячи за краї.',
+    description:
+      'Проведи пальцем або мишею доріжкою від старту до фінішу, не виходячи за краї, — або обведи фігуру по контуру.',
     status: 'available',
   },
   {
@@ -280,6 +298,14 @@ export const GAMES = [
     description: 'Розстав предмети по порядку: за розміром, за кількістю, за часом доби.',
     status: 'available',
     freeForGuests: true,
+  },
+  {
+    id: 'analogies',
+    title: 'Аналогії',
+    category: 'speech',
+    description:
+      'Кролик — морква, білка — ? Знайди, як пов’язані дві картинки, і добери пару так само.',
+    status: 'available',
   },
   {
     id: 'listen-catch',

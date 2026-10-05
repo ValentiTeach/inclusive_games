@@ -4,6 +4,7 @@ import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
 import { listAllUsers, setUserRole } from '../lib/admin'
 import RoleBadge from '../components/ui/RoleBadge'
+import RetentionPanel from '../components/admin/RetentionPanel'
 import './Admin.css'
 
 const ROLE_OPTIONS = ['student', 'teacher', 'moderator', 'parent']
@@ -151,6 +152,8 @@ function Admin() {
           </table>
         </div>
       )}
+
+      <RetentionPanel />
     </section>
   )
 }

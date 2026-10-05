@@ -3,7 +3,7 @@ import { signInAsTeacher } from './support/teacher'
 import { GAMES as CATALOG } from '../src/data/games.js'
 
 /*
- * Десять ігор нових напрямів — у справжньому браузері, з тим самим підмінним
+ * Ігри нових напрямів — у справжньому браузері, з тим самим підмінним
  * входом, що й решта ігор за авторизацією.
  *
  * Для кожної перевіряється одне, але головне: гра доходить до результату, і
@@ -28,6 +28,9 @@ const GAMES = [
   { id: 'graphic-dictation', options: '.dictation__key', delay: 40 },
   { id: 'rhythm', options: '.rhythm__drum', delay: 250 },
   { id: 'trace-path', trace: true },
+  { id: 'trail', options: '.trail__node:not([aria-disabled="true"])', delay: 60 },
+  { id: 'left-right', options: '.left-right__answer' },
+  { id: 'analogies', options: '.analogies__option' },
 ]
 
 async function start(page, gameId) {

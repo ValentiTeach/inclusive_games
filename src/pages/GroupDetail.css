@@ -123,6 +123,59 @@
   border-bottom: none;
 }
 
+/* ─────────────────── Строк зберігання і згода ─────────────────── */
+
+.group-detail__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+}
+
+.group-detail__notice svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--text-muted);
+}
+
+.group-detail__stale {
+  margin-left: var(--space-2);
+  padding: 1px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 12.5px;
+  background: var(--cat-reaction-bg);
+  color: var(--text);
+}
+
+.group-detail__consent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.group-detail__consent:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.group-detail__consent.is-given {
+  color: var(--text);
+  border-style: solid;
+  border-color: var(--cat-speech);
+  background: var(--cat-speech-bg);
+}
+
 /* ─────────────────────────── Код групи ─────────────────────────── */
 
 .group-detail__join {

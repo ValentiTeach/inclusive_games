@@ -22,6 +22,7 @@ const PAGE_LOADERS = {
   Login: () => import('./pages/Login'),
   Admin: () => import('./pages/Admin'),
   Privacy: () => import('./pages/Privacy'),
+  Consent: () => import('./pages/Consent'),
   SessionRun: () => import('./pages/SessionRun'),
   SessionBuilder: () => import('./pages/SessionBuilder'),
   StudentFile: () => import('./pages/StudentFile'),

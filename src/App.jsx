@@ -28,6 +28,7 @@ const {
   Login,
   Admin,
   Privacy,
+  Consent,
   SessionRun,
   SessionBuilder,
   StudentFile,
@@ -61,6 +62,7 @@ function App() {
             <Route path="/session/:planId" element={<SessionRun />} />
             <Route path="/join" element={<Join />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/privacy/consent" element={<Consent />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

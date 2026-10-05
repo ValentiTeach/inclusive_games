@@ -22,6 +22,15 @@ vi.mock('../lib/groups', () => ({
   removeStudentFromGroup: (...args) => removeStudentFromGroup(...args),
 }))
 
+const listConsents = vi.fn(() => Promise.resolve({}))
+const recordConsent = vi.fn()
+const clearConsent = vi.fn()
+vi.mock('../lib/consents', () => ({
+  listConsents: (...args) => listConsents(...args),
+  recordConsent: (...args) => recordConsent(...args),
+  clearConsent: (...args) => clearConsent(...args),
+}))
+
 // Only the browser download is stubbed; the CSV itself is built by the real
 // code, so this checks the wiring end to end rather than that a mock was called.
 vi.mock('../lib/csv', async (importOriginal) => ({
@@ -225,5 +234,84 @@ describe('GroupDetail — student management', () => {
     await user.click(await screen.findByRole('button', { name: /Прибрати Марічка/ }))
 
     expect(await screen.findByText(/Не вдалося прибрати учня/)).toBeInTheDocument()
+  })
+})
+
+describe('GroupDetail — згода батьків і строк зберігання', () => {
+  const student = (overrides) => ({
+    id: 'u1',
+    displayName: 'Марічка',
+    joinedAt: new Date().toISOString(),
+    attempts: 1,
+    avgScore: 80,
+    lastPlayed: new Date().toISOString(),
+    ...overrides,
+  })
+
+  beforeEach(() => {
+    getGroupDetails.mockReset()
+    listConsents.mockReset()
+    recordConsent.mockReset()
+    clearConsent.mockReset()
+    vi.restoreAllMocks()
+  })
+
+  it('без міграції колонки згоди немає зовсім', async () => {
+    getGroupDetails.mockResolvedValue({ group, students: [student()], results: [] })
+    listConsents.mockResolvedValue(null)
+    renderPage()
+
+    expect(await screen.findByText('Марічка')).toBeInTheDocument()
+    await waitFor(() => expect(listConsents).toHaveBeenCalledWith(['u1']))
+    expect(screen.queryByText('Згода батьків')).not.toBeInTheDocument()
+  })
+
+  it('відмічає згоду одним натиском', async () => {
+    const user = userEvent.setup()
+    getGroupDetails.mockResolvedValue({ group, students: [student()], results: [] })
+    listConsents.mockResolvedValue({})
+    recordConsent.mockResolvedValue('2026-09-14')
+    renderPage()
+
+    await user.click(await screen.findByRole('button', { name: /Відмітити, що згоду батьків Марічка/ }))
+
+    expect(recordConsent).toHaveBeenCalledWith('u1')
+    expect(await screen.findByRole('button', { name: /отримано 14 вер/ })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('знімає відмітку лише після підтвердження', async () => {
+    const user = userEvent.setup()
+    getGroupDetails.mockResolvedValue({ group, students: [student()], results: [] })
+    listConsents.mockResolvedValue({ u1: '2026-09-01' })
+    clearConsent.mockResolvedValue(undefined)
+    vi.spyOn(window, 'confirm').mockReturnValueOnce(false).mockReturnValueOnce(true)
+    renderPage()
+
+    const button = await screen.findByRole('button', { name: /Зняти відмітку/ })
+    await user.click(button)
+    expect(clearConsent).not.toHaveBeenCalled()
+
+    await user.click(button)
+    await waitFor(() => expect(clearConsent).toHaveBeenCalledWith('u1'))
+    expect(await screen.findByRole('button', { name: /Відмітити/ })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('позначає учня, що не грав понад рік, і нагадує про видалення', async () => {
+    const old = new Date()
+    old.setMonth(old.getMonth() - 14)
+    getGroupDetails.mockResolvedValue({
+      group,
+      students: [
+        student({ joinedAt: old.toISOString(), lastPlayed: old.toISOString() }),
+        student({ id: 'u2', displayName: 'Остап' }),
+      ],
+      results: [],
+    })
+    listConsents.mockResolvedValue({})
+    renderPage()
+
+    expect(await screen.findByText('понад рік')).toBeInTheDocument()
+    expect(screen.getAllByText('понад рік')).toHaveLength(1)
+    expect(screen.getByText(/Один учень не грав/)).toBeInTheDocument()
   })
 })

@@ -111,6 +111,14 @@ export async function signInAsTeacher(page, fixtures = {}) {
     plans = [],
     runs = [],
     posted = [],
+    /*
+     * Строк зберігання і згода батьків. `consents` — рядки parental_consents;
+     * `inactive` — що поверне rpc/inactive_students; `rpcCalls` збирає виклики
+     * видалення, щоб тест бачив, що саме пішло б на сервер.
+     */
+    consents = [],
+    inactive = [],
+    rpcCalls = [],
   } = fixtures
 
   await page.addInitScript((session) => {
@@ -185,6 +193,26 @@ export async function signInAsTeacher(page, fixtures = {}) {
         contentType: 'application/json',
         body: JSON.stringify(redeemed),
       })
+      return
+    }
+
+    if (path === 'rpc/inactive_students') {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(inactive) })
+      return
+    }
+
+    if (path === 'rpc/purge_inactive_students' || path === 'rpc/moderator_delete_student') {
+      rpcCalls.push({ path, args: JSON.parse(request.postData() ?? '{}') })
+      const body = path === 'rpc/purge_inactive_students' ? JSON.stringify(inactive.length) : ''
+      await route.fulfill({ status: body ? 200 : 204, contentType: 'application/json', body })
+      return
+    }
+
+    if (path === 'parental_consents' && request.method() === 'POST') {
+      const payload = JSON.parse(request.postData() ?? '{}')
+      posted.push({ table: path, payload })
+      consents.push(payload)
+      await route.fulfill({ status: 201, contentType: 'application/json', body: '' })
       return
     }
 
@@ -271,6 +299,7 @@ export async function signInAsTeacher(page, fixtures = {}) {
     else if (path === 'student_adaptations') body = adaptations
     else if (path === 'session_plans') body = plans
     else if (path === 'session_runs') body = runs
+    else if (path === 'parental_consents') body = consents
 
     // PostgREST віддає один обʼєкт замість масиву, коли клієнт просить .single();
     // supabase-js позначає це заголовком Accept.

@@ -1,0 +1,82 @@
+.retention {
+  margin-top: var(--space-8, 48px);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.retention h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.retention__error {
+  color: var(--cat-reaction);
+}
+
+.retention__message {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.retention__button {
+  padding: var(--space-2) var(--space-4);
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.retention__button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.retention__button--danger {
+  margin-top: var(--space-4);
+  border-color: var(--cat-reaction);
+}
+
+.retention__table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.retention__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+
+.retention__table th,
+.retention__table td {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.retention__table th {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface-muted);
+}
+
+.retention__table tr:last-child td {
+  border-bottom: none;
+}
+
+.retention__icon {
+  display: inline-flex;
+  padding: 6px;
+  color: var(--cat-reaction);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}

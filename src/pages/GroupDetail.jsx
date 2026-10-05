@@ -10,6 +10,8 @@ import {
   UserRoundPlus,
   Printer,
   Trash2,
+  FileCheck,
+  Hourglass,
 } from 'lucide-react'
 import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
@@ -21,6 +23,8 @@ import {
   removeStudentFromGroup,
 } from '../lib/groups'
 import { buildGroupCsv, csvFileName, downloadCsv } from '../lib/csv'
+import { clearConsent, listConsents, recordConsent } from '../lib/consents'
+import { RETENTION_MONTHS, isPastRetention } from '../lib/retention'
 import ParentAccess from '../components/teacher/ParentAccess'
 import GameBreakdown from '../components/teacher/GameBreakdown'
 import Assignments from '../components/teacher/Assignments'
@@ -33,6 +37,15 @@ const GAME_TITLES = Object.fromEntries(GAMES.map((game) => [game.id, game.title]
 function formatDate(iso) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('uk-UA', { day: 'numeric', month: 'short' })
+}
+
+/* Дата згоди — з роком: «12 вер.» через рік уже незрозуміло якого. */
+function formatConsentDate(day) {
+  return new Date(`${day}T12:00:00`).toLocaleDateString('uk-UA', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 }
 
 /* На папері дата має бути повною: «15 вер.» через півроку нічого не означає. */
@@ -55,6 +68,8 @@ function GroupDetail() {
   const [actionError, setActionError] = useState(null)
   const [accessFor, setAccessFor] = useState(null)
   const [copied, setCopied] = useState(false)
+  // undefined — ще вантажиться, null — таблиці згод ще немає на сервері.
+  const [consents, setConsents] = useState(undefined)
 
   useEffect(() => {
     if (!user) return undefined
@@ -74,8 +89,63 @@ function GroupDetail() {
     }
   }, [user, groupId])
 
+  const studentKey = data ? data.students.map((student) => student.id).join(',') : ''
+
+  useEffect(() => {
+    if (!studentKey) return undefined
+
+    let cancelled = false
+    listConsents(studentKey.split(','))
+      .then((result) => {
+        if (!cancelled) setConsents(result)
+      })
+      .catch(() => {
+        // Відмітки згоди — допоміжна колонка. Збій тут не має ховати таблицю
+        // з результатами, яку вчитель відкрив насправді.
+        if (!cancelled) setConsents(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [studentKey])
+
   async function reload() {
     setData(await getGroupDetails(groupId))
+  }
+
+  /*
+   * Відмітка «згоду отримано». Поставити — одним натиском (папір уже в
+   * учителя), зняти — з підтвердженням: зняття означає, що батьки згоду
+   * відкликали, і тоді дані дитини треба видалити.
+   */
+  async function handleConsent(student) {
+    const given = consents?.[student.id]
+    if (given) {
+      const confirmed = window.confirm(
+        `Зняти відмітку згоди для «${student.displayName}»? Якщо батьки відкликали згоду, дані дитини треба видалити (кошик у цьому ж рядку).`,
+      )
+      if (!confirmed) return
+    }
+
+    setBusyId(student.id)
+    setActionError(null)
+    try {
+      if (given) {
+        await clearConsent(student.id)
+        setConsents((current) => {
+          const next = { ...current }
+          delete next[student.id]
+          return next
+        })
+      } else {
+        const day = await recordConsent(student.id)
+        setConsents((current) => ({ ...current, [student.id]: day }))
+      }
+    } catch {
+      setActionError('Не вдалося зберегти відмітку згоди. Спробуй ще раз.')
+    } finally {
+      setBusyId(null)
+    }
   }
 
   async function handleRename(studentId) {
@@ -190,6 +260,8 @@ function GroupDetail() {
   }
 
   const joinUrl = `${window.location.host}/join`
+  const showConsents = Boolean(consents)
+  const stale = data.students.filter((student) => isPastRetention(student))
 
   return (
     <section className="group-detail">
@@ -297,6 +369,23 @@ function GroupDetail() {
 
           {actionError && <p className="group-detail__error">{actionError}</p>}
 
+          {/*
+            Строк зберігання — 12 місяців без активності (див. /privacy). Сервер
+            може чистити й сам, але вчитель має дізнатися першим: можливо,
+            дитина просто перейшла в іншу групу, і тоді її треба прибрати, а не
+            чекати.
+          */}
+          {stale.length > 0 && (
+            <p className="group-detail__notice print-hide">
+              <Hourglass size={16} aria-hidden="true" />
+              <span>
+                {stale.length === 1 ? 'Один учень не грав' : `Учнів, що не грали: ${stale.length},`} понад{' '}
+                {RETENTION_MONTHS} місяців. Якщо заняття з ними завершено, видаліть їхні дані (кошик у
+                рядку) — так обіцяє <Link to="/privacy">сторінка про дані</Link>.
+              </span>
+            </p>
+          )}
+
           {accessFor && (
             <ParentAccess student={accessFor} onClose={() => setAccessFor(null)} />
           )}
@@ -310,6 +399,7 @@ function GroupDetail() {
                 <th>Спроб</th>
                 <th>Середній бал</th>
                 <th>Остання гра</th>
+                {showConsents && <th className="print-hide">Згода батьків</th>}
                 <th aria-label="Дії" />
               </tr>
             </thead>
@@ -342,7 +432,38 @@ function GroupDetail() {
                   <td data-label="Приєднався">{formatDate(student.joinedAt)}</td>
                   <td data-label="Спроб">{student.attempts}</td>
                   <td data-label="Середній бал">{student.avgScore ?? '—'}</td>
-                  <td data-label="Остання гра">{formatDate(student.lastPlayed)}</td>
+                  <td data-label="Остання гра">
+                    {formatDate(student.lastPlayed)}
+                    {isPastRetention(student) && (
+                      <span className="group-detail__stale" title={`Без активності понад ${RETENTION_MONTHS} місяців`}>
+                        понад рік
+                      </span>
+                    )}
+                  </td>
+                  {showConsents && (
+                    <td data-label="Згода батьків" className="print-hide">
+                      <button
+                        type="button"
+                        className={[
+                          'group-detail__consent',
+                          consents[student.id] ? 'is-given' : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        disabled={busyId === student.id}
+                        aria-pressed={Boolean(consents[student.id])}
+                        aria-label={
+                          consents[student.id]
+                            ? `Згода батьків ${student.displayName}: отримано ${formatConsentDate(consents[student.id])}. Зняти відмітку`
+                            : `Відмітити, що згоду батьків ${student.displayName} отримано`
+                        }
+                        onClick={() => handleConsent(student)}
+                      >
+                        <FileCheck size={15} aria-hidden="true" />
+                        {consents[student.id] ? formatConsentDate(consents[student.id]) : 'Відмітити'}
+                      </button>
+                    </td>
+                  )}
                   <td className="group-detail__cell-actions">
                     <div className="group-detail__row-actions">
                       {editingId === student.id ? (

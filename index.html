@@ -31,6 +31,45 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Запобіжник проти порожнього екрана. Якщо головний скрипт так і не
+      // запустився (зіпсований кеш після деплою, старий браузер), React нічого
+      // не намалює і дитина бачить лише тло. Через 10 секунд показуємо, що
+      // сталося, і кнопку, яка чистить кеш сайту на цьому пристрої. main.jsx
+      // ставить window.__igBooted, щойно стартує, — тоді запобіжник мовчить.
+      setTimeout(function () {
+        if (window.__igBooted) return
+        var root = document.getElementById('root')
+        if (root && root.childElementCount > 0) return
+        var box = document.createElement('div')
+        box.id = 'boot-fallback'
+        box.setAttribute('role', 'alert')
+        box.style.cssText =
+          'max-width:32rem;margin:15vh auto 0;padding:24px;font:17px/1.5 system-ui,sans-serif;' +
+          'color:#1b2430;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.25)'
+        box.innerHTML =
+          '<h1 style="margin:0 0 8px;font-size:22px;color:#1b2430">Сайт не завантажився</h1>' +
+          '<p style="margin:0 0 16px;color:#1b2430">Найчастіше це застарілі файли сайту, що лишилися на пристрої після оновлення. ' +
+          'Кнопка нижче прибере їх і завантажить сайт заново. Ваші результати не зникнуть.</p>' +
+          '<button type="button" style="font:inherit;font-weight:700;padding:10px 18px;border:0;border-radius:10px;' +
+          'background:#0b4da3;color:#fff;cursor:pointer">Оновити сайт</button>'
+        box.querySelector('button').onclick = function () {
+          var jobs = []
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+            jobs.push(navigator.serviceWorker.getRegistrations().then(function (regs) {
+              return Promise.all(regs.map(function (reg) { return reg.unregister() }))
+            }))
+          }
+          if (window.caches && caches.keys) {
+            jobs.push(caches.keys().then(function (names) {
+              return Promise.all(names.map(function (name) { return caches.delete(name) }))
+            }))
+          }
+          Promise.all(jobs).catch(function () {}).then(function () { location.reload() })
+        }
+        document.body.appendChild(box)
+      }, 10000)
+    </script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

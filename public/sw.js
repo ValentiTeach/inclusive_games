@@ -15,13 +15,20 @@
  * - Файли застосунку — спершу кеш. Їхні імена містять хеш вмісту, тож стара
  *   назва завжди означає старий вміст: перевіряти мережу не має сенсу.
  *
+ * Чого кеш ніколи не бере: відповідь, що не схожа на файл, який просили. Хостинг
+ * віддає index.html на будь-яку невідому адресу, і досі шматок коду, якого вже
+ * немає після нового деплою, міг осісти в кеші як HTML під ім'ям .js —
+ * назавжди. Браузер такий «скрипт» не виконує, і сайт лишався порожнім екраном.
+ * Версія v2 стирає всі кеші v1 при активації, тож зіпсований кеш на пристроях,
+ * де він уже є, зникає сам.
+ *
  * Чого тут навмисно немає: кешування запитів до Supabase. Результати дитини —
  * не те, що можна показати застарілими, а спроба «синхронізувати потім» без
  * розв'язання конфліктів зіпсувала б дані. Офлайн гра зберігається локально і
  * вивантажується при наступному вході — цей шлях уже існує (cloudSync).
  */
 
-const VERSION = 'v1'
+const VERSION = 'v2'
 const SHELL = `shell-${VERSION}`
 const ASSETS = `assets-${VERSION}`
 
@@ -68,8 +75,12 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const copy = response.clone()
-          caches.open(SHELL).then((cache) => cache.put('/', copy))
+          // Лише справжня сторінка: помилка сервера, покладена в кеш як «/»,
+          // віддавалася б потім і без мережі.
+          if (response.ok && isType(response, 'text/html')) {
+            const copy = response.clone()
+            caches.open(SHELL).then((cache) => cache.put('/', copy))
+          }
           return response
         })
         // Будь-який перехід у застосунку віддаємо з тієї самої збереженої
@@ -87,7 +98,7 @@ self.addEventListener('fetch', (event) => {
       return fetch(request).then((response) => {
         // Кешуємо лише те, що справді віддалося: помилка 404, покладена в кеш,
         // лишилася б там назавжди.
-        if (response.ok && response.type === 'basic') {
+        if (response.ok && response.type === 'basic' && matchesRequest(url, response)) {
           const copy = response.clone()
           caches.open(ASSETS).then((cache) => cache.put(request, copy))
         }
@@ -96,3 +107,17 @@ self.addEventListener('fetch', (event) => {
     }),
   )
 })
+
+function isType(response, type) {
+  return (response.headers.get('content-type') || '').includes(type)
+}
+
+/*
+ * Чи відповідь — той самий тип файлу, що й запит. Головне тут — не покласти
+ * HTML під ім'ям .js чи .css: саме так виглядає «файлу вже немає» на хостингу,
+ * що на все невідоме віддає index.html.
+ */
+function matchesRequest(url, response) {
+  if (/\.(m?js|css)$/.test(url.pathname)) return !isType(response, 'text/html')
+  return true
+}

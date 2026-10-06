@@ -18,6 +18,30 @@ import { registerOffline } from './lib/offline'
 import { watchGlobalErrors } from './lib/errorLog'
 import { warmOfflineCache } from './lib/prefetch'
 
+// Застосунок стартував: запобіжник порожнього екрана в index.html мовчить.
+window.__igBooted = true
+// На дуже повільній мережі скрипт міг приїхати вже після того, як запобіжник
+// показав своє повідомлення: тоді його треба прибрати.
+document.getElementById('boot-fallback')?.remove()
+
+/*
+ * Шматок коду не завантажився — найчастіше тому, що вкладку відкрито до деплою,
+ * а файлу зі старим ім'ям на сервері вже немає. Одне перезавантаження підтягне
+ * свіжу сторінку з новими іменами. Позначка в sessionStorage не дає крутитися
+ * по колу, якщо причина інша: тоді спрацює межа помилок із кнопкою.
+ */
+window.addEventListener('vite:preloadError', (event) => {
+  try {
+    const last = Number(sessionStorage.getItem('ig:chunk-reload') || 0)
+    if (Date.now() - last < 60_000) return
+    sessionStorage.setItem('ig:chunk-reload', String(Date.now()))
+  } catch {
+    return
+  }
+  event.preventDefault()
+  window.location.reload()
+})
+
 /*
  * Зовнішня межа — остання лінія. Вона ловить те, що впало поза сторінкою:
  * у самій шапці, у маршрутизаторі, у розкладці. Внутрішня межа стоїть у

@@ -96,6 +96,16 @@ export async function signInAsTeacher(page, fixtures = {}) {
     parentLinks = [],
     redeemed = null,
     /*
+     * Заявки батьків. `parentRequests` — власні заявки дорослого (рядки
+     * parent_requests). `requestQueue` — те, що поверне admin_list_parent_requests
+     * модератору: масив живий, рішення прибирає з нього рядок, тож лічильник і
+     * список після дії показують наслідок, а не початковий стан. `decisions`
+     * збирає виклики admin_decide_parent_request.
+     */
+    parentRequests = [],
+    requestQueue = [],
+    decisions = [],
+    /*
      * Коди, виписані на дитину, як їх повертає list_parent_access. Масив живий:
      * скасування й відбирання доступу правлять його на місці, тож наступний
      * запит бачить наслідок дії, а не початковий стан.
@@ -196,6 +206,42 @@ export async function signInAsTeacher(page, fixtures = {}) {
       return
     }
 
+    if (path === 'rpc/admin_list_parent_requests') {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(requestQueue),
+      })
+      return
+    }
+
+    if (path === 'rpc/admin_decide_parent_request') {
+      const args = JSON.parse(request.postData() ?? '{}')
+      decisions.push(args)
+      const index = requestQueue.findIndex((row) => row.request_id === args.p_request_id)
+      if (index >= 0) requestQueue.splice(index, 1)
+      await route.fulfill({ status: 204, contentType: 'application/json', body: '' })
+      return
+    }
+
+    /*
+     * Лічильник заявок у шапці модератора — це HEAD із count=exact: число лежить
+     * у заголовку Content-Range, а не в тілі. Браузер не віддасть сторінці цей
+     * заголовок без Expose-Headers.
+     */
+    if (path === 'parent_requests' && request.method() === 'HEAD') {
+      await route.fulfill({
+        status: 200,
+        headers: {
+          'content-range': `*/${requestQueue.length}`,
+          'access-control-allow-origin': '*',
+          'access-control-expose-headers': 'content-range',
+        },
+        body: '',
+      })
+      return
+    }
+
     if (path === 'rpc/inactive_students') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(inactive) })
       return
@@ -287,6 +333,7 @@ export async function signInAsTeacher(page, fixtures = {}) {
 
     let body = []
     if (path === 'parent_links') body = parentLinks
+    else if (path === 'parent_requests') body = parentRequests
     else if (path === 'profiles' && select.includes('role')) body = [profile]
     else if (path === 'profiles' && url.searchParams.get('id')?.startsWith('eq.')) {
       // Картка дитини питає одного учня; maybeSingle на двох рядках — помилка.

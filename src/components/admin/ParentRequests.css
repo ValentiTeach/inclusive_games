@@ -1,0 +1,127 @@
+.parent-requests {
+  margin-top: var(--space-8, 48px);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.parent-requests h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.parent-requests__count {
+  min-width: 24px;
+  padding: 0 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 24px;
+  text-align: center;
+  color: #fff;
+  background: var(--cat-reaction);
+  border-radius: 12px;
+}
+
+.parent-requests__error {
+  color: var(--cat-reaction);
+}
+
+.parent-requests__message {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.parent-requests__list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.parent-requests__item {
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.parent-requests__who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Пошта буває довша за ширину екрана, а переносити її ніде, крім як усередині
+   слова: інакше картка розсуває сторінку вбік. */
+.parent-requests__email {
+  overflow-wrap: anywhere;
+}
+
+.parent-requests__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+}
+
+.parent-requests__facts dt {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.parent-requests__facts dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.parent-requests__note {
+  margin: var(--space-3) 0 0;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.parent-requests__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.parent-requests__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  /* Рішення про чужі дані не можна промазати пальцем. */
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.parent-requests__button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.parent-requests__button--approve:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.parent-requests__button--reject {
+  color: var(--cat-reaction);
+}
+
+.parent-requests__button--reject:hover:not(:disabled) {
+  border-color: var(--cat-reaction);
+}

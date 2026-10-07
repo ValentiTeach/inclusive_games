@@ -3,8 +3,12 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 
 const auth = { user: null, profile: null, loading: false }
+const pending = { count: 0 }
 
 vi.mock('../../lib/authContext', () => ({ useAuth: () => auth }))
+vi.mock('../../lib/usePendingParentRequests', () => ({
+  usePendingParentRequests: (enabled) => (enabled ? pending.count : 0),
+}))
 
 const { default: Header } = await import('./Header')
 
@@ -28,6 +32,32 @@ function header() {
 function linkNames(nav) {
   return [...nav.querySelectorAll('a')].map((link) => link.textContent.trim())
 }
+
+describe('лічильник заявок батьків', () => {
+  it('показує модератору, скільки заявок чекає, і читає це вголос', () => {
+    pending.count = 3
+    renderAs('moderator')
+
+    const link = screen.getByRole('link', { name: /Адмінка/ })
+    expect(link).toHaveTextContent('заявок батьків: 3')
+    expect(link.querySelector('.site-header__badge')).toHaveTextContent('3')
+  })
+
+  it('без заявок не малює нічого', () => {
+    pending.count = 0
+    renderAs('moderator')
+
+    expect(document.querySelector('.site-header__badge')).toBeNull()
+  })
+
+  /** Заявки вирішує лише модератор: вчителеві число нічого не каже. */
+  it('вчителеві не показує, навіть якщо заявки є', () => {
+    pending.count = 5
+    renderAs('teacher')
+
+    expect(document.querySelector('.site-header__badge')).toBeNull()
+  })
+})
 
 describe('навігація за роллю', () => {
   /**

@@ -29,12 +29,76 @@ test('дорослий без дитини бачить, що робити да�
   await expect(page.getByLabel('Код від учителя')).toBeVisible()
 })
 
+/**
+ * Код більше не відкриває дитину, а подає заявку: доступ дає лише модератор.
+ * Сторінка має це сказати прямо — інакше дорослий вирішить, що не спрацювало,
+ * і введе код ще раз.
+ */
+test('введений код подає заявку й каже, що доступ ще не відкрито', async ({ page }) => {
+  const PENDING = {
+    id: 'r1',
+    status: 'pending',
+    created_at: '2026-10-05T10:00:00Z',
+    decided_at: null,
+  }
+  const parentRequests = []
+  await signInAsTeacher(page, {
+    profile: PARENT,
+    parentLinks: [],
+    parentRequests,
+    redeemed: 'r1',
+  })
+  await page.goto('/child')
+
+  await page.getByLabel('Код від учителя').fill('KRDM47XZ')
+  parentRequests.push(PENDING)
+  await page.getByRole('button', { name: 'Подати заявку' }).click()
+
+  await expect(page.getByRole('status')).toContainText('Доступ відкриється, коли модератор')
+  await expect(page.getByRole('list', { name: 'Ваші заявки' })).toContainText(
+    'чекає на підтвердження модератора',
+  )
+  // Поле очищено, а результатів дитини немає: доступу ще нема.
+  await expect(page.getByLabel('Код від учителя')).toHaveValue('')
+  await expect(page.getByText(/Усього спроб/)).toHaveCount(0)
+})
+
+test('відхилена заявка каже просити новий код', async ({ page }) => {
+  await signInAsTeacher(page, {
+    profile: PARENT,
+    parentLinks: [],
+    parentRequests: [
+      {
+        id: 'r1',
+        status: 'rejected',
+        created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+        decided_at: new Date(Date.now() - 86400000).toISOString(),
+      },
+    ],
+  })
+  await page.goto('/child')
+
+  await expect(page.getByRole('list', { name: 'Ваші заявки' })).toContainText(
+    'відхилено. Попросіть учителя виписати новий код',
+  )
+})
+
+test('повторна заявка на ту саму дитину пояснюється словами', async ({ page }) => {
+  await signInAsTeacher(page, { profile: PARENT, parentLinks: [], redeemed: 'request_pending' })
+  await page.goto('/child')
+
+  await page.getByLabel('Код від учителя').fill('KRDM47XZ')
+  await page.getByRole('button', { name: 'Подати заявку' }).click()
+
+  await expect(page.getByText(/вже подана й чекає перевірки/)).toBeVisible()
+})
+
 test('неправильний код пояснюється словами, а не кодом помилки', async ({ page }) => {
   await signInAsTeacher(page, { profile: PARENT, parentLinks: [], redeemed: 'invalid_code' })
   await page.goto('/child')
 
   await page.getByLabel('Код від учителя').fill('ZZZZZZZZ')
-  await page.getByRole('button', { name: 'Додати дитину' }).click()
+  await page.getByRole('button', { name: 'Подати заявку' }).click()
 
   await expect(page.getByText(/Такого коду немає/)).toBeVisible()
 })
@@ -53,7 +117,7 @@ test('використаний код відрізняється від непр
   await page.goto('/child')
 
   await page.getByLabel('Код від учителя').fill('KRDM47XZ')
-  await page.getByRole('button', { name: 'Додати дитину' }).click()
+  await page.getByRole('button', { name: 'Подати заявку' }).click()
 
   await expect(page.getByText(/уже використали/)).toBeVisible()
   await expect(page.getByText(/Такого коду немає/)).toHaveCount(0)

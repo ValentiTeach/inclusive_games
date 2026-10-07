@@ -13,6 +13,10 @@ export const PARENT_ERROR = {
   CANNOT_WATCH_SELF: 'cannot_watch_self',
   CODE_REVOKED: 'code_revoked',
   CODE_EXPIRED: 'code_expired',
+  ALREADY_LINKED: 'already_linked',
+  REQUEST_PENDING: 'request_pending',
+  REQUEST_NOT_FOUND: 'request_not_found',
+  REQUEST_ALREADY_DECIDED: 'request_already_decided',
   STUDENT_NOT_FOUND: 'student_not_found',
   NOT_ALLOWED: 'not_allowed',
   UNKNOWN: 'unknown',
@@ -34,6 +38,11 @@ export const PARENT_ERROR_TEXT = {
     'Цей код скасував учитель. Попросіть новий.',
   [PARENT_ERROR.CODE_EXPIRED]:
     'Строк дії коду минув. Попросіть учителя виписати новий.',
+  [PARENT_ERROR.ALREADY_LINKED]: 'Ця дитина вже додана до вашого акаунта.',
+  [PARENT_ERROR.REQUEST_PENDING]:
+    'Заявка на цю дитину вже подана й чекає перевірки. Нового коду не потрібно.',
+  [PARENT_ERROR.REQUEST_NOT_FOUND]: 'Такої заявки вже немає. Оновіть список.',
+  [PARENT_ERROR.REQUEST_ALREADY_DECIDED]: 'Цю заявку вже розглянули. Оновіть список.',
   [PARENT_ERROR.STUDENT_NOT_FOUND]: 'Цієї дитини вже немає в групі.',
   [PARENT_ERROR.NOT_ALLOWED]: 'Код для батьків виписує вчитель цієї групи.',
   [PARENT_ERROR.UNKNOWN]: 'Не вдалося. Спробуйте ще раз за хвилину.',
@@ -98,9 +107,18 @@ export async function revokeParentAccess(parentId, studentId) {
 /**
  * Стан коду — одним словом, у порядку, в якому вони перебивають одне одного:
  * використаний код уже нічого не відкриє, хай навіть його строк минув.
+ *
+ * Використаний код має три долі, і для вчителя це різні речі: заявку ще
+ * розглядають (доступу нема), її схвалили (доступ є) або відхилили (код
+ * згорів, доступу нема і не буде — потрібен новий). `request_status` порожній
+ * у кодів, використаних до появи заявок: для них доступ відкривався одразу.
  */
 export function inviteState(invite, now = Date.now()) {
-  if (invite.used_at) return 'used'
+  if (invite.used_at) {
+    if (invite.request_status === 'pending') return 'pending'
+    if (invite.request_status === 'rejected') return 'rejected'
+    return 'used'
+  }
   if (invite.revoked_at) return 'revoked'
   if (new Date(invite.expires_at).getTime() <= now) return 'expired'
   return 'active'
@@ -109,15 +127,52 @@ export function inviteState(invite, now = Date.now()) {
 export const INVITE_STATE_TEXT = {
   active: 'Діє',
   used: 'Використано',
+  pending: 'Чекає схвалення',
+  rejected: 'Відхилено',
   revoked: 'Скасовано',
   expired: 'Строк минув',
 }
 
-/** Дорослий уводить код і дістає доступ до однієї дитини. */
+/**
+ * Дорослий уводить код і подає заявку на доступ до однієї дитини. Доступ
+ * відкриє лише модератор — тому тут повертається id заявки, а не дитини.
+ */
 export async function redeemParentInvite(code) {
   const { data, error } = await supabase.rpc('redeem_parent_invite', { p_code: code })
   if (error) throw new ParentError(parentErrorReason(error), error)
   return data
+}
+
+/**
+ * Власні заявки дорослого, найновіші спершу. Ім'я дитини тут навмисно не
+ * питається: до схвалення її профіль дорослому не відкритий.
+ */
+export async function fetchMyRequests(parentId) {
+  const { data, error } = await supabase
+    .from('parent_requests')
+    .select('id, status, created_at, decided_at')
+    .eq('parent_id', parentId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw new ParentError(parentErrorReason(error), error)
+  return data ?? []
+}
+
+const REJECTED_VISIBLE_DAYS = 14
+
+/**
+ * Що з власних заявок варто показати: ті, що чекають, і відхилені за останні
+ * два тижні. Схвалена заявка нічого не додає — дитина вже з'явилась у списку;
+ * а відхилена, що висить вічно, лишилась би докором на сторінці, де людина
+ * давно отримала новий код.
+ */
+export function visibleRequests(rows, now = Date.now()) {
+  const cutoff = now - REJECTED_VISIBLE_DAYS * 86400000
+  return rows.filter(
+    (row) =>
+      row.status === 'pending' ||
+      (row.status === 'rejected' && new Date(row.decided_at ?? row.created_at).getTime() >= cutoff),
+  )
 }
 
 /*

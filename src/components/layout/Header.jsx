@@ -10,6 +10,7 @@ import {
   HeartHandshake,
 } from 'lucide-react'
 import { useAuth } from '../../lib/authContext'
+import { usePendingParentRequests } from '../../lib/usePendingParentRequests'
 import RoleBadge from '../ui/RoleBadge'
 import ThemeToggle from '../ui/ThemeToggle'
 import './Header.css'
@@ -52,6 +53,8 @@ function Header() {
      шість, у модератора сім, і там, де учневі просторо, їм уже тісно. CSS не
      вміє рахувати елементи, тож рахунок тут, а пороги — у Header.css. */
   const isDense = links.length > NAV_LINKS.length
+  /* Заявки батьків чекають лише на модератора — йому лічильник і потрібен. */
+  const pendingRequests = usePendingParentRequests(profile?.role === 'moderator')
 
   return (
     <header className={isDense ? 'site-header site-header--dense' : 'site-header'}>
@@ -75,6 +78,14 @@ function Header() {
             >
               <link.icon size={18} aria-hidden="true" />
               <span className="site-header__link-label">{link.label}</span>
+              {link.to === '/admin' && pendingRequests > 0 && (
+                <>
+                  <span className="site-header__badge" aria-hidden="true">
+                    {pendingRequests}
+                  </span>
+                  <span className="visually-hidden">, заявок батьків: {pendingRequests}</span>
+                </>
+              )}
             </NavLink>
           ))}
           <NavLink

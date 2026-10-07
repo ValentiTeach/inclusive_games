@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
-import { listAllUsers, setUserRole } from '../lib/admin'
+import { ROLE_ERROR, listAllUsers, setUserRole } from '../lib/admin'
 import RoleBadge from '../components/ui/RoleBadge'
 import RetentionPanel from '../components/admin/RetentionPanel'
+import ParentRequests from '../components/admin/ParentRequests'
 import './Admin.css'
 
 const ROLE_OPTIONS = ['student', 'teacher', 'moderator', 'parent']
@@ -92,8 +93,12 @@ function Admin() {
       setUsers((prev) =>
         prev.map((entry) => (entry.id === targetUser.id ? { ...entry, role: nextRole } : entry)),
       )
-    } catch {
-      setErrorMessage('Не вдалося змінити роль. Спробуй ще раз.')
+    } catch (caught) {
+      setErrorMessage(
+        caught?.reason === ROLE_ERROR.OWN_ROLE
+          ? 'Свою роль змінити не можна: платформа лишилася б без модератора. Попроси іншого модератора.'
+          : 'Не вдалося змінити роль. Спробуй ще раз.',
+      )
     } finally {
       setPendingId(null)
     }
@@ -103,6 +108,10 @@ function Admin() {
     <section className="admin">
       <h1>Адмін-панель</h1>
       <p>Усі користувачі платформи. Тут можна призначати ролі.</p>
+
+      <ParentRequests />
+
+      <h2 className="admin__subtitle">Користувачі</h2>
 
       {errorMessage && <p className="admin__error">{errorMessage}</p>}
 
@@ -134,7 +143,9 @@ function Admin() {
                       <select
                         className="admin__role-select"
                         value={entry.role}
-                        disabled={pendingId === entry.id}
+                        disabled={pendingId === entry.id || entry.id === user.id}
+                        title={entry.id === user.id ? 'Свою роль змінити не можна' : undefined}
+                        aria-label={`Роль: ${entry.email ?? entry.display_name ?? 'користувач'}`}
                         onChange={(event) => handleRoleChange(entry, event.target.value)}
                       >
                         {ROLE_OPTIONS.map((role) => (

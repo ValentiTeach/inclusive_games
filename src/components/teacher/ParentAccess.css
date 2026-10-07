@@ -111,11 +111,19 @@
   background: var(--cat-thinking-bg);
 }
 
-/* Скасований і протермінований — не тривога, а просто минуле: вони нічого не
-   відкривають, і червоним їх позначати означало б лякати вчителя там, де все
-   гаразд. */
+/* «Чекає схвалення» — код уже вжито, але доступу ще немає: не «використано»
+   (синій), бо вчитель вирішив би, що дорослий уже бачить дитину. */
+.parent-access__state--pending {
+  color: var(--text);
+  background: var(--cat-memory-bg);
+}
+
+/* Скасований, протермінований і відхилений — не тривога, а просто минуле: вони
+   нічого не відкривають, і червоним їх позначати означало б лякати вчителя там,
+   де все гаразд. */
 .parent-access__state--revoked,
-.parent-access__state--expired {
+.parent-access__state--expired,
+.parent-access__state--rejected {
   color: var(--text-muted);
   background: var(--surface-muted);
 }

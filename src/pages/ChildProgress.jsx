@@ -5,7 +5,9 @@ import { isCloudConfigured } from '../lib/supabaseClient'
 import {
   fetchChildResults,
   fetchMyChildren,
+  fetchMyRequests,
   redeemParentInvite,
+  visibleRequests,
   PARENT_ERROR_TEXT,
 } from '../lib/parents'
 import { GAMES, CATEGORIES } from '../data/games'
@@ -56,13 +58,29 @@ function ChildProgress() {
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [errorText, setErrorText] = useState(null)
+  const [requests, setRequests] = useState([])
+  const [submitted, setSubmitted] = useState(false)
+
+  /*
+   * Заявки питаються окремо й мовчки: до міграції таблиці ще немає, і це не
+   * привід показувати помилку там, де дитину видно й без них.
+   */
+  const reloadRequests = useCallback(async () => {
+    if (!user) return
+    try {
+      setRequests(visibleRequests(await fetchMyRequests(user.id)))
+    } catch {
+      setRequests([])
+    }
+  }, [user])
 
   const reload = useCallback(async () => {
     if (!user) return
     const list = await fetchMyChildren(user.id)
     setChildren(list)
     setActiveId((current) => current ?? list[0]?.id ?? null)
-  }, [user])
+    await reloadRequests()
+  }, [user, reloadRequests])
 
   useEffect(() => {
     if (!user) return undefined
@@ -77,6 +95,12 @@ function ChildProgress() {
       .catch(() => {
         if (!cancelled) setChildren([])
       })
+
+    fetchMyRequests(user.id)
+      .then((rows) => {
+        if (!cancelled) setRequests(visibleRequests(rows))
+      })
+      .catch(() => {})
 
     return () => {
       cancelled = true
@@ -109,11 +133,12 @@ function ChildProgress() {
     event.preventDefault()
     setBusy(true)
     setErrorText(null)
+    setSubmitted(false)
     try {
-      const studentId = await redeemParentInvite(code)
+      await redeemParentInvite(code)
       setCode('')
+      setSubmitted(true)
       await reload()
-      setActiveId(studentId)
     } catch (error) {
       setErrorText(PARENT_ERROR_TEXT[error?.reason] ?? PARENT_ERROR_TEXT.unknown)
     } finally {
@@ -154,7 +179,8 @@ function ChildProgress() {
         <p className="child-progress__intro">
           Тут видно, як дитина грає: скільки спроб, у яких іграх і що в неї виходить
           найкраще. Щоб почати, попросіть у вчителя код — він виписує його на вашу
-          дитину окремо.
+          дитину окремо. Після введення коду модератор платформи перевірить заявку й
+          відкриє доступ.
         </p>
       )}
 
@@ -173,11 +199,36 @@ function ChildProgress() {
             spellCheck={false}
           />
           <Button type="submit" disabled={busy || code.trim().length === 0}>
-            {busy ? 'Перевіряю…' : 'Додати дитину'}
+            {busy ? 'Надсилаю…' : 'Подати заявку'}
           </Button>
         </div>
         {errorText && <p className="child-progress__error">{errorText}</p>}
+        {submitted && (
+          <p className="child-progress__status" role="status">
+            Заявку подано. Доступ відкриється, коли модератор її підтвердить — зазвичай
+            це не миттєво. Повертайтеся на цю сторінку пізніше.
+          </p>
+        )}
       </form>
+
+      {requests.length > 0 && (
+        <ul className="child-progress__requests" aria-label="Ваші заявки">
+          {requests.map((request) => (
+            <li
+              key={request.id}
+              className={
+                request.status === 'rejected'
+                  ? 'child-progress__request child-progress__request--rejected'
+                  : 'child-progress__request'
+              }
+            >
+              {request.status === 'pending'
+                ? `Заявка від ${formatDate(request.created_at)} чекає на підтвердження модератора.`
+                : `Заявку від ${formatDate(request.created_at)} відхилено. Попросіть учителя виписати новий код.`}
+            </li>
+          ))}
+        </ul>
+      )}
 
       {children !== null && children.length > 1 && (
         <div className="child-progress__switch" role="group" aria-label="Оберіть дитину">

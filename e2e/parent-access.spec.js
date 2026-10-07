@@ -134,3 +134,32 @@ test('панель із кодами не потрапляє на роздрук
   await page.emulateMedia({ media: 'print' })
   await expect(page.getByText('AAAA1111')).toBeHidden()
 })
+
+/**
+ * «Чекає схвалення» — це не «використано»: дорослий ще нічого не бачить. Якби
+ * вчитель побачив «використано», він вирішив би, що дитину вже відкрито, а
+ * кнопки «відібрати доступ» тут бути не може — відбирати ще нічого.
+ */
+test('код із заявкою, що чекає, не видається за наданий доступ', async ({ page }) => {
+  await openAccess(page, [
+    invite({
+      code: 'WAIT1111',
+      used_at: new Date().toISOString(),
+      parent_id: null,
+      parent_label: 'mama@example.org',
+      request_status: 'pending',
+    }),
+    invite({
+      code: 'NOPE2222',
+      used_at: new Date().toISOString(),
+      parent_id: null,
+      parent_label: 'stranger@example.org',
+      request_status: 'rejected',
+    }),
+  ])
+
+  await expect(states(page)).toHaveText(['Чекає схвалення', 'Відхилено'])
+  await expect(page.getByText(/mama@example.org/)).toBeVisible()
+  await expect(page.getByRole('button', { name: /Відібрати доступ/ })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /Скасувати код/ })).toHaveCount(0)
+})

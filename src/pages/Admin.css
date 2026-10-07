@@ -2,6 +2,10 @@
   max-width: 960px;
 }
 
+.admin__subtitle {
+  margin-top: var(--space-8, 48px);
+}
+
 .admin__error {
   color: var(--cat-reaction);
 }

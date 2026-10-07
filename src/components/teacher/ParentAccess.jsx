@@ -83,7 +83,8 @@ function ParentAccess({ student, onClose }) {
 
       <p className="parent-access__note">
         Код виписується на цю дитину й діє 7 днів. Дорослий уводить його на сторінці
-        «Моя дитина». Код спрацьовує один раз.
+        «Моя дитина» і подає заявку: доступ відкриється, коли модератор платформи її
+        підтвердить. Код спрацьовує один раз.
       </p>
 
       {errorText && <p className="parent-access__error">{errorText}</p>}
@@ -124,7 +125,7 @@ function ParentAccess({ student, onClose }) {
                 </span>
 
                 <span className="parent-access__when">
-                  {state === 'used'
+                  {state === 'used' || state === 'pending' || state === 'rejected'
                     ? `${row.parent_label} · ${formatDate(row.used_at)}`
                     : `до ${formatDate(row.expires_at)}`}
                 </span>

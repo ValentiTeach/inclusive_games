@@ -42,6 +42,7 @@ import { FELT_LABELS } from '../games/engine/felt'
 import { isLowerBetter, metricLabel } from '../games/engine/metrics'
 import AdaptationsEditor from '../components/specialist/AdaptationsEditor'
 import VaultPanel from '../components/specialist/VaultPanel'
+import MetricHelp from '../components/ui/MetricHelp'
 import '../components/specialist/Specialist.css'
 import './StudentFile.css'
 
@@ -369,7 +370,10 @@ function Battery({ groupId, studentId, plans, runs, results, onAssigned }) {
                         {key === 'score' ? (
                           <strong>{GAME_TITLES[step.gameId]}</strong>
                         ) : (
-                          <span className="student-file__metric">{label}</span>
+                          <>
+                            <span className="student-file__metric">{label}</span>
+                            <MetricHelp metric={key} />
+                          </>
                         )}
                         {key === 'score' && ` · ${label}`}
                       </td>

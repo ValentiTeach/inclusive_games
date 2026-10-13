@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import GameBreakdown from './GameBreakdown'
 
 const STUDENTS = [
@@ -35,7 +36,12 @@ const RESULTS = [
 ]
 
 function renderBreakdown(results = RESULTS, students = STUDENTS) {
-  render(<GameBreakdown results={results} students={students} />)
+  // Роутер — заради «?» біля показників: це посилання на довідку.
+  render(
+    <MemoryRouter>
+      <GameBreakdown results={results} students={students} />
+    </MemoryRouter>,
+  )
 }
 
 describe('зріз за іграми', () => {
@@ -147,6 +153,18 @@ describe('зріз за іграми', () => {
     await user.click(screen.getByText('Таблиці Шульте'))
 
     expect(screen.queryByText(/Проб із часом/i)).not.toBeInTheDocument()
+  })
+
+  /*
+   * «Сер. час, мс: 817» вчителю зрозуміле, а «Розкид часу (CV)» — ні. Біля
+   * показника — «?», що веде до пояснення в довідці.
+   */
+  it('показник у заголовку веде до пояснення в довідці', () => {
+    renderBreakdown()
+
+    const help = screen.getByRole('link', { name: 'Що означає «Точність»' })
+    expect(help).toHaveAttribute('href', '/help#metric-accuracy_pct')
+    expect(help).toHaveAttribute('title', expect.stringMatching(/частка відповідей/))
   })
 
   it('без жодної спроби пояснює, що тут буде', () => {

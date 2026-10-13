@@ -77,7 +77,9 @@ describe('гра', () => {
     expect(screen.getByLabelText('Знак питання')).toBeInTheDocument()
     fireEvent.click(screen.getAllByRole('button')[0])
     expect(screen.queryByLabelText('Знак питання')).not.toBeInTheDocument()
-    expect(screen.getByText(/—/, { selector: '.analogies__explain' })).toBeInTheDocument()
+    // Задача випадкова, і не кожне пояснення має тире («Риба плаває у воді, а
+    // птах літає в небі.») — тож перевіряється саме пояснення, а не пунктуація.
+    expect(screen.getByText(/\S/, { selector: '.analogies__explain' })).toBeInTheDocument()
 
     act(() => {
       vi.advanceTimersByTime(2100)

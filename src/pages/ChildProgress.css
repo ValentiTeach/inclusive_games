@@ -164,6 +164,12 @@
   flex-wrap: wrap;
 }
 
+.child-progress__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
 .child-progress__print-head h2 {
   margin: 0 0 var(--space-1);
 }

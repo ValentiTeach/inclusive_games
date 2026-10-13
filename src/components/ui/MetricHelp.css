@@ -1,0 +1,39 @@
+.metric-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  flex: none;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: 0;
+  vertical-align: middle;
+  color: var(--accent);
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+}
+
+.metric-help:hover {
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Пальцем у 20 px не влучити. Коло лишається тим самим, а ціль — 44 px,
+   за рахунок невидимого поля навколо. */
+@media (pointer: coarse) {
+  .metric-help {
+    position: relative;
+  }
+
+  .metric-help::after {
+    content: '';
+    position: absolute;
+    inset: -12px;
+  }
+}

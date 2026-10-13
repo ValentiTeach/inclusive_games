@@ -63,3 +63,49 @@
   font-size: 14px;
   color: var(--text-muted);
 }
+
+.account__section {
+  margin-top: var(--space-6, 32px);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.account__section h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 20px;
+}
+
+.account__danger h2 {
+  color: var(--cat-reaction);
+}
+
+.account__groups {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.account__groups p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.account__check {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+
+.account__check input {
+  width: 22px;
+  height: 22px;
+  margin: 2px 0 0;
+  flex: none;
+}

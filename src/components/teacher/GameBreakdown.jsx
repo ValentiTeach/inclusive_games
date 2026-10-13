@@ -4,6 +4,7 @@ import Badge from '../ui/Badge'
 import { CATEGORIES } from '../../data/games'
 import { metricLabel } from '../../games/engine/metrics'
 import { breakdownByGame, studentsWithoutAttempts } from '../../lib/groupBreakdown'
+import MetricHelp from '../ui/MetricHelp'
 import './GameBreakdown.css'
 
 /**
@@ -73,6 +74,7 @@ function GameBreakdown({ results, students }) {
             {HEADLINE.map((key) => (
               <th key={key} scope="col">
                 {metricLabel(key)}
+                <MetricHelp metric={key} />
               </th>
             ))}
             <th scope="col">Востаннє</th>
@@ -130,7 +132,10 @@ function GameBreakdown({ results, students }) {
                           <dl className="breakdown__extra">
                             {extraKeys.map((key) => (
                               <div key={key} className="breakdown__extra-item">
-                                <dt>{shortLabel(key)}</dt>
+                                <dt>
+                                  <span>{shortLabel(key)}</span>
+                                  <MetricHelp metric={key} />
+                                </dt>
                                 <dd>{formatMetric(key, row.metrics[key])}</dd>
                               </div>
                             ))}

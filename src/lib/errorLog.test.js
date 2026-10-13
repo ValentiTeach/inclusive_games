@@ -40,6 +40,26 @@ describe('журнал падінь', () => {
     expect(row.stack).toContain('у грі «Зайвий предмет»')
   })
 
+  it('підписує падіння версією збірки', async () => {
+    reportError(new Error('з версією'), 'window')
+    await settle()
+
+    expect(insert.mock.calls[0][0].build).toBeTruthy()
+  })
+
+  // Поки міграцію 20261013 не застосовано, колонки build немає, і PostgREST
+  // відхиляє рядок цілком. Падіння має дійти хоч без версії.
+  it('без колонки версії надсилає падіння ще раз, без неї', async () => {
+    insert.mockResolvedValueOnce({ error: { code: 'PGRST204', message: 'build' } })
+
+    reportError(new Error('стара база'), 'window')
+    await settle()
+
+    expect(insert).toHaveBeenCalledTimes(2)
+    expect(insert.mock.calls[1][0]).not.toHaveProperty('build')
+    expect(insert.mock.calls[1][0].message).toBe('стара база')
+  })
+
   /**
    * Одне падіння в циклі малювання повторює себе десятки разів на секунду. Без
    * стелі перша ж така помилка залила б таблицю тисячами однакових рядків —

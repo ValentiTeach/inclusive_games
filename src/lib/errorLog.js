@@ -1,4 +1,5 @@
 import { supabase, isCloudConfigured } from './supabaseClient'
+import { BUILD } from './build'
 
 /**
  * Куди діваються падіння.
@@ -85,6 +86,7 @@ export function reportError(error, kind = 'window', extra = null) {
       stack,
       path: cut(safeLocation(), MAX_PATH),
       user_agent: cut(safeAgent(), MAX_AGENT),
+      build: BUILD,
     })
   } catch {
     // Обробник помилок, що кинув помилку, — найгірше, що тут може статися.
@@ -107,7 +109,17 @@ async function send(row) {
       userId = null
     }
 
-    await supabase.from('client_errors').insert({ ...row, user_id: userId })
+    const { error } = await supabase.from('client_errors').insert({ ...row, user_id: userId })
+
+    /*
+     * Колонка build з'являється з міграцією 20261013. Поки її немає, PostgREST
+     * відхиляє весь рядок (PGRST204) — краще падіння без версії, ніж жодного.
+     */
+    if (error?.code === 'PGRST204') {
+      const withoutBuild = { ...row, user_id: userId }
+      delete withoutBuild.build
+      await supabase.from('client_errors').insert(withoutBuild)
+    }
   } catch {
     // Мережі немає або таблиці ще немає — звіт про падіння не той привід,
     // щоб падати вдруге.

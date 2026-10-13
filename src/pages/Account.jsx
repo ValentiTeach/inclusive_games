@@ -1,14 +1,31 @@
+import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/authContext'
 import { supabase, isCloudConfigured } from '../lib/supabaseClient'
 import { clearAllResults } from '../games/engine/storage'
 import Button from '../components/ui/Button'
 import RoleBadge from '../components/ui/RoleBadge'
+import AccountSettings from '../components/account/AccountSettings'
 import './Account.css'
 
 function Account() {
   const { user, profile, loading } = useAuth()
   const navigate = useNavigate()
+  // Після видалення сеансу вже немає, і без цього сторінка мовчки перекинула
+  // б на вхід — людина не дізналася б, чи все вдалося.
+  const [deleted, setDeleted] = useState(false)
+
+  if (deleted) {
+    return (
+      <section className="account">
+        <h1>Акаунт видалено</h1>
+        <p role="status">
+          Ваш акаунт і пов’язані з ним дані видалено. Дякуємо, що були з нами.
+        </p>
+        <Button to="/">На головну</Button>
+      </section>
+    )
+  }
 
   if (!isCloudConfigured) {
     return (
@@ -99,6 +116,10 @@ function Account() {
           </Button>
         )}
       </div>
+
+      {!isAnonymous && (
+        <AccountSettings user={user} role={profile?.role} onDeleted={() => setDeleted(true)} />
+      )}
     </section>
   )
 }

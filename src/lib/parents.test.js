@@ -75,10 +75,35 @@ describe('код запрошення', () => {
    * йому ще не відкрито.
    */
   it('уведений код подає заявку й повертає її id', async () => {
-    rpc.mockResolvedValue({ data: 'request-1', error: null })
+    rpc.mockResolvedValue({ data: { request_id: 'request-1' }, error: null })
 
     await expect(redeemParentInvite('KRDM47XZ')).resolves.toBe('request-1')
-    expect(rpc).toHaveBeenCalledWith('redeem_parent_invite', { p_code: 'KRDM47XZ' })
+    expect(rpc).toHaveBeenCalledWith('try_redeem_parent_invite', { p_code: 'KRDM47XZ' })
+  })
+
+  /*
+   * Невірний код і ліміт сервер повертає значенням: виняток відкотив би запис
+   * про спробу, і лічильник нічого б не рахував.
+   */
+  it('невірний код і ліміт, повернені значенням, стають причинами', async () => {
+    rpc.mockResolvedValueOnce({ data: { error: 'invalid_code' }, error: null })
+    await expect(redeemParentInvite('KRDM47XZ')).rejects.toMatchObject({
+      reason: PARENT_ERROR.INVALID_CODE,
+    })
+
+    rpc.mockResolvedValueOnce({ data: { error: 'too_many_attempts' }, error: null })
+    await expect(redeemParentInvite('KRDM47XZ')).rejects.toMatchObject({
+      reason: PARENT_ERROR.TOO_MANY_ATTEMPTS,
+    })
+  })
+
+  it('без міграції ліміту йде старим шляхом', async () => {
+    rpc
+      .mockResolvedValueOnce({ data: null, error: { code: 'PGRST202', message: 'not found' } })
+      .mockResolvedValueOnce({ data: 'request-1', error: null })
+
+    await expect(redeemParentInvite('KRDM47XZ')).resolves.toBe('request-1')
+    expect(rpc).toHaveBeenLastCalledWith('redeem_parent_invite', { p_code: 'KRDM47XZ' })
   })
 
   it('повторну заявку на ту саму дитину відрізняє від інших відмов', async () => {

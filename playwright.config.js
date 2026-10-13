@@ -8,9 +8,14 @@ import { defineConfig, devices } from '@playwright/test'
 // version would download, and downloading is blocked there. PW_CHROMIUM_PATH
 // points the run at whatever build is already on the machine; unset, Playwright
 // resolves its own as usual.
-const chromiumLaunch = process.env.PW_CHROMIUM_PATH
-  ? { executablePath: process.env.PW_CHROMIUM_PATH }
-  : {}
+//
+// LANG — для назв завантажених файлів. Без UTF-8-локалі Chromium на Linux
+// замінює кириличну назву («Андрій-2026-10-13.csv») на «download». На раннері
+// GitHub локаль і так C.UTF-8, а в голому контейнері її може не бути зовсім.
+const chromiumLaunch = {
+  ...(process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {}),
+  env: { ...process.env, LANG: process.env.LANG || 'C.UTF-8' },
+}
 
 const projects = [
   {

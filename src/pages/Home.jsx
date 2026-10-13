@@ -213,7 +213,7 @@ function Home() {
             <ShieldCheck size={20} aria-hidden="true" />
             <p>
               Про дитину — лише ім’я, група й результати. Без пошти, телефону й фото, без реклами
-              й стежильних скриптів. <Link to="/privacy">Дані та приватність</Link>
+              й стежильних скриптів. <Link to="/privacy">Як ми бережемо дані</Link>
             </p>
           </li>
           <li className="home-card">

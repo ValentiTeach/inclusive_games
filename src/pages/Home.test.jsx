@@ -36,7 +36,7 @@ describe('головна', () => {
 
   it('веде до приватності й доступності просто з головної', () => {
     renderHome()
-    expect(screen.getByRole('link', { name: 'Дані та приватність' })).toHaveAttribute('href', '/privacy')
+    expect(screen.getByRole('link', { name: 'Як ми бережемо дані' })).toHaveAttribute('href', '/privacy')
     expect(screen.getByRole('link', { name: 'Що зроблено для доступності' })).toHaveAttribute(
       'href',
       '/accessibility',

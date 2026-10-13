@@ -7,6 +7,8 @@ const mocks = vi.hoisted(() => ({
   profileRow: null,
   rpcResult: { error: null },
   rpcArgs: null,
+  // Відповідь саме try_join_group; null — як rpcResult.
+  tryResult: null,
 }))
 
 // Скільки локальних спроб лежить у браузері прямо зараз. Саме це число
@@ -39,6 +41,7 @@ vi.mock('./supabaseClient', () => ({
     rpc: async (name, args) => {
       mocks.calls.push(`rpc:${name}`)
       mocks.rpcArgs = args
+      if (name === 'try_join_group' && mocks.tryResult) return mocks.tryResult
       return mocks.rpcResult
     },
   },
@@ -60,6 +63,7 @@ beforeEach(() => {
   mocks.profileRow = null
   mocks.rpcResult = { error: null }
   mocks.rpcArgs = null
+  mocks.tryResult = null
   localStorage.clear()
 })
 
@@ -141,7 +145,7 @@ describe('joinGroup', () => {
     expect(mocks.calls).toEqual([
       'signOut',
       'signIn(localResults=0)',
-      'rpc:join_group',
+      'rpc:try_join_group',
     ])
   })
 
@@ -152,13 +156,13 @@ describe('joinGroup', () => {
 
     await joinGroup('abc123', 'Оля Петренко')
 
-    expect(mocks.calls).toEqual(['rpc:join_group'])
+    expect(mocks.calls).toEqual(['rpc:try_join_group'])
   })
 
   it('signs in anonymously when there is no session at all', async () => {
     await joinGroup('abc123', 'Оля Петренко')
 
-    expect(mocks.calls).toEqual(['signIn(localResults=0)', 'rpc:join_group'])
+    expect(mocks.calls).toEqual(['signIn(localResults=0)', 'rpc:try_join_group'])
   })
 
   it('normalises the code and the name it sends', async () => {
@@ -176,6 +180,56 @@ describe('joinGroup', () => {
     await expect(joinGroup('ABC123', 'Максим')).rejects.toMatchObject({
       reason: JOIN_ERROR.SESSION_BELONGS_TO_OTHER,
     })
+  })
+})
+
+/*
+ * Ліміт спроб (20261013_logs_limits_account.sql). Невірний код і «забагато
+ * спроб» приходять значенням, а не помилкою — інакше сервер не зміг би
+ * записати спробу. Сторінка ж має отримати ту саму JoinError, що й раніше.
+ */
+describe('joinGroup з лімітом спроб', () => {
+  it('turns a returned token into the same refusal the page already handles', async () => {
+    mocks.tryResult = { data: 'invalid_code', error: null }
+
+    await expect(joinGroup('ABC123', 'Оля')).rejects.toMatchObject({
+      reason: JOIN_ERROR.INVALID_CODE,
+    })
+  })
+
+  it('reports the limit as its own reason, not as a wrong code', async () => {
+    mocks.tryResult = { data: 'too_many_attempts', error: null }
+
+    await expect(joinGroup('ABC123', 'Оля')).rejects.toMatchObject({
+      reason: JOIN_ERROR.TOO_MANY_ATTEMPTS,
+    })
+  })
+
+  it('does not mistake an unknown token for success', async () => {
+    mocks.tryResult = { data: 'something_new', error: null }
+
+    await expect(joinGroup('ABC123', 'Оля')).rejects.toMatchObject({
+      reason: JOIN_ERROR.UNKNOWN,
+    })
+  })
+
+  // Міграцію ще не застосовано: функції немає, і вхід має працювати як досі.
+  it('falls back to join_group while the migration is not applied', async () => {
+    mocks.tryResult = { data: null, error: { code: 'PGRST202', message: 'not found' } }
+
+    await joinGroup('ABC123', 'Оля')
+
+    expect(mocks.calls).toEqual(['signIn(localResults=0)', 'rpc:try_join_group', 'rpc:join_group'])
+  })
+
+  // Будь-яка інша помилка — не привід іти в обхід ліміту старою функцією.
+  it('does not retry through join_group on any other error', async () => {
+    mocks.tryResult = { data: null, error: { message: 'session_belongs_to_other' } }
+
+    await expect(joinGroup('ABC123', 'Оля')).rejects.toMatchObject({
+      reason: JOIN_ERROR.SESSION_BELONGS_TO_OTHER,
+    })
+    expect(mocks.calls).not.toContain('rpc:join_group')
   })
 })
 

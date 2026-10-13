@@ -13,11 +13,14 @@ import {
 import { GAMES, CATEGORIES } from '../data/games'
 import { metricLabel } from '../games/engine/metrics'
 import { highlightMetrics, improvement } from '../lib/progressMetrics'
+import { buildGroupCsv, csvFileName, downloadCsv } from '../lib/csv'
 import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
+import MetricHelp from '../components/ui/MetricHelp'
 import './ChildProgress.css'
 
 const GAME_BY_ID = Object.fromEntries(GAMES.map((game) => [game.id, game]))
+const GAME_TITLES = Object.fromEntries(GAMES.map((game) => [game.id, game.title]))
 
 function formatDate(iso) {
   if (!iso) return '—'
@@ -265,9 +268,31 @@ function ChildProgress() {
           <div className="child-progress__name-row">
             <h2 className="child-progress__name">{active.display_name ?? 'Без імені'}</h2>
             {rows !== null && totalAttempts > 0 && (
-              <Button variant="secondary" onClick={() => window.print()}>
-                Друкувати
-              </Button>
+              <div className="child-progress__actions">
+                {/*
+                  Копія даних дитини — право батьків. Той самий CSV, що й у
+                  вчителя (lib/csv.js): одна спроба — один рядок з усіма
+                  показниками, відкривається в Excel і Google Таблицях.
+                */}
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    downloadCsv(
+                      csvFileName(active.display_name ?? 'dytyna'),
+                      buildGroupCsv({
+                        students: [{ id: active.id, displayName: active.display_name ?? 'Без імені' }],
+                        results: rows.map((row) => ({ ...row, user_id: active.id })),
+                        gameTitles: GAME_TITLES,
+                      }),
+                    )
+                  }
+                >
+                  Завантажити дані (CSV)
+                </Button>
+                <Button variant="secondary" onClick={() => window.print()}>
+                  Друкувати
+                </Button>
+              </div>
             )}
           </div>
 
@@ -305,7 +330,10 @@ function ChildProgress() {
                       <dl className="child-progress__metrics">
                         {entry.highlights.map(({ key, value }) => (
                           <div key={key}>
-                            <dt>{metricLabel(key)}</dt>
+                            <dt>
+                              <span>{metricLabel(key)}</span>
+                              <MetricHelp metric={key} />
+                            </dt>
                             <dd>{value}</dd>
                           </div>
                         ))}

@@ -41,3 +41,21 @@
 .button--secondary:hover {
   border-color: var(--accent);
 }
+
+/* Незворотна дія. Контурна, а не залита червоним: білий текст на червоному
+   кольорі категорії не дотягує до 4.5:1, а червона рамка з текстом теми — так. */
+.button--danger {
+  background: transparent;
+  border-color: var(--cat-reaction);
+  color: var(--text);
+}
+
+.button--danger:hover:not(:disabled) {
+  background: var(--cat-reaction-bg);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+}

@@ -23,6 +23,21 @@ describe('Дані та приватність', () => {
   })
 })
 
+describe('службові дані на сторінці приватності', () => {
+  it('називає строки журналу помилок і відгуків і захист від підбору кодів', () => {
+    renderAt(<Privacy />)
+    expect(screen.getByText(/видаляються через 90 днів/)).toBeInTheDocument()
+    expect(screen.getByText('Відгуки')).toBeInTheDocument()
+    expect(screen.getByText('Захист від підбору кодів')).toBeInTheDocument()
+  })
+
+  it('каже дорослому, як видалити власний акаунт', () => {
+    renderAt(<Privacy />)
+    expect(screen.getByRole('heading', { name: 'Акаунт дорослого' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '«Акаунт»' })).toHaveAttribute('href', '/account')
+  })
+})
+
 describe('бланк згоди', () => {
   it('має все, що батьки мають знати до підпису', () => {
     renderAt(<Consent />)

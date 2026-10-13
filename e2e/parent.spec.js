@@ -139,6 +139,34 @@ test('дорослий бачить прогрес своєї дитини', asy
   await expect(page.getByText(/Бал виріс на 43/)).toBeVisible()
 })
 
+/*
+ * Копія даних дитини — право батьків. Файл той самий, що й у вчителя: по
+ * рядку на спробу, з BOM, щоб Excel не показав кирилицю кракозябрами.
+ */
+test('батьки завантажують дані дитини одним файлом', async ({ page }) => {
+  await signInAsTeacher(page, {
+    profile: PARENT,
+    parentLinks: [{ student_id: CHILD.id, created_at: '2026-09-10T10:00:00Z' }],
+    students: [CHILD],
+    results: RESULTS,
+  })
+  await page.goto('/child')
+
+  const downloadStarted = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Завантажити дані (CSV)' }).click()
+  const download = await downloadStarted
+
+  expect(download.suggestedFilename()).toMatch(/^Андрій-\d{4}-\d{2}-\d{2}\.csv$/)
+  const text = await (await download.createReadStream()).toArray()
+  const csv = Buffer.concat(text).toString('utf8')
+  const lines = csv.replace(/^\uFEFF/, '').split('\r\n')
+
+  expect(csv.charCodeAt(0)).toBe(0xfeff)
+  expect(lines[0]).toMatch(/^Учень;Гра;Рівень;Бал;Дата/)
+  expect(lines).toHaveLength(1 + RESULTS.length)
+  expect(lines.slice(1).every((line) => line.startsWith('Андрій;Таблиці Шульте;'))).toBe(true)
+})
+
 /**
  * Головна обіцянка цієї сторінки: дорослий бачить свою дитину і більше нікого.
  * На сервері це тримає RLS, тут — те, що сторінка взагалі не питає нічого

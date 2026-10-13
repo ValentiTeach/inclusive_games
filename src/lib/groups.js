@@ -159,6 +159,7 @@ export const JOIN_ERROR = {
   INVALID_CODE: 'invalid_code',
   NOT_A_STUDENT: 'not_a_student',
   SESSION_BELONGS_TO_OTHER: 'session_belongs_to_other',
+  TOO_MANY_ATTEMPTS: 'too_many_attempts',
   UNKNOWN: 'unknown',
 }
 
@@ -272,10 +273,35 @@ export async function joinGroup(code, displayName, { startFresh = false } = {}) 
     }
   }
 
-  const { error } = await supabase.rpc('join_group', {
+  const args = {
     p_code: code.trim().toUpperCase(),
     p_display_name: normalizeStudentName(displayName),
-  })
+  }
+
+  /*
+   * try_join_group рахує невірні коди і після десяти за 15 хвилин відповідає
+   * «забагато спроб» (supabase/migrations/20261013_logs_limits_account.sql).
+   * Невірний код і ліміт вона повертає значенням, а не помилкою: помилка
+   * відкотила б і запис про спробу, і лічильник нічого б не рахував.
+   *
+   * Поки міграцію не застосовано, функції немає — тоді старий join_group,
+   * як і досі. Після міграції старий закритий, і назад дороги немає.
+   */
+  const { data, error } = await supabase.rpc('try_join_group', args)
+
+  if (error && isMissingFunction(error)) {
+    const { error: legacyError } = await supabase.rpc('join_group', args)
+    if (legacyError) throw new JoinError(joinErrorReason(legacyError), legacyError)
+    return
+  }
 
   if (error) throw new JoinError(joinErrorReason(error), error)
+
+  if (typeof data === 'string' && data !== '') {
+    throw new JoinError(SERVER_REASONS.includes(data) ? data : JOIN_ERROR.UNKNOWN)
+  }
+}
+
+function isMissingFunction(error) {
+  return error?.code === 'PGRST202' || error?.code === '42883'
 }

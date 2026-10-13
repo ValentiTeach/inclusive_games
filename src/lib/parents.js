@@ -19,6 +19,7 @@ export const PARENT_ERROR = {
   REQUEST_ALREADY_DECIDED: 'request_already_decided',
   STUDENT_NOT_FOUND: 'student_not_found',
   NOT_ALLOWED: 'not_allowed',
+  TOO_MANY_ATTEMPTS: 'too_many_attempts',
   UNKNOWN: 'unknown',
 }
 
@@ -45,6 +46,8 @@ export const PARENT_ERROR_TEXT = {
   [PARENT_ERROR.REQUEST_ALREADY_DECIDED]: 'Цю заявку вже розглянули. Оновіть список.',
   [PARENT_ERROR.STUDENT_NOT_FOUND]: 'Цієї дитини вже немає в групі.',
   [PARENT_ERROR.NOT_ALLOWED]: 'Код для батьків виписує вчитель цієї групи.',
+  [PARENT_ERROR.TOO_MANY_ATTEMPTS]:
+    'Забагато невірних кодів поспіль. Спробуйте знову за годину або попросіть учителя продиктувати код ще раз.',
   [PARENT_ERROR.UNKNOWN]: 'Не вдалося. Спробуйте ще раз за хвилину.',
 }
 
@@ -138,9 +141,27 @@ export const INVITE_STATE_TEXT = {
  * відкриє лише модератор — тому тут повертається id заявки, а не дитини.
  */
 export async function redeemParentInvite(code) {
-  const { data, error } = await supabase.rpc('redeem_parent_invite', { p_code: code })
+  /*
+   * try_redeem_parent_invite рахує невірні коди (5 на годину) і про невірний
+   * код та ліміт каже значенням {error}, а не помилкою: помилка відкотила б
+   * запис про спробу. Без міграції 20261013 функції немає — тоді старий шлях.
+   */
+  const { data, error } = await supabase.rpc('try_redeem_parent_invite', { p_code: code })
+
+  if (error && (error.code === 'PGRST202' || error.code === '42883')) {
+    const legacy = await supabase.rpc('redeem_parent_invite', { p_code: code })
+    if (legacy.error) throw new ParentError(parentErrorReason(legacy.error), legacy.error)
+    return legacy.data
+  }
+
   if (error) throw new ParentError(parentErrorReason(error), error)
-  return data
+
+  if (data?.error) {
+    throw new ParentError(
+      SERVER_REASONS.includes(data.error) ? data.error : PARENT_ERROR.UNKNOWN,
+    )
+  }
+  return data?.request_id ?? null
 }
 
 /**

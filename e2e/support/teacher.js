@@ -129,6 +129,18 @@ export async function signInAsTeacher(page, fixtures = {}) {
     consents = [],
     inactive = [],
     rpcCalls = [],
+    /*
+     * Службове для модератора: рядки client_errors і feedback. Зміни
+     * відгуків (PATCH, DELETE) складаються в `posted`, як і решта записів.
+     */
+    clientErrors = [],
+    feedback = [],
+    /*
+     * Власний акаунт: відмова сервера для transfer_my_groups і
+     * delete_my_account (машинний токен) або null, якщо все гаразд. Виклики
+     * складаються в rpcCalls.
+     */
+    accountError = null,
   } = fixtures
 
   await page.addInitScript((session) => {
@@ -189,6 +201,29 @@ export async function signInAsTeacher(page, fixtures = {}) {
       return
     }
 
+    /*
+     * try_redeem_parent_invite повертає невірний код і ліміт значенням
+     * {error}, а решту відмов — помилкою, як і старий redeem_parent_invite.
+     * Підміна відтворює саме цей поділ.
+     */
+    if (path === 'rpc/try_redeem_parent_invite') {
+      const returned = redeemed === 'invalid_code' || redeemed === 'too_many_attempts'
+      if (!returned && typeof redeemed === 'string' && redeemed.includes('_')) {
+        await route.fulfill({
+          status: 400,
+          contentType: 'application/json',
+          body: JSON.stringify({ code: 'P0001', message: redeemed, details: redeemed }),
+        })
+        return
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(returned ? { error: redeemed } : { request_id: redeemed }),
+      })
+      return
+    }
+
     if (path === 'rpc/redeem_parent_invite') {
       if (typeof redeemed === 'string' && redeemed.includes('_')) {
         await route.fulfill({
@@ -242,6 +277,21 @@ export async function signInAsTeacher(page, fixtures = {}) {
       return
     }
 
+    if (path === 'rpc/transfer_my_groups' || path === 'rpc/delete_my_account') {
+      rpcCalls.push({ path, args: JSON.parse(request.postData() ?? '{}') })
+      if (accountError) {
+        await route.fulfill({
+          status: 400,
+          contentType: 'application/json',
+          body: JSON.stringify({ code: 'P0001', message: accountError, details: accountError }),
+        })
+        return
+      }
+      const body = path === 'rpc/transfer_my_groups' ? JSON.stringify(groups.length) : ''
+      await route.fulfill({ status: body ? 200 : 204, contentType: 'application/json', body })
+      return
+    }
+
     if (path === 'rpc/inactive_students') {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(inactive) })
       return
@@ -251,6 +301,17 @@ export async function signInAsTeacher(page, fixtures = {}) {
       rpcCalls.push({ path, args: JSON.parse(request.postData() ?? '{}') })
       const body = path === 'rpc/purge_inactive_students' ? JSON.stringify(inactive.length) : ''
       await route.fulfill({ status: body ? 200 : 204, contentType: 'application/json', body })
+      return
+    }
+
+    if (path === 'feedback' && ['PATCH', 'DELETE'].includes(request.method())) {
+      posted.push({
+        table: path,
+        method: request.method(),
+        filter: url.searchParams.get('id'),
+        payload: request.postData() ? JSON.parse(request.postData()) : null,
+      })
+      await route.fulfill({ status: 204, contentType: 'application/json', body: '' })
       return
     }
 
@@ -347,6 +408,8 @@ export async function signInAsTeacher(page, fixtures = {}) {
     else if (path === 'session_plans') body = plans
     else if (path === 'session_runs') body = runs
     else if (path === 'parental_consents') body = consents
+    else if (path === 'client_errors') body = clientErrors
+    else if (path === 'feedback') body = feedback
 
     // PostgREST віддає один обʼєкт замість масиву, коли клієнт просить .single();
     // supabase-js позначає це заголовком Accept.

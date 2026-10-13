@@ -6,6 +6,8 @@ import { ROLE_ERROR, listAllUsers, setUserRole } from '../lib/admin'
 import RoleBadge from '../components/ui/RoleBadge'
 import RetentionPanel from '../components/admin/RetentionPanel'
 import ParentRequests from '../components/admin/ParentRequests'
+import FeedbackPanel from '../components/admin/FeedbackPanel'
+import ErrorLogPanel from '../components/admin/ErrorLogPanel'
 import './Admin.css'
 
 const ROLE_OPTIONS = ['student', 'teacher', 'moderator', 'parent']
@@ -111,6 +113,8 @@ function Admin() {
 
       <ParentRequests />
 
+      <FeedbackPanel moderatorId={user.id} />
+
       <h2 className="admin__subtitle">Користувачі</h2>
 
       {errorMessage && <p className="admin__error">{errorMessage}</p>}
@@ -165,6 +169,8 @@ function Admin() {
       )}
 
       <RetentionPanel />
+
+      <ErrorLogPanel />
     </section>
   )
 }

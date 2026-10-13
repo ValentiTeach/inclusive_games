@@ -1,0 +1,91 @@
+/* Текстові сторінки: довідка, доступність, відгук. Та сама типографіка, що й
+   у «Дані та приватність», — читаються як одна серія. */
+.doc-page {
+  max-width: 68ch;
+}
+
+.doc-page__lede {
+  font-size: 18px;
+}
+
+.doc-page section {
+  margin-top: var(--space-6);
+  scroll-margin-top: var(--space-4);
+}
+
+.doc-page h2 {
+  font-size: 22px;
+  margin: 0 0 var(--space-3);
+}
+
+.doc-page h3 {
+  font-size: 17px;
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.doc-page li {
+  margin-bottom: var(--space-2);
+}
+
+.doc-page__toc {
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.doc-page__toc h2 {
+  font-size: 15px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.doc-page__toc ol {
+  margin: 0;
+  padding-left: var(--space-5);
+}
+
+.doc-page__toc li {
+  margin-bottom: var(--space-1);
+}
+
+.doc-page__note {
+  margin: var(--space-3) 0 0;
+  padding: var(--space-4);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  background: var(--surface-muted);
+}
+
+.doc-page__metrics dt {
+  margin-top: var(--space-4);
+  font-weight: 700;
+  scroll-margin-top: var(--space-6);
+}
+
+.doc-page__metrics dd {
+  margin: var(--space-1) 0 0;
+}
+
+/* Показник, до якого прийшли з «?» у звіті. :target тут не допоможе: перехід
+   усередині застосунку міняє адресу через history, і браузер :target не
+   оновлює. */
+.doc-page__metrics .is-target {
+  margin: var(--space-3) calc(-1 * var(--space-3)) 0;
+  padding: var(--space-1) var(--space-3) var(--space-3);
+  background: var(--surface-muted);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+
+.doc-page__other {
+  columns: 2 220px;
+  padding-left: var(--space-5);
+}
+
+.doc-page__other li {
+  break-inside: avoid;
+  margin-bottom: var(--space-1);
+}

@@ -29,6 +29,9 @@ const {
   Admin,
   Privacy,
   Consent,
+  Help,
+  Accessibility,
+  Feedback,
   SessionRun,
   SessionBuilder,
   StudentFile,
@@ -63,6 +66,9 @@ function App() {
             <Route path="/join" element={<Join />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/privacy/consent" element={<Consent />} />
+            <Route path="/help" element={<Help />} />
+            <Route path="/accessibility" element={<Accessibility />} />
+            <Route path="/feedback" element={<Feedback />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

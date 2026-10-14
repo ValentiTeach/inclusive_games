@@ -15,6 +15,8 @@ import RoleBadge from '../ui/RoleBadge'
 import ThemeToggle from '../ui/ThemeToggle'
 import './Header.css'
 
+const LOGO_NAME = 'Inclusive Games'
+
 const NAV_LINKS = [
   { to: '/', label: 'Головна', end: true, icon: Home },
   { to: '/games', label: 'Каталог ігор', icon: Gamepad2 },
@@ -62,7 +64,26 @@ function Header() {
         <NavLink to="/" className="site-header__logo">
           <img src="/logo.png" alt="" className="site-header__logo-mark" />
           <span className="site-header__logo-text">
-            <span className="site-header__logo-name">Inclusive Games</span>
+            <span className="site-header__logo-name">
+              {/* Літери по одній — щоб кожна мала свій колір. Читачеві екрана
+                  така назва звучала б по буквах, тож він чує цілу назву окремо. */}
+              <span className="visually-hidden">{LOGO_NAME}</span>
+              <span className="site-header__logo-letters" aria-hidden="true">
+                {[...LOGO_NAME].map((char, index) =>
+                  char === ' ' ? (
+                    <span key={index} className="site-header__logo-gap" />
+                  ) : (
+                    <span
+                      key={index}
+                      className="site-header__logo-letter"
+                      style={{ '--letter-index': index }}
+                    >
+                      {char}
+                    </span>
+                  ),
+                )}
+              </span>
+            </span>
             <span className="site-header__logo-edition">| Historic_up&apos;s edition</span>
           </span>
         </NavLink>

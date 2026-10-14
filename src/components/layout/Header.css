@@ -58,38 +58,106 @@
   flex-wrap: wrap;
 }
 
-/* Марка звучала одним кольором, хоча платформа побудована на чотирьох навичках.
-   Напис бере всі чотири — і цим сам каже, про що тут ідеться.
+/* Напис у кольорах самої марки: темно-синій корабля, чорний, білий і відтінки
+   синього між ними. Кожна літера — свій тон, як назва на обкладинці гри, а
+   невеликий виступ знизу додає літерам «об'єму».
 
-   Колір лишається звичайним кольором тексту доти, доки браузер не підтвердить,
-   що вміє обрізати тло по літерах. Без цієї перевірки color: transparent у
-   старому браузері дав би невидиму назву сайту. */
+   Напис — це звичайний колір тексту, без background-clip: text. Прозорого
+   тексту, який старий браузер міг би лишити невидимим, тут більше немає. */
 .site-header__logo-name {
+  --logo-1: #00306e; /* колір корабля на марці */
+  --logo-2: #ffffff;
+  --logo-3: #1f5cb8;
+  --logo-4: #0a0f1a;
+  --logo-2-alt: #ffffff;
+  /* Світлій літері потрібна межа: біле на білій шапці інакше зникає. */
+  --logo-edge: #00306e;
+  --logo-depth: rgba(0, 48, 110, 0.35);
+
   color: var(--text);
 }
 
-@supports (background-clip: text) or (-webkit-background-clip: text) {
-  .site-header__logo-name {
-    background-image: linear-gradient(
-      100deg,
-      var(--brand-1) 0%,
-      var(--brand-2) 34%,
-      var(--brand-3) 67%,
-      var(--brand-4) 100%
-    );
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
+.site-header__logo-letters {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.site-header__logo-gap {
+  width: 0.28em;
+}
+
+.site-header__logo-letter {
+  display: inline-block;
+  color: var(--logo-1);
+  text-shadow: 0 0.1em 0 var(--logo-depth);
+}
+
+/* Чотири тони по колу. Світлий стоїть між темними, щоб мав темних сусідів. */
+.site-header__logo-letter:nth-child(4n + 2) {
+  color: var(--logo-2);
+  /* Контур тінями, а не -webkit-text-stroke: штрих лягає всередину гліфа й
+     з'їдає тонкі місця. */
+  text-shadow:
+    -1px 0 0 var(--logo-edge),
+    1px 0 0 var(--logo-edge),
+    0 -1px 0 var(--logo-edge),
+    0 1px 0 var(--logo-edge),
+    0 0.1em 0 var(--logo-edge);
+}
+
+.site-header__logo-letter:nth-child(4n + 3) {
+  color: var(--logo-3);
+}
+
+.site-header__logo-letter:nth-child(4n + 4) {
+  color: var(--logo-4);
+}
+
+/* «Games» — друге слово, тож світлий тон у ньому свій: слова не мають бути
+   дзеркальними копіями одне одного. */
+.site-header__logo-gap ~ .site-header__logo-letter:nth-child(4n + 2) {
+  color: var(--logo-2-alt);
+}
+
+/* У темній темі шапка сама темно-синя, і чорна чи темно-синя літера на ній
+   зникла б. Тож темні тони марки йдуть у тінь і контур, а літери беруть
+   світлі: білий, блакитний і два відтінки синього. */
+:root[data-theme='dark'] .site-header__logo-name {
+  --logo-1: #ffffff;
+  --logo-2: #a9c8f2;
+  --logo-3: #6f9fe6;
+  --logo-4: #dce8fa;
+  --logo-2-alt: #8fb6ee;
+  --logo-edge: #00306e;
+  --logo-depth: #000000;
+}
+
+/* Ігровий штрих: наведення на марку пускає хвилю по літерах. Тільки там, де
+   рух дозволено, — і системно, і в налаштуваннях застосунку. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :root:not(.force-reduced-motion) .site-header__logo:hover .site-header__logo-letter {
+    animation: logo-letter-hop 0.5s ease-out both;
+    animation-delay: calc(var(--letter-index) * 35ms);
   }
 }
 
-/* У режимі високої контрастності система сама призначає кольори, і прозорий
-   текст на градієнті там просто зникає. Тому повертаємо звичайний текст. */
+@keyframes logo-letter-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-4px);
+  }
+}
+
+/* У режимі високої контрастності система сама призначає кольори, і контур із
+   тіней там лише заважає. Повертаємо звичайний текст. */
 @media (forced-colors: active) {
-  .site-header__logo-name {
-    background-image: none;
+  .site-header__logo-letter,
+  .site-header__logo-letter:nth-child(n) {
     color: CanvasText;
-    forced-color-adjust: none;
+    text-shadow: none;
   }
 }
 

@@ -9,6 +9,7 @@ function makeAudioMock() {
   const started = []
   const stopped = []
   const gains = []
+  const contexts = []
 
   class FakeParam {
     constructor() {
@@ -25,6 +26,9 @@ function makeAudioMock() {
     cancelScheduledValues() {
       this.calls.push(['cancel'])
     }
+    setTargetAtTime(v) {
+      this.calls.push(['target', v])
+    }
   }
 
   class FakeContext {
@@ -32,6 +36,7 @@ function makeAudioMock() {
       this.state = 'running'
       this.currentTime = 0
       this.destination = { name: 'destination' }
+      contexts.push(this)
     }
     resume() {}
     createOscillator() {
@@ -55,7 +60,7 @@ function makeAudioMock() {
     }
   }
 
-  return { FakeContext, started, stopped, gains }
+  return { FakeContext, started, stopped, gains, contexts }
 }
 
 let mock
@@ -68,10 +73,16 @@ beforeEach(async () => {
 })
 
 afterEach(() => {
+  vi.useRealTimers()
+  vi.restoreAllMocks()
   delete window.AudioContext
 })
 
-async function load() {
+async function load({ sensorySafe = false } = {}) {
+  if (sensorySafe) {
+    const { __setAdaptationsForTest } = await import('./adaptations')
+    __setAdaptationsForTest({ sensorySafe: true })
+  }
   return import('./sound')
 }
 
@@ -195,5 +206,132 @@ describe('фонова музика', () => {
     startAmbient()
 
     expect(isAmbientPlaying()).toBe(true)
+  })
+})
+
+describe('ігрові звуки', () => {
+  it('«правильно» — дві ноти вгору', async () => {
+    setMode('clicks')
+    const { playCorrect } = await load()
+
+    playCorrect()
+
+    const [first, second] = mock.started.map((node) => node.frequency.calls[0][1])
+    expect(mock.started).toHaveLength(2)
+    expect(second).toBeGreaterThan(first)
+  })
+
+  it('помилка звичайно — «у-у» вниз, без зумера', async () => {
+    setMode('clicks')
+    const { playWrong } = await load()
+
+    playWrong()
+
+    const [first, second] = mock.started.map((node) => node.frequency.calls[0][1])
+    expect(mock.started).toHaveLength(2)
+    expect(second).toBeLessThan(first)
+    expect(mock.started.every((node) => node.type !== 'sawtooth' && node.type !== 'square')).toBe(true)
+  })
+
+  it('у сенсорно-безпечному режимі помилка — один тихий тон', async () => {
+    setMode('clicks')
+    const { playWrong } = await load({ sensorySafe: true })
+
+    playWrong()
+
+    expect(mock.started).toHaveLength(1)
+    expect(mock.started[0].type).toBe('sine')
+  })
+
+  it('фанфара — арпеджіо й акорд', async () => {
+    setMode('clicks')
+    const { playVictory } = await load()
+
+    playVictory()
+    expect(mock.started.length).toBeGreaterThan(4)
+  })
+
+  it('у сенсорному режимі фанфара мовчить', async () => {
+    setMode('clicks')
+    const { playVictory } = await load({ sensorySafe: true })
+
+    playVictory()
+    expect(mock.started).toHaveLength(0)
+  })
+
+  it('відлік звучить, а в тиші мовчить', async () => {
+    setMode('clicks')
+    const sound = await load()
+    sound.playCountdownTick()
+    sound.playGo()
+    expect(mock.started).toHaveLength(2)
+
+    mock.started.length = 0
+    setMode('off')
+    sound.playCountdownTick()
+    sound.playGo()
+    expect(mock.started).toHaveLength(0)
+  })
+})
+
+describe('петля фонової музики', () => {
+  it('акорди змінюються, а скринька дзенькає поверх', async () => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    setMode('music')
+    const { startAmbient } = await load()
+
+    startAmbient()
+    const voices = mock.started.length
+    vi.advanceTimersByTime(4000)
+
+    const glides = mock.started
+      .slice(0, voices)
+      .flatMap((node) => node.frequency.calls.filter(([kind]) => kind === 'target'))
+    expect(glides.length).toBeGreaterThan(0)
+    expect(mock.started.length).toBeGreaterThan(voices)
+  })
+
+  it('у сенсорному режимі лише рівний акорд синусоїдами, без раптових нот', async () => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    setMode('music')
+    const { startAmbient } = await load({ sensorySafe: true })
+
+    startAmbient()
+    const voices = mock.started.length
+    vi.advanceTimersByTime(8000)
+
+    expect(mock.started).toHaveLength(voices)
+    expect(mock.started.every((node) => node.type === 'sine')).toBe(true)
+  })
+
+  /** Ноти, заплановані в приспаному контексті, пролунали б усі разом. */
+  it('поки контекст чекає на дотик, нот не накопичується', async () => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    setMode('music')
+    const { startAmbient } = await load()
+
+    startAmbient()
+    mock.contexts[0].state = 'suspended'
+    const voices = mock.started.length
+    vi.advanceTimersByTime(8000)
+
+    expect(mock.started).toHaveLength(voices)
+  })
+
+  it('після зупинки петля більше нічого не грає', async () => {
+    vi.useFakeTimers()
+    vi.spyOn(Math, 'random').mockReturnValue(0)
+    setMode('music')
+    const { startAmbient, stopAmbient } = await load()
+
+    startAmbient()
+    stopAmbient()
+    const after = mock.started.length
+    vi.advanceTimersByTime(8000)
+
+    expect(mock.started).toHaveLength(after)
   })
 })

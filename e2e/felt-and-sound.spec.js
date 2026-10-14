@@ -153,6 +153,7 @@ test.describe('режими звуку', () => {
         setValueAtTime() {},
         exponentialRampToValueAtTime() {},
         cancelScheduledValues() {},
+        setTargetAtTime() {},
       })
       window.AudioContext = class {
         constructor() {
@@ -198,7 +199,7 @@ test.describe('режими звуку', () => {
     await page.waitForSelector('.odd__item')
     const duringGame = await audio(page)
 
-    // Фон — три голоси; клацання по «Почати» дає щонайбільше один звук.
+    // Фон — три голоси, що звучать, доки йде гра.
     expect(duringGame.started - beforeStart.started).toBeGreaterThanOrEqual(3)
     /*
      * Саме скільки звучить просто зараз, а не скільки створено: клацання теж
@@ -237,13 +238,17 @@ test.describe('режими звуку', () => {
     await recordAudio(page)
     await page.goto('/games/odd-one-out')
 
-    const before = await audio(page)
     await page.getByRole('button', { name: 'Почати' }).click()
     await page.waitForSelector('.odd__item')
     const during = await audio(page)
 
-    // Тільки клацання по кнопці, жодного фонового голосу.
-    expect(during.started - before.started).toBeLessThanOrEqual(1)
+    /*
+     * Короткі звуки тут є — клацання, «тік» відліку, «Старт!», — але кожен сам
+     * себе й зупиняє. Фон же грав би без кінця, тож рахуємо саме тих, хто досі
+     * звучить.
+     */
+    expect(during.started).toBeGreaterThan(0)
+    expect(during.started - during.stopped).toBe(0)
   })
 
   test('у тиші не звучить нічого', async ({ page }) => {

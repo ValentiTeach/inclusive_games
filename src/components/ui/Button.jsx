@@ -4,6 +4,16 @@ import './Button.css'
 
 function Button({ to, variant = 'primary', onClick, children, ...rest }) {
   const className = `button button--${variant}`
+  // Крапка з брижами — частина вигляду основної кнопки, а не її змісту.
+  const content =
+    variant === 'primary' ? (
+      <>
+        <span className="button__label">{children}</span>
+        <span className="button__ripple" aria-hidden="true" />
+      </>
+    ) : (
+      children
+    )
 
   function handleClick(event) {
     playClick()
@@ -13,14 +23,14 @@ function Button({ to, variant = 'primary', onClick, children, ...rest }) {
   if (to) {
     return (
       <Link to={to} className={className} onClick={handleClick} {...rest}>
-        {children}
+        {content}
       </Link>
     )
   }
 
   return (
     <button className={className} onClick={handleClick} {...rest}>
-      {children}
+      {content}
     </button>
   )
 }

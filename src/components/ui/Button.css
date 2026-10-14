@@ -1,47 +1,175 @@
+/*
+ * Два стилі кнопок сайту.
+ *
+ * Основна — суцільна бірюзова, текст великими літерами, а при наведенні від
+ * крапки праворуч розходяться «брижі». Другорядна — фіолетовий контур, який
+ * при наведенні заливається косою смугою зліва направо.
+ *
+ * Бірюза в світлій темі темніша за #40B3A2: білий текст на #40B3A2 дає лише
+ * 2.56:1, а тут потрібно щонайменше 4.5:1. Темна тема бере саме #40B3A2 —
+ * з темним текстом він дає 7.45:1. Фіолетовий у темній темі світлий з тієї ж
+ * причини: #800080 на темно-синій шапці майже зникає.
+ */
 .button {
+  --btn-teal: #1d7a6c;
+  --btn-teal-text: #ffffff;
+  --btn-purple: #800080;
+  --btn-purple-text: #ffffff;
+
+  position: relative;
+  /* Без цього ::before з z-index: -1 ховається за фоном картки, на якій стоїть
+     кнопка, і заливки не видно взагалі. */
+  isolation: isolate;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
+  box-sizing: border-box;
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
-  padding: 12px 24px;
-  border-radius: var(--radius-md);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 12px 20px;
+  border-radius: 4px;
   border: 2px solid transparent;
   cursor: pointer;
-  text-decoration: none;
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  outline: 0;
 }
 
-.button:hover {
-  transform: translateY(-1px);
+:root[data-theme='dark'] .button {
+  --btn-teal: #40b3a2;
+  --btn-teal-text: #04101f;
+  --btn-purple: #d2a8ff;
+  --btn-purple-text: #04101f;
 }
 
-.button:active {
-  transform: translateY(0) scale(0.97);
+/* Прибрали outline: 0 з рамки — тож фокус з клавіатури мусить бути видно
+   інакше, і чітко. */
+.button:focus-visible {
+  box-shadow:
+    0 0 0 3px var(--surface),
+    0 0 0 6px var(--accent);
 }
 
+/* ───────────────────────── Основна: бірюза й брижі ───────────────────────── */
 .button--primary {
-  background: var(--accent);
-  color: var(--accent-contrast);
-  box-shadow: var(--shadow-sm);
+  justify-content: space-between;
+  min-width: min(200px, 100%);
+  padding: 14px 20px;
+  background: var(--btn-teal);
+  color: var(--btn-teal-text);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .button--primary:hover {
-  box-shadow: var(--shadow-md);
+  opacity: 0.95;
 }
 
+/* Крапка, від якої йдуть брижі. Кольором тексту — тож видна в обох темах. */
+.button__ripple {
+  position: relative;
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-left: var(--space-2);
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/*
+ * Брижі — чотири кільця по 20 px, що розходяться від крапки, як у
+ * box-shadow-версії: 0 → 20 → 40 → 60 px і зовнішнє, що згасає до 80 px.
+ * Тінями їх не намалюєш: на крапці 8 px браузер урізає радіус тіні до 4 px,
+ * і кільця виходять квадратиками. Тому це концентричні кола градієнта, а
+ * зсув кілець — анімована довжина --ripple.
+ *
+ * z-index: -1 ставить кільця під текст і крапку, але над тлом самої кнопки —
+ * кнопка є власним контекстом накладання (isolation: isolate).
+ */
+@property --ripple {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+.button__ripple::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  transform: translate(-50%, -50%);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  /* Шари по 0.1, як чотири тіні: де вони накладаються, там світліше. */
+  background: radial-gradient(
+    circle closest-side,
+    rgba(255, 255, 255, 0.34) 0 var(--ripple),
+    rgba(255, 255, 255, 0.27) 0 calc(var(--ripple) + 20px),
+    rgba(255, 255, 255, 0.19) 0 calc(var(--ripple) + 40px),
+    rgba(255, 255, 255, 0.1) 0 calc(var(--ripple) + 60px),
+    transparent 0
+  );
+}
+
+/* Брижі — лише коли кнопку наведено чи вибрано з клавіатури. Безупинна
+   пульсація на кожній кнопці відволікала б саме тих дітей, для яких тут усе
+   зроблено. */
+.button--primary:hover .button__ripple::before,
+.button--primary:focus-visible .button__ripple::before {
+  opacity: 1;
+  animation: button-ripple 0.6s linear infinite;
+}
+
+@keyframes button-ripple {
+  from {
+    --ripple: 0px;
+  }
+
+  to {
+    --ripple: 20px;
+  }
+}
+
+/* ─────────────────── Другорядна: фіолетовий контур і заливка ─────────────── */
 .button--secondary {
   background: transparent;
-  border-color: var(--border);
-  color: var(--text);
+  border-color: var(--btn-purple);
+  color: var(--btn-purple);
+  font-size: 17px;
+  padding: 10px 20px;
+  transition: color 1s;
 }
 
-.button--secondary:hover {
-  border-color: var(--accent);
+.button--secondary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -40px;
+  height: 100%;
+  width: 0%;
+  transform: skewX(45deg);
+  background-color: var(--btn-purple);
+  z-index: -1;
+  transition: width 1s;
 }
 
+.button--secondary:hover,
+.button--secondary:focus-visible {
+  color: var(--btn-purple-text);
+}
+
+.button--secondary:hover::before,
+.button--secondary:focus-visible::before {
+  width: 160%;
+}
+
+/* ───────────────────────────────── Небезпечна ─────────────────────────────── */
 /* Незворотна дія. Контурна, а не залита червоним: білий текст на червоному
    кольорі категорії не дотягує до 4.5:1, а червона рамка з текстом теми — так. */
 .button--danger {
@@ -57,5 +185,41 @@
 .button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
-  transform: none;
+}
+
+.button:disabled .button__ripple::before {
+  animation: none;
+  opacity: 0;
+}
+
+.button--secondary:disabled {
+  color: var(--btn-purple);
+}
+
+.button--secondary:disabled::before {
+  width: 0%;
+}
+
+/* Сенсорно-безпечний профіль: брижі вимкнено зовсім, а не лише прискорено,
+   як це робить загальне правило зменшеного руху. */
+:root[data-sensory-safe='on'] .button__ripple::before {
+  display: none;
+}
+
+/* Висока контрастність: система сама малює рамку й колір. */
+@media (forced-colors: active) {
+  .button {
+    border-color: ButtonText;
+  }
+
+  .button__ripple,
+  .button--secondary::before {
+    display: none;
+  }
+}
+
+.button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }

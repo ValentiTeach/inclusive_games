@@ -67,10 +67,11 @@
 .site-header__logo-name {
   --logo-1: #00306e; /* колір корабля на марці */
   --logo-2: #ffffff;
-  --logo-3: #1f5cb8;
-  --logo-4: #0a0f1a;
-  --logo-2-alt: #ffffff;
-  /* Світлій літері потрібна межа: біле на білій шапці інакше зникає. */
+  --logo-3: #1769d1;
+  --logo-4: #7cc0ff;
+  --logo-5: #0a0f1a;
+  /* Світлим літерам потрібна межа: біле й блакитне на білій шапці інакше
+     зникають. */
   --logo-edge: #00306e;
   --logo-depth: rgba(0, 48, 110, 0.35);
 
@@ -92,9 +93,11 @@
   text-shadow: 0 0.1em 0 var(--logo-depth);
 }
 
-/* Чотири тони по колу. Світлий стоїть між темними, щоб мав темних сусідів. */
-.site-header__logo-letter:nth-child(4n + 2) {
-  color: var(--logo-2);
+/* П'ять тонів по колу, і жодні два сусіди не схожі: темний, світлий, яскравий,
+   світлий, темний. Пробіл між словами теж рахується, тож «Games» починає коло
+   з іншого місця, ніж «Inclusive», — слова не повторюють одне одного. */
+.site-header__logo-letter:nth-child(5n + 2),
+.site-header__logo-letter:nth-child(5n + 4) {
   /* Контур тінями, а не -webkit-text-stroke: штрих лягає всередину гліфа й
      з'їдає тонкі місця. */
   text-shadow:
@@ -105,30 +108,32 @@
     0 0.1em 0 var(--logo-edge);
 }
 
-.site-header__logo-letter:nth-child(4n + 3) {
+.site-header__logo-letter:nth-child(5n + 2) {
+  color: var(--logo-2);
+}
+
+.site-header__logo-letter:nth-child(5n + 3) {
   color: var(--logo-3);
 }
 
-.site-header__logo-letter:nth-child(4n + 4) {
+.site-header__logo-letter:nth-child(5n + 4) {
   color: var(--logo-4);
 }
 
-/* «Games» — друге слово, тож світлий тон у ньому свій: слова не мають бути
-   дзеркальними копіями одне одного. */
-.site-header__logo-gap ~ .site-header__logo-letter:nth-child(4n + 2) {
-  color: var(--logo-2-alt);
+.site-header__logo-letter:nth-child(5n + 5) {
+  color: var(--logo-5);
 }
 
-/* У темній темі шапка сама темно-синя, і чорна чи темно-синя літера на ній
-   зникла б. Тож темні тони марки йдуть у тінь і контур, а літери беруть
-   світлі: білий, блакитний і два відтінки синього. */
+/* У темній темі шапка сама темно-синя. Ролі міняються: світлі тони стоять
+   там, де були темні, а темно-синя й чорна літери отримують світлий контур —
+   тож усі п'ять кольорів марки лишаються в написі. */
 :root[data-theme='dark'] .site-header__logo-name {
   --logo-1: #ffffff;
-  --logo-2: #a9c8f2;
-  --logo-3: #6f9fe6;
-  --logo-4: #dce8fa;
-  --logo-2-alt: #8fb6ee;
-  --logo-edge: #00306e;
+  --logo-2: #00306e;
+  --logo-3: #4d9bf0;
+  --logo-4: #0a0f1a;
+  --logo-5: #9fd0ff;
+  --logo-edge: #cfe2fb;
   --logo-depth: #000000;
 }
 

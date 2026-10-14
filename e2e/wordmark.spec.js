@@ -1,14 +1,16 @@
 import { test, expect } from '@playwright/test'
 
 /**
- * Марка написана градієнтом із чотирьох кольорів навичок. Градієнтний текст
- * легко стає гарним і нечитним, тому колір літер тут не береться з CSS — він
- * читається зі знімка, як його намалював браузер.
+ * Напис марки — у кольорах самого знака: темно-синій корабля, чорний, білий і
+ * відтінки синього. Кожна літера має свій тон, світлі літери — темний контур.
  *
- * Кольори категорій для цього не годилися: на білій поверхні шапки «Мислення»
- * давало 3.04:1, тобто трималося лише на тому, що напис великий і жирний.
- * Токени --brand-* — ті самі тони, затемнені до 5:1.
+ * Перевіряється те, що браузер справді обчислив для кожної літери: колір і
+ * контур, — а не те, що написано в CSS.
  */
+function parse(color) {
+  return color.match(/[\d.]+/g).slice(0, 3).map(Number)
+}
+
 function luminance([r, g, b]) {
   const channel = (value) => {
     const v = value / 255
@@ -22,154 +24,85 @@ function contrast(a, b) {
   return (light + 0.05) / (dark + 0.05)
 }
 
-/*
- * Пікселі самих літер, без згладжених країв. Проміжок між літерами — теж
- * колонка, і найдальший піксель у ній це блідий залишок згладжування: перша
- * спроба міряти його дала 1.26:1 — колір краю, а не напису. Тож у рахунок іде
- * лише те, що вкрите майже повністю.
- */
-async function letterPixels(page) {
-  const shot = await page.locator('.site-header__logo-name').screenshot()
-  return page.evaluate(async (data) => {
-    const img = new Image()
-    img.src = 'data:image/png;base64,' + data
-    await img.decode()
-    const canvas = document.createElement('canvas')
-    canvas.width = img.width
-    canvas.height = img.height
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
-    ctx.drawImage(img, 0, 0)
-    const { data: px } = ctx.getImageData(0, 0, canvas.width, canvas.height)
-
+async function letters(page) {
+  return page.evaluate(() => {
     const surface = getComputedStyle(document.querySelector('.site-header')).backgroundColor
-    const [sr, sg, sb] = surface.match(/\d+/g).map(Number)
-    const away = (r, g, b) => (r - sr) ** 2 + (g - sg) ** 2 + (b - sb) ** 2
-
-    const columns = []
-    let peak = 0
-    for (let x = 0; x < canvas.width; x += 1) {
-      let best = null
-      let bestAway = 0
-      for (let y = 0; y < canvas.height; y += 1) {
-        const i = (y * canvas.width + x) * 4
-        if (px[i + 3] < 250) continue
-        const d = away(px[i], px[i + 1], px[i + 2])
-        if (d > bestAway) {
-          bestAway = d
-          best = [px[i], px[i + 1], px[i + 2]]
-        }
-      }
-      if (!best) continue
-      columns.push({ pixel: best, away: bestAway })
-      if (bestAway > peak) peak = bestAway
-    }
-
     return {
-      surface: [sr, sg, sb],
-      pixels: columns.filter((column) => column.away >= peak * 0.95).map((c) => c.pixel),
-      total: columns.length,
+      surface,
+      letters: [...document.querySelectorAll('.site-header__logo-letter')].map((node) => {
+        const style = getComputedStyle(node)
+        // Контуром вважається лише справжня обвідка (зсув в обидва боки), а не
+        // напівпрозора тінь «об'єму» під темними літерами.
+        const outlined = style.textShadow.includes('-1px')
+        const edge = outlined ? style.textShadow.match(/rgba?\([^)]+\)/)[0] : null
+        return { char: node.textContent, color: style.color, edge }
+      }),
     }
-  }, shot.toString('base64'))
+  })
 }
 
 for (const scheme of ['light', 'dark']) {
-  test(`марка читається в ${scheme === 'light' ? 'світлій' : 'темній'} темі`, async ({ page }) => {
-    await page.emulateMedia({ colorScheme: scheme })
-    await page.goto('/')
-    await expect(page.locator('.site-header__logo-name')).toBeVisible()
+  const name = scheme === 'light' ? 'світлій' : 'темній'
 
-    const { surface, pixels } = await letterPixels(page)
-    /*
-     * Повністю вкритих колонок мало — на 19 px такими є лише найтовщі місця
-     * штрихів, решта в тій чи іншій мірі змішана з тлом. Десятка вистачає, щоб
-     * зачепити всі чотири кольори градієнта; менше означало б, що знімок не
-     * той або напис зник.
-     */
-    expect(pixels.length).toBeGreaterThanOrEqual(8)
+  test.describe(`марка в ${name} темі`, () => {
+    test.beforeEach(async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme })
+      await page.goto('/')
+      await expect(page.locator('.site-header__logo-name')).toBeVisible()
+    })
 
-    const ratios = pixels.map((pixel) => contrast(pixel, surface))
-    const worst = Math.min(...ratios)
-    const worstPixel = pixels[ratios.indexOf(worst)]
+    test('усі літери на місці й читаються', async ({ page }) => {
+      const { surface, letters: list } = await letters(page)
+      expect(list.map((letter) => letter.char).join('')).toBe('InclusiveGames')
 
-    expect(
-      worst,
-      `найгірша літера rgb(${worstPixel}) на rgb(${surface}) — ${worst.toFixed(2)}:1`,
-    ).toBeGreaterThanOrEqual(4.5)
+      /*
+       * Літера читається, якщо від тла її відділяє або власний колір, або
+       * контур. Біла літера на білій шапці тримається саме на контурі.
+       */
+      for (const letter of list) {
+        const fill = contrast(parse(letter.color), parse(surface))
+        const edge = letter.edge ? contrast(parse(letter.edge), parse(surface)) : 0
+        expect(
+          Math.max(fill, edge),
+          `«${letter.char}» ${letter.color} (контур ${letter.edge}) на ${surface}`,
+        ).toBeGreaterThanOrEqual(4.5)
+      }
+    })
+
+    test('напис різнокольоровий, і лише в кольорах марки', async ({ page }) => {
+      const { letters: list } = await letters(page)
+      const colors = new Set(list.map((letter) => letter.color))
+      expect(colors.size).toBeGreaterThanOrEqual(3)
+
+      /* Сині, білий, чорний — синій канал ніде не слабший за червоний і
+         зелений. Кольори навичок (бірюзовий, фіолетовий, охра, малиновий)
+         цю перевірку не пройшли б. */
+      for (const color of colors) {
+        const [r, g, b] = parse(color)
+        expect(b, color).toBeGreaterThanOrEqual(Math.max(r, g))
+      }
+    })
   })
 }
 
 /**
- * Напис має бути різнокольоровим, а не просто пофарбованим в один колір із
- * палітри: саме однотонність і була вадою.
+ * Літери стоять окремими елементами, і читач екрана вимовив би назву по
+ * буквах. Тому літери сховані від нього, а ціла назва звучить окремо.
  */
-test('у написі справді кілька кольорів', async ({ page }) => {
+test('читач екрана чує цілу назву, а не літери', async ({ page }) => {
   await page.goto('/')
-  await expect(page.locator('.site-header__logo-name')).toBeVisible()
-
-  const { pixels } = await letterPixels(page)
-  const hues = new Set(pixels.map(([r, g, b]) => `${r >> 5}:${g >> 5}:${b >> 5}`))
-
-  expect(hues.size).toBeGreaterThanOrEqual(3)
+  await expect(page.getByRole('link', { name: /^Inclusive Games/ })).toBeVisible()
+  await expect(page.locator('.site-header__logo-letters')).toHaveAttribute('aria-hidden', 'true')
 })
 
-/**
- * background-clip: text робить колір прозорим. Якщо браузер цього не вміє, а
- * прозорість уже застосована, назва сайту зникає. Тому прозорість живе тільки
- * всередині @supports, а базове правило лишає звичайний колір.
- *
- * Перевіряється саме базове правило в таблиці стилів, а не те, що видно зараз:
- * у Chromium @supports виконується завжди, тож підмінити його на сторінці не
- * вийде — а перевірка «я сам задав колір, і колір є» нічого не варта.
- */
-test('у браузері без обрізання тла напис лишається видимим', async ({ page }) => {
+/** У режимі високої контрастності кольори призначає система, а не марка. */
+test('у високій контрастності напис — звичайний текст без контуру', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' })
   await page.goto('/')
   await expect(page.locator('.site-header__logo-name')).toBeVisible()
 
-  /*
-   * Відтворюємо саме той браузер, якого боїмося: таблиця стилів перезбирається
-   * без жодного блоку @supports і підставляється замість оригінальної. Якщо
-   * прозорість колись переїде з-під запобіжника назовні, назва сайту тут зникне.
-   *
-   * Чому не читанням правил: Vite вішає на <link> атрибут crossorigin, і
-   * sheet.cssRules кидає SecurityError — обхід таблиць повертав порожньо.
-   */
-  const color = await page.evaluate(async () => {
-    const links = [...document.querySelectorAll('link[rel="stylesheet"]')]
-    const texts = await Promise.all(links.map((link) => fetch(link.href).then((r) => r.text())))
-
-    const stripSupports = (css) => {
-      let out = ''
-      let i = 0
-      while (i < css.length) {
-        const at = css.indexOf('@supports', i)
-        if (at === -1) {
-          out += css.slice(i)
-          break
-        }
-        out += css.slice(i, at)
-        let depth = 0
-        let j = css.indexOf('{', at)
-        for (; j < css.length; j += 1) {
-          if (css[j] === '{') depth += 1
-          else if (css[j] === '}') {
-            depth -= 1
-            if (depth === 0) break
-          }
-        }
-        i = j + 1
-      }
-      return out
-    }
-
-    for (const link of links) link.disabled = true
-    const style = document.createElement('style')
-    style.textContent = texts.map(stripSupports).join('\n')
-    document.head.append(style)
-
-    await new Promise((resolve) => requestAnimationFrame(resolve))
-    return getComputedStyle(document.querySelector('.site-header__logo-name')).color
-  })
-
-  expect(color).not.toBe('rgba(0, 0, 0, 0)')
-  expect(color).not.toBe('transparent')
+  const shadows = await page
+    .locator('.site-header__logo-letter')
+    .evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).textShadow))
+  expect(new Set(shadows)).toEqual(new Set(['none']))
 })

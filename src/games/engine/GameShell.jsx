@@ -9,7 +9,14 @@ import { computeStreak } from '../../lib/streak'
 import { getResults, saveResult, rateLastResult } from './storage'
 import { suggestLevel } from './suggestLevel'
 import { pushResult, pushRating } from '../../lib/cloudSync'
-import { playVictory, playClick, startAmbient, stopAmbient } from '../../lib/sound'
+import {
+  playVictory,
+  playClick,
+  playCountdownTick,
+  playGo,
+  startAmbient,
+  stopAmbient,
+} from '../../lib/sound'
 import { getSettings, updateSettings } from '../../lib/settings'
 import {
   paceLevel,
@@ -120,6 +127,8 @@ function GameShell({ config, renderPlay, session = null }) {
   useEffect(() => {
     if (phase !== 'countdown') return undefined
 
+    // «Тік» на кожне число відліку — як перед стартом у грі.
+    playCountdownTick()
     const timer = setTimeout(() => {
       setCountdown((value) => {
         if (value <= 1) {
@@ -142,6 +151,7 @@ function GameShell({ config, renderPlay, session = null }) {
   useEffect(() => {
     if (phase !== 'playing') return undefined
 
+    playGo()
     startAmbient()
     return () => stopAmbient()
   }, [phase])

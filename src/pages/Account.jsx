@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/authContext'
 import { supabase, isCloudConfigured } from '../lib/supabaseClient'
@@ -6,7 +6,57 @@ import { clearAllResults } from '../games/engine/storage'
 import Button from '../components/ui/Button'
 import RoleBadge from '../components/ui/RoleBadge'
 import AccountSettings from '../components/account/AccountSettings'
+import AvatarPicker from '../components/student/AvatarPicker'
+import { getSessionIdentity } from '../lib/groups'
+import { setMyAvatar } from '../lib/avatar'
 import './Account.css'
+
+/*
+ * «Моя тваринка» для дитини, що зайшла за кодом. Без міграції 20261015
+ * (колонки avatar ще немає) розділу немає зовсім.
+ */
+function ChildAvatar() {
+  const [state, setState] = useState(null)
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    getSessionIdentity()
+      .then((identity) => {
+        if (!cancelled && identity?.avatarSupported) setState({ avatar: identity.avatar })
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (!state) return null
+
+  async function pick(key) {
+    const previous = state.avatar
+    setState({ avatar: key })
+    setSaved(false)
+    try {
+      await setMyAvatar(key)
+      setSaved(true)
+    } catch {
+      setState({ avatar: previous })
+    }
+  }
+
+  return (
+    <section className="account__section" aria-labelledby="account-avatar">
+      <h2 id="account-avatar">Моя тваринка</h2>
+      <AvatarPicker value={state.avatar} onPick={pick} />
+      {saved && (
+        <p className="account__note" role="status">
+          Готово! Тепер це твоя тваринка.
+        </p>
+      )}
+    </section>
+  )
+}
 
 function Account() {
   const { user, profile, loading } = useAuth()
@@ -116,6 +166,8 @@ function Account() {
           </Button>
         )}
       </div>
+
+      {isAnonymous && <ChildAvatar />}
 
       {!isAnonymous && (
         <AccountSettings user={user} role={profile?.role} onDeleted={() => setDeleted(true)} />

@@ -4,6 +4,9 @@ import { useAuth } from '../lib/authContext'
 import { supabase, isCloudConfigured } from '../lib/supabaseClient'
 import { JOIN_ERROR, getSessionIdentity, joinGroup } from '../lib/groups'
 import Button from '../components/ui/Button'
+import Avatar from '../components/ui/Avatar'
+import AvatarPicker from '../components/student/AvatarPicker'
+import { setMyAvatar } from '../lib/avatar'
 import './Join.css'
 
 // The server speaks in tokens; the child reads Ukrainian. Everything the RPC
@@ -118,7 +121,10 @@ function Join() {
         data: { user },
       } = await supabase.auth.getUser()
       await refreshProfile(user)
-      navigate('/games')
+      // Тваринки ще немає — дамо обрати одразу, поки дитина тут. Хто вже має
+      // свою (повернулася на свій пристрій), іде грати без зайвого кроку.
+      if (asReturningStudent && identity?.avatar) navigate('/games')
+      else setStatus('pick-avatar')
     } catch (error) {
       setStatus('idle')
       const reason = error?.reason ?? JOIN_ERROR.UNKNOWN
@@ -127,6 +133,30 @@ function Join() {
       // перейменував учня). Відкриваємо поле імені, щоб вихід був за один крок.
       if (reason === JOIN_ERROR.SESSION_BELONGS_TO_OTHER) setHandover(true)
     }
+  }
+
+  async function pickAvatar(key) {
+    setStatus('saving-avatar')
+    try {
+      await setMyAvatar(key)
+    } catch {
+      // Тваринка — прикраса, а не умова гри: без неї (немає міграції, немає
+      // мережі) дитина однаково йде грати.
+    }
+    navigate('/games')
+  }
+
+  if (status === 'pick-avatar' || status === 'saving-avatar') {
+    return (
+      <section className="join">
+        <h1>Обери свою тваринку</h1>
+        <p>За нею ти впізнаєш себе, коли сядеш за цей комп’ютер наступного разу.</p>
+        <AvatarPicker onPick={pickAvatar} disabled={status === 'saving-avatar'} />
+        <button type="button" className="join__linkish" onClick={() => navigate('/games')}>
+          Пропустити
+        </button>
+      </section>
+    )
   }
 
   function startHandover() {
@@ -142,7 +172,10 @@ function Join() {
       {currentStudent && !handover && (
         <div className="join__whoami">
           <p className="join__whoami-line">
-            На цьому пристрої зараз <strong>{currentStudent}</strong>.
+            <Avatar avatarKey={identity?.avatar} size="lg" />
+            <span>
+              На цьому пристрої зараз <strong>{currentStudent}</strong>.
+            </span>
           </p>
           <p className="join__note">
             Якщо це не ти — почни свій сеанс, і твої результати не змішаються з її.

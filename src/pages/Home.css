@@ -240,3 +240,29 @@
     max-width: 140px;
   }
 }
+
+/* Режим без читання: головна — це великі плитки навичок і кнопка до ігор.
+   Розділи для дорослих (як почати, для фахівців) ховаються: їх читає
+   дорослий, а вмикає режим він же — для пристрою дитини. */
+:root[data-picture-mode='on'] .home-hero__lede,
+:root[data-picture-mode='on'] .home-hero__categories-label,
+:root[data-picture-mode='on'] .home-section {
+  display: none;
+}
+
+:root[data-picture-mode='on'] .home-hero__category .badge {
+  min-height: 64px;
+  padding: var(--space-3) var(--space-5);
+  font-size: 20px;
+}
+
+:root[data-picture-mode='on'] .home-hero__category .badge svg {
+  width: 28px;
+  height: 28px;
+}
+
+:root[data-picture-mode='on'] .home-hero__actions .button {
+  min-height: 72px;
+  padding: 0 var(--space-6);
+  font-size: 22px;
+}

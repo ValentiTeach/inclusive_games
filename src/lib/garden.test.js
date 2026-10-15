@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { GARDEN_SIZE, buildGarden, slotPosition } from './garden'
+import {
+  GARDEN_SIZE,
+  buildGarden,
+  heartStage,
+  loadGardenPrefs,
+  saveGardenPrefs,
+  seasonOf,
+  slotPosition,
+} from './garden'
 
 describe('buildGarden', () => {
   it('a day of play grows grass, a finished session grows a flower', () => {
@@ -31,5 +39,36 @@ describe('buildGarden', () => {
       expect(x).toBeLessThan(375)
       expect(y).toBeLessThan(230)
     }
+  })
+})
+
+describe('пори року, улюблена рослина, назва', () => {
+  it('пора року йде за календарем', () => {
+    expect(seasonOf(new Date('2026-01-10'))).toBe('winter')
+    expect(seasonOf(new Date('2026-12-01'))).toBe('winter')
+    expect(seasonOf(new Date('2026-04-10'))).toBe('spring')
+    expect(seasonOf(new Date('2026-07-10'))).toBe('summer')
+    expect(seasonOf(new Date('2026-10-15'))).toBe('autumn')
+  })
+
+  // Серце саду лише росте: стадія залежить від кількості рослин, а не від балу.
+  it('улюблена рослина росте разом із садом і не меншає', () => {
+    expect(heartStage(0)).toBe('sprout')
+    expect(heartStage(6)).toBe('bud')
+    expect(heartStage(16)).toBe('bloom')
+    expect(heartStage(200)).toBe('bloom')
+  })
+
+  // Друга дитина за тим самим комп'ютером не отримує чужої назви.
+  it('назва й рослина — окремо для кожного власника історії', () => {
+    localStorage.clear()
+    saveGardenPrefs('child-a', { name: '  Чарівний сад  ', favorite: 'sunflower' })
+    expect(loadGardenPrefs('child-a')).toEqual({ name: 'Чарівний сад', favorite: 'sunflower' })
+    expect(loadGardenPrefs('child-b')).toEqual({ name: '', favorite: null })
+  })
+
+  it('невідому рослину зі сховища не бере', () => {
+    localStorage.setItem('inclusive-games:garden:x', JSON.stringify({ name: 'А', favorite: 'cactus' }))
+    expect(loadGardenPrefs('x').favorite).toBeNull()
   })
 })

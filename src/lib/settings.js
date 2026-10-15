@@ -10,6 +10,8 @@ const DEFAULTS = {
   voice: 'button',
   pace: 'normal',
   errorFeedback: 'standard',
+  // Режим без читання: великі картинки ігор, назва вголос, менше тексту.
+  pictureMode: false,
 }
 
 export const SOUND_MODES = ['off', 'clicks', 'music']
@@ -115,6 +117,7 @@ export function applySettings(settings) {
   root.dataset.textSize = settings.textSize
   root.dataset.errorFeedback = settings.errorFeedback === 'gentle' ? 'gentle' : 'standard'
   root.classList.toggle('force-reduced-motion', settings.reducedMotion)
+  root.dataset.pictureMode = settings.pictureMode ? 'on' : 'off'
 
   const resolved = resolveTheme(settings.theme, systemPrefersDark())
   root.dataset.theme = resolved

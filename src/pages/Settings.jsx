@@ -220,6 +220,37 @@ function Settings() {
         </div>
       </div>
 
+      {/*
+        Для дитини, яка ще не читає: ігри в каталозі — великими картинками,
+        назва звучить, коли на картку наводять чи переходять клавішею, а
+        пояснення для дорослих на головній і в каталозі ховаються.
+      */}
+      <div className="settings__row">
+        <div>
+          <h2>Без читання</h2>
+          <p>
+            Великі картинки ігор і назва вголос замість тексту — для дитини, яка ще не
+            читає.{!voice && ' Щоб назви звучали, потрібен український голос (див. вище).'}
+          </p>
+        </div>
+        <div className="settings__options">
+          {[
+            [false, 'Вимкнено'],
+            [true, 'Увімкнено'],
+          ].map(([value, label]) => (
+            <button
+              key={label}
+              type="button"
+              className={settings.pictureMode === value ? 'settings__option is-active' : 'settings__option'}
+              onClick={() => update({ pictureMode: value })}
+              aria-pressed={settings.pictureMode === value}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="settings__row">
         <div>
           <h2>Розмір тексту</h2>

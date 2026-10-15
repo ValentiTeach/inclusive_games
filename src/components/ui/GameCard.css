@@ -72,3 +72,22 @@ a.game-card--locked {
   align-items: center;
   gap: 4px;
 }
+
+/* Режим без читання: картинка гри велика, опис прихований — дитина шукає
+   очима, а назву чує. */
+.game-card__picture {
+  display: block;
+  font-size: 64px;
+  line-height: 1.1;
+  text-align: center;
+  forced-color-adjust: none;
+}
+
+:root[data-picture-mode='on'] .game-card__description {
+  display: none;
+}
+
+:root[data-picture-mode='on'] .game-card__title {
+  text-align: center;
+  font-size: 22px;
+}

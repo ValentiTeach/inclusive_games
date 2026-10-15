@@ -203,3 +203,7 @@
     min-height: 44px;
   }
 }
+
+:root[data-picture-mode='on'] .catalog-grid {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+}

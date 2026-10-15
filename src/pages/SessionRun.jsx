@@ -6,9 +6,9 @@ import { getPlan, listMyRuns, startRun, updateRun } from '../lib/sessions'
 import { getActiveAdaptations } from '../lib/adaptations'
 import { groupVaultKey, seal } from '../lib/vault'
 import { moodContext } from '../lib/diary'
-import { buildGarden, plantName } from '../lib/garden'
+import { buildGarden, loadGardenPrefs, plantName, seasonOf } from '../lib/garden'
 import { GAMES } from '../data/games'
-import { getResults } from '../games/engine/storage'
+import { getHistoryOwner, getResults } from '../games/engine/storage'
 import { localDay } from '../lib/day'
 import { GAME_REGISTRY } from '../games/registry'
 import { FELT_OPTIONS } from '../games/engine/felt'
@@ -439,7 +439,12 @@ function SessionRun() {
               {plantName(garden.items.at(-1)?.plant)}.
             </p>
           </div>
-          <Garden garden={garden} highlightLast />
+          <Garden
+            garden={garden}
+            highlightLast
+            season={seasonOf()}
+            favorite={loadGardenPrefs(getHistoryOwner()).favorite}
+          />
           <div className="session-run__actions">
             <Button to="/games">До каталогу</Button>
             <Button to="/progress" variant="secondary">

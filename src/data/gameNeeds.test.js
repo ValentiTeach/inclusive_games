@@ -35,3 +35,12 @@ describe('вимоги ігор', () => {
     expect(gameNeeds('listen-catch')).toEqual(['hearing', 'timer'])
   })
 })
+
+describe('картинки ігор для режиму без читання', () => {
+  it('кожна гра має свою картинку, і вони не повторюються', async () => {
+    const { GAME_ICONS } = await import('./gameIcons')
+    for (const game of GAMES) expect(GAME_ICONS[game.id], game.id).toBeTruthy()
+    const icons = GAMES.map((game) => GAME_ICONS[game.id])
+    expect(new Set(icons).size).toBe(icons.length)
+  })
+})

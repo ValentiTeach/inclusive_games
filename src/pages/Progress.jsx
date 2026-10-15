@@ -4,7 +4,7 @@ import { Flame, Trophy } from 'lucide-react'
 import { GAMES, CATEGORIES } from '../data/games'
 import { CATEGORY_ICONS } from '../data/categoryIcons'
 import { ACHIEVEMENTS, achievementProgress } from '../data/achievements'
-import { getResults } from '../games/engine/storage'
+import { getHistoryOwner, getResults } from '../games/engine/storage'
 import { metricLabel } from '../games/engine/metrics'
 import { highlightMetrics, improvement } from '../lib/progressMetrics'
 import { fetchCloudHistory } from '../lib/cloudSync'
@@ -18,7 +18,14 @@ import Button from '../components/ui/Button'
 import AchievementBadge from '../components/ui/AchievementBadge'
 import CountUpNumber from '../components/ui/CountUpNumber'
 import Garden from '../components/ui/Garden'
-import { buildGarden, GARDEN_SIZE } from '../lib/garden'
+import {
+  buildGarden,
+  GARDEN_SIZE,
+  loadGardenPrefs,
+  saveGardenPrefs,
+  seasonOf,
+} from '../lib/garden'
+import GardenSettings from '../components/student/GardenSettings'
 import { listMyRuns } from '../lib/sessions'
 import './Progress.css'
 
@@ -31,6 +38,8 @@ function Progress() {
   const [cloudHistory, setCloudHistory] = useState(null)
   const [barsVisible, setBarsVisible] = useState(false)
   const [sessionDates, setSessionDates] = useState([])
+  const [gardenPrefs, setGardenPrefs] = useState(() => loadGardenPrefs(getHistoryOwner()))
+  const [gardenOpen, setGardenOpen] = useState(false)
 
   useEffect(() => {
     if (!user) return undefined
@@ -126,8 +135,30 @@ function Progress() {
         завершене заняття додають рослину, і нічого не забирається.
       */}
       <div className="progress-garden">
-        <h2>Мій сад</h2>
-        <Garden garden={garden} />
+        <h2>{gardenPrefs.name || 'Мій сад'}</h2>
+        <Garden
+          garden={garden}
+          season={seasonOf()}
+          favorite={gardenPrefs.favorite}
+          name={gardenPrefs.name}
+        />
+        <button
+          type="button"
+          className="progress-garden__edit"
+          aria-expanded={gardenOpen}
+          onClick={() => setGardenOpen((open) => !open)}
+        >
+          {gardenOpen ? 'Готово' : 'Назвати сад і обрати рослину'}
+        </button>
+        {gardenOpen && (
+          <GardenSettings
+            prefs={gardenPrefs}
+            onChange={(next) => {
+              setGardenPrefs(next)
+              saveGardenPrefs(getHistoryOwner(), next)
+            }}
+          />
+        )}
         <p className="progress-garden__note">
           Кожен день, коли ти тренуєшся, у саду проростає травинка, а кожне
           завершене заняття — квітка.

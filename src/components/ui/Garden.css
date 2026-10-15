@@ -56,3 +56,39 @@
     opacity: 1;
   }
 }
+
+/* Пори року: інше небо й земля, рослини ті самі. Темна тема має власні
+   відтінки — нижче. */
+.garden--winter .garden__ground {
+  fill: #eef4fb;
+}
+
+.garden--winter .garden__sky {
+  fill: #c9d9ec;
+}
+
+.garden--autumn .garden__ground {
+  fill: #d9c27a;
+}
+
+.garden--spring .garden__ground {
+  fill: #cdeeb4;
+}
+
+.garden__snow circle {
+  fill: #ffffff;
+  stroke: #9fb4cc;
+  stroke-width: 0.6;
+}
+
+:root[data-theme='dark'] .garden--winter .garden__ground {
+  fill: #4a5a72;
+}
+
+:root[data-theme='dark'] .garden--autumn .garden__ground {
+  fill: #5a4a26;
+}
+
+:root[data-theme='dark'] .garden--spring .garden__ground {
+  fill: #35633f;
+}

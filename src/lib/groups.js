@@ -238,11 +238,12 @@ export async function getSessionIdentity() {
   if (!session) return null
 
   const { user } = session
-  const { data } = await supabase
-    .from('profiles')
-    .select('display_name, role, group_id')
-    .eq('id', user.id)
-    .maybeSingle()
+  const profileQuery = (columns) =>
+    supabase.from('profiles').select(columns).eq('id', user.id).maybeSingle()
+
+  let { data, error } = await profileQuery('display_name, role, group_id, avatar')
+  const avatarSupported = !isMissingColumn(error)
+  if (!avatarSupported) ({ data } = await profileQuery('display_name, role, group_id'))
 
   return {
     userId: user.id,
@@ -251,6 +252,8 @@ export async function getSessionIdentity() {
     displayName: data?.display_name ?? null,
     role: data?.role ?? null,
     groupId: data?.group_id ?? null,
+    avatar: data?.avatar ?? null,
+    avatarSupported,
   }
 }
 

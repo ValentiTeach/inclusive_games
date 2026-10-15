@@ -5,6 +5,7 @@ import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
 import { CATEGORIES, GAMES, NEEDS, gameNeeds } from '../data/games'
 import { CATEGORY_ICONS } from '../data/categoryIcons'
+import { getSettings } from '../lib/settings'
 import {
   catalogHref,
   categoryFromParams,
@@ -21,6 +22,7 @@ function Catalog() {
   const gatingActive = isCloudConfigured && !user
 
   const navigate = useNavigate()
+  const picture = getSettings().pictureMode
   const active = categoryFromParams(searchParams)
   const without = needsFromParams(searchParams)
   // Лічильники навичок рахуються вже без схованих вимог: число в пігулці має
@@ -82,22 +84,24 @@ function Catalog() {
         Кнопки-перемикачі, а не посилання: вони не ведуть деінде, а лише
         звужують те, що вже на екрані.
       */}
-      <div className="catalog-needs" role="group" aria-labelledby="catalog-needs-label">
-        <span id="catalog-needs-label" className="catalog-needs__label">
-          Сховати ігри, якщо дитині:
-        </span>
-        {Object.entries(NEEDS).map(([key, need]) => (
-          <button
-            key={key}
-            type="button"
-            className="catalog-need"
-            aria-pressed={without.includes(key)}
-            onClick={() => toggleNeed(key)}
-          >
-            {need.filter}
-          </button>
-        ))}
-      </div>
+      {!picture && (
+        <div className="catalog-needs" role="group" aria-labelledby="catalog-needs-label">
+          <span id="catalog-needs-label" className="catalog-needs__label">
+            Сховати ігри, якщо дитині:
+          </span>
+          {Object.entries(NEEDS).map(([key, need]) => (
+            <button
+              key={key}
+              type="button"
+              className="catalog-need"
+              aria-pressed={without.includes(key)}
+              onClick={() => toggleNeed(key)}
+            >
+              {need.filter}
+            </button>
+          ))}
+        </div>
+      )}
       {without.length > 0 && (
         <p className="catalog-needs__summary" role="status">
           Сховано ігор: {GAMES.length - suitable.length}.
@@ -115,7 +119,8 @@ function Catalog() {
             status={game.status}
             beta={game.beta}
             locked={gatingActive && !game.freeForGuests}
-            needs={gameNeeds(game.id)}
+            needs={picture ? [] : gameNeeds(game.id)}
+            picture={picture}
           />
         ))}
       </div>

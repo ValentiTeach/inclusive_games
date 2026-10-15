@@ -141,6 +141,12 @@ export async function signInAsTeacher(page, fixtures = {}) {
      * складаються в rpcCalls.
      */
     accountError = null,
+    /*
+     * Хто веде групу — рядки, які поверне list_group_team. null — функції ще
+     * немає (міграцію 20261015 не застосовано). Додавання й видалення правлять
+     * масив на місці, тож повторний запит бачить наслідок.
+     */
+    team = null,
   } = fixtures
 
   await page.addInitScript((session) => {
@@ -289,6 +295,56 @@ export async function signInAsTeacher(page, fixtures = {}) {
       }
       const body = path === 'rpc/transfer_my_groups' ? JSON.stringify(groups.length) : ''
       await route.fulfill({ status: body ? 200 : 204, contentType: 'application/json', body })
+      return
+    }
+
+    if (path === 'rpc/list_group_team') {
+      if (team === null) {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({ code: 'PGRST202', message: 'not found' }),
+        })
+        return
+      }
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(team) })
+      return
+    }
+
+    if (
+      [
+        'rpc/add_group_specialist',
+        'rpc/remove_group_specialist',
+        'rpc/teacher_move_student',
+      ].includes(path)
+    ) {
+      const args = JSON.parse(request.postData() ?? '{}')
+      rpcCalls.push({ path, args })
+      if (path === 'rpc/add_group_specialist' && team) {
+        team.push({
+          user_id: `added-${team.length}`,
+          display_name: null,
+          email: args.p_email,
+          is_owner: false,
+          added_at: new Date().toISOString(),
+        })
+      }
+      if (path === 'rpc/remove_group_specialist' && team) {
+        const index = team.findIndex((row) => row.user_id === args.p_specialist_id)
+        if (index >= 0) team.splice(index, 1)
+      }
+      if (path === 'rpc/teacher_move_student') {
+        const index = students.findIndex((row) => row.id === args.p_student_id)
+        if (index >= 0) students.splice(index, 1)
+      }
+      const body = path === 'rpc/remove_group_specialist' ? '' : JSON.stringify('ok')
+      await route.fulfill({ status: body ? 200 : 204, contentType: 'application/json', body })
+      return
+    }
+
+    if (path === 'notification_settings' && request.method() === 'POST') {
+      posted.push({ table: path, payload: JSON.parse(request.postData() ?? '{}') })
+      await route.fulfill({ status: 201, contentType: 'application/json', body: '' })
       return
     }
 

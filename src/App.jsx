@@ -32,6 +32,8 @@ const {
   Help,
   Accessibility,
   Feedback,
+  PrintObservation,
+  PrintCards,
   SessionRun,
   SessionBuilder,
   StudentFile,
@@ -69,6 +71,8 @@ function App() {
             <Route path="/help" element={<Help />} />
             <Route path="/accessibility" element={<Accessibility />} />
             <Route path="/feedback" element={<Feedback />} />
+            <Route path="/print/observation" element={<PrintObservation />} />
+            <Route path="/print/cards" element={<PrintCards />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

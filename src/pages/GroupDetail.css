@@ -364,3 +364,9 @@
   color: var(--text);
   font-weight: 600;
 }
+
+.group-detail__printables {
+  margin: var(--space-4) 0 0;
+  font-size: 15px;
+  color: var(--text-muted);
+}

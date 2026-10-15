@@ -12,6 +12,7 @@ import {
   Trash2,
   FileCheck,
   Hourglass,
+  ArrowRightLeft,
 } from 'lucide-react'
 import { useAuth } from '../lib/authContext'
 import { isCloudConfigured } from '../lib/supabaseClient'
@@ -29,6 +30,10 @@ import ParentAccess from '../components/teacher/ParentAccess'
 import GameBreakdown from '../components/teacher/GameBreakdown'
 import Assignments from '../components/teacher/Assignments'
 import SessionPlans from '../components/teacher/SessionPlans'
+import WeeklyDigest from '../components/teacher/WeeklyDigest'
+import TeamPanel from '../components/teacher/TeamPanel'
+import MoveStudent from '../components/teacher/MoveStudent'
+import Avatar from '../components/ui/Avatar'
 import { GAMES } from '../data/games'
 import './GroupDetail.css'
 
@@ -67,6 +72,8 @@ function GroupDetail() {
   const [busyId, setBusyId] = useState(null)
   const [actionError, setActionError] = useState(null)
   const [accessFor, setAccessFor] = useState(null)
+  const [moveFor, setMoveFor] = useState(null)
+  const [moved, setMoved] = useState(null)
   const [copied, setCopied] = useState(false)
   // undefined — ще вантажиться, null — таблиці згод ще немає на сервері.
   const [consents, setConsents] = useState(undefined)
@@ -260,6 +267,13 @@ function GroupDetail() {
   }
 
   const joinUrl = `${window.location.host}/join`
+  /*
+   * Фахівець, доданий до чужої групи (20261015_team_avatars.sql), бачить
+   * дітей і результати, але незворотні дії лишаються за власником — сервер їх
+   * і так відхилить, тож кнопок для них фахівцю не показуємо. Без teacher_id
+   * (стара відповідь) вважаємо власником, як і досі.
+   */
+  const isOwner = !data.group.teacher_id || data.group.teacher_id === user.id
   const showConsents = Boolean(consents)
   const stale = data.students.filter((student) => isPastRetention(student))
 
@@ -342,6 +356,14 @@ function GroupDetail() {
         </button>
       )}
 
+      {/* Матеріали для заняття без екрана — поруч із тим, де заняття плануються. */}
+      <p className="group-detail__printables print-hide">
+        Для друку: <Link to="/print/observation">бланк спостереження</Link> ·{' '}
+        <Link to="/print/cards">картки ігор з правилами</Link>
+      </p>
+
+      <WeeklyDigest students={data.students} results={data.results ?? []} />
+
       <SessionPlans groupId={groupId} students={data.students} results={data.results ?? []} />
 
       <Assignments
@@ -390,6 +412,26 @@ function GroupDetail() {
             <ParentAccess student={accessFor} onClose={() => setAccessFor(null)} />
           )}
 
+          {moved && (
+            <p className="group-detail__notice print-hide" role="status">
+              {moved}
+            </p>
+          )}
+
+          {moveFor && (
+            <MoveStudent
+              student={moveFor}
+              groupId={groupId}
+              userId={user.id}
+              onClose={() => setMoveFor(null)}
+              onMoved={async (student, targetName) => {
+                setMoveFor(null)
+                setMoved(`${student.displayName} тепер у групі ${targetName}.`)
+                await reload()
+              }}
+            />
+          )}
+
           <div className="group-detail__table-wrap">
           <table className="group-detail__table">
             <thead>
@@ -425,6 +467,7 @@ function GroupDetail() {
                         className="group-detail__student-link"
                         title="Картка дитини: адаптації, цілі ІПР, щоденник"
                       >
+                        <Avatar avatarKey={student.avatar} size="sm" />
                         {student.displayName}
                       </Link>
                     )}
@@ -488,19 +531,21 @@ function GroupDetail() {
                         </>
                       ) : (
                         <>
-                          <button
-                            type="button"
-                            className="group-detail__icon-btn"
-                            aria-label={`Перейменувати ${student.displayName}`}
-                            disabled={busyId === student.id}
-                            onClick={() => {
-                              setEditingId(student.id)
-                              setDraftName(student.displayName)
-                              setActionError(null)
-                            }}
-                          >
-                            <Pencil size={16} aria-hidden="true" />
-                          </button>
+                          {isOwner && (
+                            <button
+                              type="button"
+                              className="group-detail__icon-btn"
+                              aria-label={`Перейменувати ${student.displayName}`}
+                              disabled={busyId === student.id}
+                              onClick={() => {
+                                setEditingId(student.id)
+                                setDraftName(student.displayName)
+                                setActionError(null)
+                              }}
+                            >
+                              <Pencil size={16} aria-hidden="true" />
+                            </button>
+                          )}
                           <button
                             type="button"
                             className="group-detail__icon-btn"
@@ -510,24 +555,42 @@ function GroupDetail() {
                           >
                             <UserRoundPlus size={16} aria-hidden="true" />
                           </button>
-                          <button
-                            type="button"
-                            className="group-detail__icon-btn group-detail__icon-btn--danger"
-                            aria-label={`Прибрати ${student.displayName} з групи`}
-                            disabled={busyId === student.id}
-                            onClick={() => handleRemove(student)}
-                          >
-                            <UserMinus size={16} aria-hidden="true" />
-                          </button>
-                          <button
-                            type="button"
-                            className="group-detail__icon-btn group-detail__icon-btn--danger"
-                            aria-label={`Видалити дані ${student.displayName} назавжди`}
-                            disabled={busyId === student.id}
-                            onClick={() => handleDelete(student)}
-                          >
-                            <Trash2 size={16} aria-hidden="true" />
-                          </button>
+                          {isOwner && (
+                            <button
+                              type="button"
+                              className="group-detail__icon-btn"
+                              aria-label={`Перевести ${student.displayName} в іншу групу`}
+                              disabled={busyId === student.id}
+                              onClick={() => {
+                                setMoveFor(student)
+                                setMoved(null)
+                              }}
+                            >
+                              <ArrowRightLeft size={16} aria-hidden="true" />
+                            </button>
+                          )}
+                          {isOwner && (
+                            <button
+                              type="button"
+                              className="group-detail__icon-btn group-detail__icon-btn--danger"
+                              aria-label={`Прибрати ${student.displayName} з групи`}
+                              disabled={busyId === student.id}
+                              onClick={() => handleRemove(student)}
+                            >
+                              <UserMinus size={16} aria-hidden="true" />
+                            </button>
+                          )}
+                          {isOwner && (
+                            <button
+                              type="button"
+                              className="group-detail__icon-btn group-detail__icon-btn--danger"
+                              aria-label={`Видалити дані ${student.displayName} назавжди`}
+                              disabled={busyId === student.id}
+                              onClick={() => handleDelete(student)}
+                            >
+                              <Trash2 size={16} aria-hidden="true" />
+                            </button>
+                          )}
                         </>
                       )}
                     </div>
@@ -539,6 +602,8 @@ function GroupDetail() {
           </div>
         </>
       )}
+
+      <TeamPanel groupId={groupId} userId={user.id} isOwner={isOwner} />
     </section>
   )
 }

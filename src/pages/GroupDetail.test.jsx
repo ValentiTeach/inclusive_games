@@ -261,7 +261,7 @@ describe('GroupDetail — згода батьків і строк зберіга
     listConsents.mockResolvedValue(null)
     renderPage()
 
-    expect(await screen.findByText('Марічка')).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: 'Марічка' })).toBeInTheDocument()
     await waitFor(() => expect(listConsents).toHaveBeenCalledWith(['u1']))
     expect(screen.queryByText('Згода батьків')).not.toBeInTheDocument()
   })
@@ -313,5 +313,45 @@ describe('GroupDetail — згода батьків і строк зберіга
     expect(await screen.findByText('понад рік')).toBeInTheDocument()
     expect(screen.getAllByText('понад рік')).toHaveLength(1)
     expect(screen.getByText(/Один учень не грав/)).toBeInTheDocument()
+  })
+})
+
+/*
+ * Фахівця, доданого до чужої групи (20261015_team_avatars.sql), сервер не
+ * пустить ні перейменувати, ні прибрати, ні видалити, ні перевести дитину.
+ * Кнопки, що завжди закінчуються відмовою, — гірше за їхню відсутність.
+ */
+describe('GroupDetail — фахівець у чужій групі', () => {
+  beforeEach(() => {
+    getGroupDetails.mockReset()
+    getGroupDetails.mockResolvedValue({
+      group: { ...group, teacher_id: 'someone-else' },
+      students: [
+        { id: 'u1', displayName: 'Марічка', attempts: 0, avgScore: null, joinedAt: null, lastPlayed: null },
+      ],
+      results: [],
+    })
+  })
+
+  it('бачить дітей і доступ батьків, але не незворотні дії', async () => {
+    renderPage()
+
+    expect(await screen.findByRole('link', { name: 'Марічка' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Доступ батьків: Марічка/ })).toBeInTheDocument()
+    for (const name of [/Перейменувати/, /Перевести/, /Прибрати/, /Видалити дані/]) {
+      expect(screen.queryByRole('button', { name })).not.toBeInTheDocument()
+    }
+  })
+
+  it('власник бачить і перенесення', async () => {
+    getGroupDetails.mockResolvedValue({
+      group: { ...group, teacher_id: 'teacher-1' },
+      students: [
+        { id: 'u1', displayName: 'Марічка', attempts: 0, avgScore: null, joinedAt: null, lastPlayed: null },
+      ],
+      results: [],
+    })
+    renderPage()
+    expect(await screen.findByRole('button', { name: /Перевести Марічка/ })).toBeInTheDocument()
   })
 })

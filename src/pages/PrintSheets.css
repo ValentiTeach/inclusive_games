@@ -1,0 +1,203 @@
+/* Бланки й картки для друку. На екрані — попередній перегляд на «аркуші»,
+   на папері — лише сам аркуш, чорним по білому, без теми й декору. */
+
+.print-sheet__screen-only {
+  max-width: 68ch;
+  margin-bottom: var(--space-5);
+}
+
+.print-sheet__print {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  margin-top: var(--space-3);
+  padding: 0 var(--space-5);
+  font: inherit;
+  font-weight: 700;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.print-sheet__label {
+  display: block;
+  margin-top: var(--space-3);
+  font-weight: 600;
+}
+
+.print-sheet__select {
+  min-height: 44px;
+  margin-top: var(--space-1);
+  padding: 0 var(--space-3);
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+/* Аркуш: на екрані — біла сторінка з тінню, щоб було видно, що піде на папір. */
+.print-sheet__page {
+  max-width: 800px;
+  padding: 32px 40px;
+  color: #111;
+  background: #fff;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+}
+
+.print-sheet__title {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+
+.print-sheet__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+  margin: 0 0 16px;
+}
+
+.print-sheet__fields div {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.print-sheet__fields dt {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.print-sheet__fields dd {
+  flex: 1;
+  height: 1.4em;
+  margin: 0;
+  border-bottom: 1px solid #555;
+}
+
+.print-sheet__box {
+  display: inline-block;
+  margin: 0 6px;
+  font-size: 20px;
+}
+
+.print-sheet__table {
+  width: 100%;
+  margin: 12px 0;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.print-sheet__table th,
+.print-sheet__table td {
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+  border: 1px solid #555;
+}
+
+.print-sheet__table td {
+  height: 64px;
+}
+
+.print-sheet__table td:first-child {
+  width: 22%;
+}
+
+.print-sheet__table td:last-child {
+  width: 30%;
+}
+
+.print-sheet__check {
+  display: block;
+  white-space: nowrap;
+}
+
+.print-sheet__notes p {
+  min-height: 64px;
+  margin: 8px 0;
+  border-bottom: 1px solid #555;
+}
+
+.print-sheet__footer {
+  margin: 16px 0 0;
+  font-size: 11px;
+  color: #555;
+}
+
+/* Картки ігор: на екрані сітка, на папері — по чотири на аркуш. */
+.print-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.print-card {
+  padding: 18px 20px;
+  color: #111;
+  background: #fff;
+  border: 2px dashed #777;
+  border-radius: 12px;
+  break-inside: avoid;
+}
+
+.print-card__skill {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #444;
+}
+
+.print-card__title {
+  margin: 4px 0 8px;
+  font-size: 20px;
+}
+
+.print-card__description {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.print-card__steps {
+  margin: 0 0 8px;
+  padding-left: 20px;
+  font-size: 13px;
+}
+
+.print-card__hint,
+.print-card__needs {
+  margin: 0;
+  font-size: 13px;
+}
+
+.print-card__needs {
+  margin-top: 6px;
+  color: #444;
+}
+
+@media print {
+  .print-sheet__page {
+    max-width: none;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+  }
+
+  .print-cards {
+    grid-template-columns: 1fr 1fr;
+    gap: 10mm;
+  }
+
+  .print-card {
+    min-height: 120mm;
+  }
+}

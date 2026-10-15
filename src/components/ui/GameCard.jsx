@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
-import { Lock, Play, Clock } from 'lucide-react'
+import { BookA, Clock, Ear, Hand, Lock, Play, Timer } from 'lucide-react'
 import Badge from './Badge'
-import { CATEGORIES } from '../../data/games'
+import { CATEGORIES, NEEDS } from '../../data/games'
 import { CATEGORY_ICONS } from '../../data/categoryIcons'
 import './GameCard.css'
 
-function GameCard({ id, title, category, description, status, beta, locked }) {
+const NEED_ICONS = { hearing: Ear, reading: BookA, fineMotor: Hand, timer: Timer }
+
+function GameCard({ id, title, category, description, status, beta, locked, needs = [] }) {
   const categoryInfo = CATEGORIES[category]
   const CategoryIcon = CATEGORY_ICONS[category]
   const isAvailable = status === 'available'
@@ -41,6 +43,19 @@ function GameCard({ id, title, category, description, status, beta, locked }) {
       </div>
       <h3 className="game-card__title">{title}</h3>
       <p className="game-card__description">{description}</p>
+      {needs.length > 0 && (
+        <ul className="game-card__needs" aria-label="Що потрібно для гри">
+          {needs.map((key) => {
+            const Icon = NEED_ICONS[key]
+            return (
+              <li key={key} className="game-card__need">
+                <Icon size={14} aria-hidden="true" />
+                {NEEDS[key].label}
+              </li>
+            )
+          })}
+        </ul>
+      )}
     </>
   )
 

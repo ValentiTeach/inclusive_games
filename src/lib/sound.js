@@ -86,6 +86,29 @@ export function onWrongAnswer(listener) {
 }
 
 /*
+ * Будь-яка відповідь — правильна чи ні. Її слухає оболонка гри, щоб сказати
+ * результат проби екранному читачу: звук чути, колір видно, а незряча дитина
+ * досі в половині ігор не дізнавалася нічого. Сповіщення йде до звуку й не
+ * залежить від налаштування «Тихо»: тиша — це про динамік, а не про читач.
+ */
+const answerListeners = new Set()
+
+export function onAnswer(listener) {
+  answerListeners.add(listener)
+  return () => answerListeners.delete(listener)
+}
+
+function notifyAnswer(correct) {
+  answerListeners.forEach((listener) => {
+    try {
+      listener(correct)
+    } catch {
+      // Слухач — прикраса; гра не має падати через нього.
+    }
+  })
+}
+
+/*
  * Звуки ігрові, але всі синтезовані тут же, з простих тонів: жодного чужого
  * запису чи впізнаваної мелодії з відомої гри, тож і питань про авторські права
  * немає. Короткі інтервали (квінта, терція, арпеджіо мажору) — загальне місце
@@ -99,6 +122,7 @@ export function playClick() {
 
 /** «Дзень-дзелень» — дві ноти вгору на квінту: правильно! */
 export function playCorrect() {
+  notifyAnswer(true)
   safePlay([
     { frequency: 659.25, duration: 0.09, type: 'triangle', volume: 0.07 },
     { frequency: 987.77, duration: 0.18, type: 'triangle', volume: 0.07, delay: 0.07 },
@@ -106,6 +130,7 @@ export function playCorrect() {
 }
 
 export function playWrong() {
+  notifyAnswer(false)
   wrongListeners.forEach((listener) => {
     try {
       listener()

@@ -326,3 +326,83 @@ a {
   --cat-reaction: var(--text-muted);
   --cat-reaction-bg: var(--surface-muted);
 }
+
+/* ───────────────── Підвищений контраст (prefers-contrast: more) ─────────────────
+   Людина сама попросила систему про більший контраст — зазвичай через слабкий
+   зір. Приглушений текст стає повним, рамки — помітними, декор — тихішим, а
+   посилання підкреслені всюди: колір не має бути єдиною ознакою посилання. */
+@media (prefers-contrast: more) {
+  :root {
+    --text-muted: var(--text);
+    --border: #4a5568;
+  }
+
+  :root[data-theme='dark'] {
+    --border: #a3b1c9;
+  }
+
+  .decor {
+    opacity: 0.35;
+  }
+
+  a {
+    text-decoration-line: underline;
+    text-underline-offset: 3px;
+  }
+
+  :focus-visible {
+    outline-width: 3px;
+    outline-offset: 3px;
+  }
+}
+
+/* ───────────────── Режим високої контрастності (forced-colors) ─────────────────
+   Windows сам перефарбовує сторінку в кілька системних кольорів. Для більшості
+   сторінки це саме те, що треба. Але дві речі в ньому губляться:
+
+   1. Ігрове поле. У Струпі, Саймоні, Світлофорі, Go/No-Go, Сортуванні карток
+      колір — це і є завдання, а в Шульте, Симетрії, Доріжці фон клітинки — це
+      її стан. Перефарбоване, поле втрачає зміст. Тому поле, як картинка чи
+      мапа, лишає власні кольори (forced-color-adjust: none) і отримує чітку
+      системну рамку навколо.
+   2. Стан, показаний лише тлом: вибраний варіант, натиснутий перемикач. Тло
+      система прибирає — тож стан дублюється рамкою кольору Highlight. */
+@media (forced-colors: active) {
+  .game-play {
+    forced-color-adjust: none;
+    outline: 2px solid CanvasText;
+    outline-offset: 4px;
+  }
+
+  .game-play :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  .button,
+  button,
+  [role='button'],
+  input,
+  select,
+  textarea {
+    border-color: ButtonText;
+  }
+
+  [aria-pressed='true'],
+  [aria-current='page'],
+  [aria-selected='true'],
+  .is-active,
+  input:checked + span {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  /* Значки навичок розрізняються лише кольором тла — рамка повертає їм форму. */
+  .badge {
+    border: 1px solid CanvasText;
+  }
+
+  .decor {
+    display: none;
+  }
+}

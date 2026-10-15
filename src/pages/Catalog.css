@@ -149,3 +149,57 @@
     min-height: 44px;
   }
 }
+
+/* «Сховати ігри, якщо дитині: …» — підбір під дитину. Тихіше за фільтр
+   навичок: ним користується дорослий, а не дитина. */
+.catalog-needs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.catalog-needs__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.catalog-need {
+  min-height: 36px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.catalog-need[aria-pressed='true'] {
+  background: var(--surface-muted);
+  border: 2px solid var(--accent);
+  padding: 3px 11px;
+  font-weight: 600;
+}
+
+.catalog-need[aria-pressed='true']::before {
+  content: '✓ ';
+}
+
+.catalog-needs__summary {
+  margin: var(--space-2) 0 0;
+  font-size: 14px;
+}
+
+@media (pointer: coarse) {
+  .catalog-need {
+    min-height: 44px;
+  }
+}

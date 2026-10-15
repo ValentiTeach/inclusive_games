@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, fireEvent, render, screen } from '@testing-library/react'
 import AdaptivePlay from './AdaptivePlay'
 import { EMPTY_PROFILE, clearActiveAdaptations } from '../../lib/adaptations'
-import { playWrong } from '../../lib/sound'
+import { playCorrect, playWrong } from '../../lib/sound'
 import { saveSettings, getSettings } from '../../lib/settings'
 import { shortLevel, shortResult } from './adapt'
 
@@ -195,5 +195,52 @@ describe('AdaptivePlay — focus outside the field', () => {
     outside.focus()
     fireEvent.keyDown(outside, { key: ' ', code: 'Space' })
     expect(onPick).not.toHaveBeenCalled()
+  })
+})
+
+describe('AdaptivePlay — результат проби для екранного читача', () => {
+  const announcer = () => document.querySelector('.game-play__announce')
+
+  it('каже «Правильно» і «Не так» у живому регіоні', () => {
+    renderWith({})
+    expect(announcer()).toHaveAttribute('aria-live', 'polite')
+
+    act(() => playCorrect())
+    expect(announcer().textContent.trim()).toBe('Правильно.')
+
+    act(() => playWrong())
+    expect(announcer().textContent.trim()).toBe('Не так.')
+  })
+
+  // Той самий текст двічі поспіль читач не повторив би.
+  it('дві правильні відповіді поспіль — два різні тексти', () => {
+    renderWith({})
+    act(() => playCorrect())
+    const first = announcer().textContent
+    act(() => playCorrect())
+    expect(announcer().textContent).not.toBe(first)
+    expect(announcer().textContent.trim()).toBe('Правильно.')
+  })
+
+  it('мовчить, коли гра вже має власне озвучення', () => {
+    render(
+      <AdaptivePlay config={config} profile={EMPTY_PROFILE}>
+        <p aria-live="polite">Риба плаває у воді.</p>
+      </AdaptivePlay>,
+    )
+    act(() => playCorrect())
+    expect(announcer().textContent).toBe('')
+  })
+
+  it('говорить і тоді, коли звук вимкнено', () => {
+    const before = getSettings()
+    saveSettings({ ...before, sound: 'off' })
+    try {
+      renderWith({})
+      act(() => playWrong())
+      expect(announcer().textContent.trim()).toBe('Не так.')
+    } finally {
+      saveSettings(before)
+    }
   })
 })

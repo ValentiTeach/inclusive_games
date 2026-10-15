@@ -1,4 +1,4 @@
-import { CATEGORIES } from '../data/games'
+import { CATEGORIES, NEEDS, gameNeeds } from '../data/games'
 
 /**
  * Фільтр каталогу живе в адресі, а не в стані компонента. Так посилання на
@@ -24,4 +24,28 @@ export function countByCategory(games) {
     if (game.category in counts) counts[game.category] += 1
   }
   return counts
+}
+
+/*
+ * «Дитині важко: …» — вимоги, які треба сховати. Теж в адресі
+ * (?without=hearing,reading), щоб добірку під дитину можна було зберегти чи
+ * передати колезі. Невідомі ключі мовчки відкидаються.
+ */
+export function needsFromParams(params) {
+  const raw = params.get('without') ?? ''
+  return Object.keys(NEEDS).filter((key) => raw.split(',').includes(key))
+}
+
+export function filterByNeeds(games, without) {
+  if (without.length === 0) return games
+  return games.filter((game) => !gameNeeds(game.id).some((need) => without.includes(need)))
+}
+
+/** Адреса каталогу з обома фільтрами: навик і «без вимог». */
+export function catalogHref({ category = null, without = [] } = {}) {
+  const params = new URLSearchParams()
+  if (category) params.set('category', category)
+  if (without.length > 0) params.set('without', without.join(','))
+  const query = params.toString()
+  return query ? `/games?${query}` : '/games'
 }

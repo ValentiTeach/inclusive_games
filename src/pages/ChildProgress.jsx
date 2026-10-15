@@ -17,14 +17,15 @@ import { buildGroupCsv, csvFileName, downloadCsv } from '../lib/csv'
 import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
 import MetricHelp from '../components/ui/MetricHelp'
+import { useT } from '../i18n/i18n'
 import './ChildProgress.css'
 
 const GAME_BY_ID = Object.fromEntries(GAMES.map((game) => [game.id, game]))
 const GAME_TITLES = Object.fromEntries(GAMES.map((game) => [game.id, game.title]))
 
-function formatDate(iso) {
+function formatDate(iso, locale = 'uk') {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('uk-UA', {
+  return new Date(iso).toLocaleDateString(locale === 'en' ? 'en-GB' : 'uk-UA', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
@@ -55,6 +56,8 @@ function byGame(results) {
 
 function ChildProgress() {
   const { user, profile, loading } = useAuth()
+  const t = useT()
+  const date = (iso) => formatDate(iso, t.locale)
   const [children, setChildren] = useState(null)
   const [activeId, setActiveId] = useState(null)
   const [results, setResults] = useState(null)
@@ -143,7 +146,8 @@ function ChildProgress() {
       setSubmitted(true)
       await reload()
     } catch (error) {
-      setErrorText(PARENT_ERROR_TEXT[error?.reason] ?? PARENT_ERROR_TEXT.unknown)
+      const reason = PARENT_ERROR_TEXT[error?.reason] ? error.reason : 'unknown'
+      setErrorText(t(`parentError.${reason}`))
     } finally {
       setBusy(false)
     }
@@ -152,8 +156,8 @@ function ChildProgress() {
   if (!isCloudConfigured) {
     return (
       <section className="child-progress">
-        <h1>Моя дитина</h1>
-        <p>Ця можливість ще не підключена на цьому сайті.</p>
+        <h1>{t('child.title')}</h1>
+        <p>{t('child.notConnected')}</p>
       </section>
     )
   }
@@ -161,8 +165,8 @@ function ChildProgress() {
   if (loading) {
     return (
       <section className="child-progress">
-        <h1>Моя дитина</h1>
-        <p>Завантаження…</p>
+        <h1>{t('child.title')}</h1>
+        <p>{t('child.loading')}</p>
       </section>
     )
   }
@@ -176,20 +180,15 @@ function ChildProgress() {
 
   return (
     <section className="child-progress">
-      <h1>Моя дитина</h1>
+      <h1>{t('child.title')}</h1>
 
       {children !== null && children.length === 0 && (
-        <p className="child-progress__intro">
-          Тут видно, як дитина грає: скільки спроб, у яких іграх і що в неї виходить
-          найкраще. Щоб почати, попросіть у вчителя код — він виписує його на вашу
-          дитину окремо. Після введення коду модератор платформи перевірить заявку й
-          відкриє доступ.
-        </p>
+        <p className="child-progress__intro">{t('child.intro')}</p>
       )}
 
       <form className="child-progress__form" onSubmit={handleRedeem}>
         <label className="child-progress__label" htmlFor="parent-code">
-          Код від учителя
+          {t('child.codeLabel')}
         </label>
         <div className="child-progress__row">
           <input
@@ -202,20 +201,19 @@ function ChildProgress() {
             spellCheck={false}
           />
           <Button type="submit" disabled={busy || code.trim().length === 0}>
-            {busy ? 'Надсилаю…' : 'Подати заявку'}
+            {busy ? t('child.submitting') : t('child.submit')}
           </Button>
         </div>
         {errorText && <p className="child-progress__error">{errorText}</p>}
         {submitted && (
           <p className="child-progress__status" role="status">
-            Заявку подано. Доступ відкриється, коли модератор її підтвердить — зазвичай
-            це не миттєво. Повертайтеся на цю сторінку пізніше.
+            {t('child.submitted')}
           </p>
         )}
       </form>
 
       {requests.length > 0 && (
-        <ul className="child-progress__requests" aria-label="Ваші заявки">
+        <ul className="child-progress__requests" aria-label={t('child.requests')}>
           {requests.map((request) => (
             <li
               key={request.id}
@@ -226,15 +224,15 @@ function ChildProgress() {
               }
             >
               {request.status === 'pending'
-                ? `Заявка від ${formatDate(request.created_at)} чекає на підтвердження модератора.`
-                : `Заявку від ${formatDate(request.created_at)} відхилено. Попросіть учителя виписати новий код.`}
+                ? t('child.requestPending', { date: date(request.created_at) })
+                : t('child.requestRejected', { date: date(request.created_at) })}
             </li>
           ))}
         </ul>
       )}
 
       {children !== null && children.length > 1 && (
-        <div className="child-progress__switch" role="group" aria-label="Оберіть дитину">
+        <div className="child-progress__switch" role="group" aria-label={t('child.pick')}>
           {children.map((child) => (
             <button
               key={child.id}
@@ -247,7 +245,7 @@ function ChildProgress() {
               aria-pressed={child.id === activeId}
               onClick={() => setActiveId(child.id)}
             >
-              {child.display_name ?? 'Без імені'}
+              {child.display_name ?? t('child.noName')}
             </button>
           ))}
         </div>
@@ -261,12 +259,12 @@ function ChildProgress() {
             просто стос чисел.
           */}
           <div className="print-only child-progress__print-head">
-            <h2>Звіт про заняття: {active.display_name ?? 'Без імені'}</h2>
-            <p>Станом на {formatDate(new Date().toISOString())} · Inclusive Games</p>
+            <h2>{t('child.reportTitle', { name: active.display_name ?? t('child.noName') })}</h2>
+            <p>{t('child.asOf', { date: date(new Date().toISOString()) })}</p>
           </div>
 
           <div className="child-progress__name-row">
-            <h2 className="child-progress__name">{active.display_name ?? 'Без імені'}</h2>
+            <h2 className="child-progress__name">{active.display_name ?? t('child.noName')}</h2>
             {rows !== null && totalAttempts > 0 && (
               <div className="child-progress__actions">
                 {/*
@@ -287,43 +285,51 @@ function ChildProgress() {
                     )
                   }
                 >
-                  Завантажити дані (CSV)
+                  {t('child.downloadCsv')}
                 </Button>
                 <Button variant="secondary" onClick={() => window.print()}>
-                  Друкувати
+                  {t('child.print')}
                 </Button>
               </div>
             )}
           </div>
 
-          {rows === null && <p>Завантаження…</p>}
+          {rows === null && <p>{t('child.loading')}</p>}
 
           {rows !== null && totalAttempts === 0 && (
-            <p className="child-progress__empty">
-              Дитина ще не зіграла жодної гри. Щойно зіграє — тут з’явиться, що саме.
-            </p>
+            <p className="child-progress__empty">{t('child.empty')}</p>
           )}
 
           {games !== null && games.length > 0 && (
             <>
               <p className="child-progress__summary">
-                Усього спроб: <strong>{totalAttempts}</strong> у {games.length}{' '}
-                {games.length === 1 ? 'грі' : 'іграх'}.
+                {t('child.summary', {
+                  count: totalAttempts,
+                  games: t(games.length === 1 ? 'child.games.one' : 'child.games.many', {
+                    n: games.length,
+                  }),
+                })}
               </p>
+              {t.locale !== 'uk' && (
+                <p className="child-progress__lang-note">{t('child.gamesInUkrainian')}</p>
+              )}
 
               <ul className="child-progress__games">
                 {games.map((entry) => (
-                  <li key={entry.gameId} className="child-progress__game">
+                  <li key={entry.gameId} className="child-progress__game" lang="uk">
                     <div className="child-progress__game-head">
                       <h3>{entry.game.title}</h3>
                       <Badge tone={CATEGORIES[entry.game.category].color}>
-                        {CATEGORIES[entry.game.category].label}
+                        {t(`category.${entry.game.category}`)}
                       </Badge>
                     </div>
 
                     <p className="child-progress__game-meta">
-                      Спроб: {entry.history.length} · Найкращий бал: {entry.best} ·
-                      Востаннє: {formatDate(entry.last)}
+                      {t('child.meta', {
+                        attempts: entry.history.length,
+                        best: entry.best,
+                        date: date(entry.last),
+                      })}
                     </p>
 
                     {entry.highlights.length > 0 && (
@@ -355,8 +361,8 @@ function ChildProgress() {
                         }
                       >
                         {entry.growth >= 0
-                          ? `Бал виріс на ${entry.growth} порівняно з першими спробами.`
-                          : `Бал знизився на ${Math.abs(entry.growth)} порівняно з першими спробами.`}
+                          ? t('child.growthUp', { n: entry.growth })
+                          : t('child.growthDown', { n: Math.abs(entry.growth) })}
                       </p>
                     )}
                   </li>
@@ -368,10 +374,7 @@ function ChildProgress() {
       )}
 
       {profile?.role === 'student' && children?.length === 0 && (
-        <p className="child-progress__note">
-          Ця сторінка для дорослих. Свої власні результати ви бачите в розділі «Мій
-          прогрес».
-        </p>
+        <p className="child-progress__note">{t('child.studentNote')}</p>
       )}
     </section>
   )

@@ -18,6 +18,11 @@ import { registerOffline } from './lib/offline'
 import { watchGlobalErrors } from './lib/errorLog'
 import { warmOfflineCache } from './lib/prefetch'
 import { watchWebVitals } from './lib/vitals'
+import { applyLocale } from './i18n/i18n'
+
+// Мова інтерфейсу з минулого візиту — до першого малювання, щоб lang у
+// <html> одразу відповідав тексту.
+applyLocale()
 
 // Застосунок стартував: запобіжник порожнього екрана в index.html мовчить.
 window.__igBooted = true

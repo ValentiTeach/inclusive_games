@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { getSettings, applySettings, watchSystemTheme } from '../../lib/settings'
+import { usePageMeta } from '../../lib/pageMeta'
 import Header from './Header'
 import Footer from './Footer'
 import DecorativeBackground from './DecorativeBackground'
@@ -9,6 +10,7 @@ import './Layout.css'
 
 function Layout() {
   const location = useLocation()
+  usePageMeta()
 
   useEffect(() => {
     applySettings(getSettings())

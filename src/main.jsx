@@ -17,6 +17,7 @@ import ErrorBoundary from './components/layout/ErrorBoundary'
 import { registerOffline } from './lib/offline'
 import { watchGlobalErrors } from './lib/errorLog'
 import { warmOfflineCache } from './lib/prefetch'
+import { watchWebVitals } from './lib/vitals'
 
 // Застосунок стартував: запобіжник порожнього екрана в index.html мовчить.
 window.__igBooted = true
@@ -64,3 +65,4 @@ createRoot(document.getElementById('root')).render(
 watchGlobalErrors()
 warmOfflineCache()
 registerOffline()
+watchWebVitals()

@@ -61,6 +61,18 @@
   --cat-regulation: #4553b8;
   --cat-regulation-bg: rgba(69, 83, 184, 0.13);
 
+  /* Текст значка навички на власній підкладці. Самі кольори навичок давали
+     там 2.6–4.2:1 (axe-core знайшов на бейджі ролі в шапці) — нижче 4.5 для
+     дрібного тексту. Ці — той самий тон, затемнений до ≥ 4.6:1 на підкладці
+     поверх білої, сірої, сторінкової поверхні й активного пункту шапки. */
+  --cat-attention-text: #21647a;
+  --cat-memory-text: #6148a9;
+  --cat-thinking-text: #7c531b;
+  --cat-reaction-text: #9b374a;
+  --cat-speech-text: #1f6640;
+  --cat-space-text: #515f0e;
+  --cat-regulation-text: #4250b1;
+
   /* Затемнені кольори навичок для тексту на білій поверхні (стани доступу
      батьків). Колись ними писалася марка, звідси назва.
      Це ті самі чотири навички, але не ті самі значення: на білій поверхні шапки
@@ -126,6 +138,15 @@
   --cat-space-bg: rgba(179, 207, 90, 0.16);
   --cat-regulation: #9aa8ff;
   --cat-regulation-bg: rgba(154, 168, 255, 0.16);
+
+  /* У темній темі самі кольори навичок і так дають ≥ 5:1 на підкладці. */
+  --cat-attention-text: var(--cat-attention);
+  --cat-memory-text: var(--cat-memory);
+  --cat-thinking-text: var(--cat-thinking);
+  --cat-reaction-text: var(--cat-reaction);
+  --cat-speech-text: var(--cat-speech);
+  --cat-space-text: var(--cat-space);
+  --cat-regulation-text: var(--cat-regulation);
 
   /* У темній темі затемнювати нічого не треба: на поверхні #121b2e ті самі
      кольори дають 6.51–8.34:1, тож беремо їх як є. */

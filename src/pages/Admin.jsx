@@ -8,6 +8,7 @@ import RetentionPanel from '../components/admin/RetentionPanel'
 import ParentRequests from '../components/admin/ParentRequests'
 import FeedbackPanel from '../components/admin/FeedbackPanel'
 import ErrorLogPanel from '../components/admin/ErrorLogPanel'
+import VitalsPanel from '../components/admin/VitalsPanel'
 import './Admin.css'
 
 const ROLE_OPTIONS = ['student', 'teacher', 'moderator', 'parent']
@@ -171,6 +172,8 @@ function Admin() {
       <RetentionPanel />
 
       <ErrorLogPanel />
+
+      <VitalsPanel />
     </section>
   )
 }

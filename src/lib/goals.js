@@ -31,6 +31,19 @@ export async function listGoals(studentId) {
   return data
 }
 
+/** Відкриті цілі всіх дітей групи — для підсумку тижня. */
+export async function listOpenGoals(studentIds) {
+  if (studentIds.length === 0) return []
+  const { data, error } = await supabase
+    .from('ipr_goals')
+    .select(GOAL_COLUMNS)
+    .in('student_id', studentIds)
+    .is('closed_at', null)
+  if (isMissingTable(error)) return null
+  if (error) throw error
+  return data
+}
+
 export async function createGoal({ studentId, gameId, levelId, metric, target, dueOn, note }) {
   const { data, error } = await supabase
     .from('ipr_goals')

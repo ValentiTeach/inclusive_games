@@ -1,15 +1,20 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
-import { Backpack, GraduationCap } from 'lucide-react'
+import { Backpack, GraduationCap, HeartHandshake } from 'lucide-react'
 import { useAuth } from '../lib/authContext'
 import { supabase, isCloudConfigured } from '../lib/supabaseClient'
 import { joinGroup } from '../lib/groups'
+import { useT } from '../i18n/i18n'
 import './Login.css'
 
 function Login() {
   const { user, loading, refreshProfile } = useAuth()
   const navigate = useNavigate()
+  const t = useT()
   const [mode, setMode] = useState('choose')
+  // Батьки входять тією самою поштою, що й учителі, — але після входу їм
+  // потрібна сторінка «Моя дитина», а не групи.
+  const [forParent, setForParent] = useState(false)
 
   const [code, setCode] = useState('')
   const [name, setName] = useState('')
@@ -23,7 +28,7 @@ function Login() {
   const [emailError, setEmailError] = useState(null)
 
   if (loading) {
-    return <div className="login login--plain">Завантаження…</div>
+    return <div className="login login--plain">{t('login.loading')}</div>
   }
 
   if (user) {
@@ -33,8 +38,8 @@ function Login() {
   if (!isCloudConfigured) {
     return (
       <section className="login login--plain">
-        <h1>Вхід</h1>
-        <p>Вхід ще не підключено на цьому сайті.</p>
+        <h1>{t('login.title')}</h1>
+        <p>{t('login.notConnected')}</p>
       </section>
     )
   }
@@ -53,7 +58,7 @@ function Login() {
       navigate('/games')
     } catch {
       setJoinStatus('idle')
-      setJoinError('Не вдалося приєднатися. Перевір код і спробуй ще раз.')
+      setJoinError(t('login.joinError'))
     }
   }
 
@@ -67,7 +72,7 @@ function Login() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: forParent ? `${window.location.origin}/child` : window.location.origin,
         shouldCreateUser: isRegister,
         ...(isRegister && teacherName.trim() ? { data: { display_name: teacherName.trim() } } : {}),
       },
@@ -77,12 +82,14 @@ function Login() {
       setEmailStatus('idle')
 
       if (error.status === 429 || error.code === 'over_email_send_rate_limit') {
-        setEmailError('Забагато спроб за короткий час. Зачекай кілька хвилин і спробуй ще раз.')
+        setEmailError(t('login.rateLimited'))
       } else if (!isRegister && (error.status === 400 || error.status === 422)) {
-        setEmailError('Акаунт із такою поштою не знайдено. Якщо в тебе ще немає акаунта — перейди на «Реєстрація».')
+        setEmailError(t('login.notFound'))
       } else {
         setEmailError(
-          `${isRegister ? 'Не вдалося зареєструватися' : 'Не вдалося увійти'}: ${error.message || 'невідома помилка'}`,
+          t(isRegister ? 'login.registerFailed' : 'login.loginFailed', {
+            message: error.message || t('login.unknownError'),
+          }),
         )
       }
       return
@@ -95,23 +102,40 @@ function Login() {
     <section className="login">
       <div className="login__hero">
         <p className="login__eyebrow">Inclusive Games</p>
-        <h1 className="login__title">Вхід у платформу</h1>
-        <p className="login__subtitle">
-          Обери, як ти заходиш — це визначить, що ти побачиш далі.
-        </p>
+        <h1 className="login__title">{t('login.heroTitle')}</h1>
+        <p className="login__subtitle">{t('login.heroSubtitle')}</p>
       </div>
 
       {mode === 'choose' && (
         <div className="login__cards">
           <button type="button" className="login__card" onClick={() => setMode('student')}>
             <Backpack className="login__card-icon" aria-hidden="true" />
-            <span className="login__card-title">Я учень</span>
-            <span className="login__card-text">Код групи від вчителя + твоє ім'я. Пошта не потрібна.</span>
+            <span className="login__card-title">{t('login.student.title')}</span>
+            <span className="login__card-text">{t('login.student.text')}</span>
           </button>
-          <button type="button" className="login__card" onClick={() => setMode('teacher')}>
+          <button
+            type="button"
+            className="login__card"
+            onClick={() => {
+              setForParent(false)
+              setMode('teacher')
+            }}
+          >
             <GraduationCap className="login__card-icon" aria-hidden="true" />
-            <span className="login__card-title">Я вчитель / психолог</span>
-            <span className="login__card-text">Вхід або реєстрація поштою — без пароля, посиланням.</span>
+            <span className="login__card-title">{t('login.teacher.title')}</span>
+            <span className="login__card-text">{t('login.teacher.text')}</span>
+          </button>
+          <button
+            type="button"
+            className="login__card"
+            onClick={() => {
+              setForParent(true)
+              setMode('teacher')
+            }}
+          >
+            <HeartHandshake className="login__card-icon" aria-hidden="true" />
+            <span className="login__card-title">{t('login.parent.title')}</span>
+            <span className="login__card-text">{t('login.parent.text')}</span>
           </button>
         </div>
       )}
@@ -119,12 +143,12 @@ function Login() {
       {mode === 'student' && (
         <div className="login__panel">
           <button type="button" className="login__back" onClick={() => setMode('choose')}>
-            ← Назад
+            {t('login.back')}
           </button>
-          <h2 className="login__panel-title">Приєднатися за кодом</h2>
+          <h2 className="login__panel-title">{t('login.joinTitle')}</h2>
           <form className="login__form" onSubmit={handleJoin}>
             <label className="login__label" htmlFor="login-code">
-              Код групи
+              {t('login.code')}
             </label>
             <input
               id="login-code"
@@ -138,7 +162,7 @@ function Login() {
               autoComplete="off"
             />
             <label className="login__label" htmlFor="login-name">
-              Твоє ім'я
+              {t('login.name')}
             </label>
             <input
               id="login-name"
@@ -147,11 +171,11 @@ function Login() {
               value={name}
               onChange={(event) => setName(event.target.value)}
               className="login__input"
-              placeholder="Ім'я"
+              placeholder={t('login.namePlaceholder')}
             />
             {joinError && <p className="login__error">{joinError}</p>}
             <button type="submit" className="login__submit" disabled={joinStatus === 'sending'}>
-              {joinStatus === 'sending' ? 'Приєднуємо…' : 'Приєднатися'}
+              {joinStatus === 'sending' ? t('login.joining') : t('login.join')}
             </button>
           </form>
         </div>
@@ -160,11 +184,16 @@ function Login() {
       {mode === 'teacher' && (
         <div className="login__panel">
           <button type="button" className="login__back" onClick={() => setMode('choose')}>
-            ← Назад
+            {t('login.back')}
           </button>
           <h2 className="login__panel-title">
-            {teacherMode === 'register' ? 'Реєстрація' : 'Вхід поштою'}
+            {forParent
+              ? t('login.parent.title')
+              : teacherMode === 'register'
+                ? t('login.register')
+                : t('login.emailLogin')}
           </h2>
+          {forParent && <p className="login__hint">{t('login.parent.hint')}</p>}
 
           {emailStatus !== 'sent' && (
             <div className="login__tabs" role="tablist">
@@ -178,7 +207,7 @@ function Login() {
                   setEmailError(null)
                 }}
               >
-                Вхід
+                {t('login.tabLogin')}
               </button>
               <button
                 type="button"
@@ -190,26 +219,25 @@ function Login() {
                   setEmailError(null)
                 }}
               >
-                Реєстрація
+                {t('login.register')}
               </button>
             </div>
           )}
 
           {emailStatus !== 'sent' && teacherMode === 'register' && (
-            <p className="login__hint">Створи акаунт вчителя/психолога — посилання для входу прийде на пошту.</p>
+            <p className="login__hint">{t('login.registerHint')}</p>
           )}
 
           {emailStatus === 'sent' ? (
             <p className="login__sent">
-              Перевір пошту <strong>{email}</strong> і перейди за посиланням, щоб{' '}
-              {teacherMode === 'register' ? 'завершити реєстрацію' : 'увійти'}.
+              {t(teacherMode === 'register' ? 'login.sentRegister' : 'login.sentLogin', { email })}
             </p>
           ) : (
             <form className="login__form" onSubmit={handleEmail}>
               {teacherMode === 'register' && (
                 <>
                   <label className="login__label" htmlFor="login-teacher-name">
-                    Ім'я
+                    {t('login.adultName')}
                   </label>
                   <input
                     id="login-teacher-name"
@@ -218,12 +246,12 @@ function Login() {
                     value={teacherName}
                     onChange={(event) => setTeacherName(event.target.value)}
                     className="login__input"
-                    placeholder="Ім'я"
+                    placeholder={t('login.namePlaceholder')}
                   />
                 </>
               )}
               <label className="login__label" htmlFor="login-email">
-                Електронна пошта
+                {t('login.email')}
               </label>
               <input
                 id="login-email"
@@ -237,10 +265,10 @@ function Login() {
               {emailError && <p className="login__error">{emailError}</p>}
               <button type="submit" className="login__submit" disabled={emailStatus === 'sending'}>
                 {emailStatus === 'sending'
-                  ? 'Надсилаємо…'
+                  ? t('login.sending')
                   : teacherMode === 'register'
-                    ? 'Зареєструватися'
-                    : 'Надіслати посилання для входу'}
+                    ? t('login.registerSubmit')
+                    : t('login.loginSubmit')}
               </button>
             </form>
           )}

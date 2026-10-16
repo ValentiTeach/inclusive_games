@@ -207,3 +207,33 @@
 .service-log__table tr:last-child td {
   border-bottom: none;
 }
+
+/* Оцінка показника — не лише кольором: поруч слово «добре / так собі /
+   повільно». */
+.vitals--good {
+  box-shadow: inset 4px 0 0 var(--cat-speech);
+}
+
+.vitals--needs-improvement {
+  box-shadow: inset 4px 0 0 var(--cat-thinking);
+}
+
+.vitals--poor {
+  box-shadow: inset 4px 0 0 var(--cat-reaction);
+}
+
+.vitals__rating,
+.vitals__count {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.vitals__subtitle {
+  margin: var(--space-4) 0 var(--space-2);
+  font-size: 16px;
+}
+
+.vitals__pages {
+  margin: 0;
+  padding-left: var(--space-5);
+}

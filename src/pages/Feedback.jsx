@@ -11,15 +11,15 @@ import {
 import Button from '../components/ui/Button'
 import PrivacyContact from '../components/ui/PrivacyContact'
 import { PRIVACY_CONTACT } from '../lib/privacy'
+import { useT } from '../i18n/i18n'
 import './DocPage.css'
 import './Feedback.css'
 
-const ERROR_TEXT = {
-  [FEEDBACK_ERROR.EMPTY]: 'Напишіть хоч кілька слів.',
-  [FEEDBACK_ERROR.TOO_MANY]:
-    'Ви вже надіслали кілька повідомлень за годину. Спробуйте трохи пізніше — ми все отримали.',
-  [FEEDBACK_ERROR.UNAVAILABLE]: 'Форма ще не ввімкнена на сервері. Спробуйте пізніше.',
-  [FEEDBACK_ERROR.UNKNOWN]: 'Не вдалося надіслати. Перевірте зв’язок і спробуйте ще раз.',
+const ERROR_KEYS = {
+  [FEEDBACK_ERROR.EMPTY]: 'feedback.error.empty',
+  [FEEDBACK_ERROR.TOO_MANY]: 'feedback.error.tooMany',
+  [FEEDBACK_ERROR.UNAVAILABLE]: 'feedback.error.unavailable',
+  [FEEDBACK_ERROR.UNKNOWN]: 'feedback.error.unknown',
 }
 
 /**
@@ -30,6 +30,7 @@ const ERROR_TEXT = {
  * її в state), і версію сайту — це половина відповіді на «що саме».
  */
 function Feedback() {
+  const t = useT()
   const location = useLocation()
   const [params] = useSearchParams()
   const initialKind = FEEDBACK_KINDS[params.get('kind')] ? params.get('kind') : 'problem'
@@ -50,7 +51,7 @@ function Feedback() {
       await sendFeedback({ kind, message, contact, fromPath })
       setSent(true)
     } catch (caught) {
-      setError(ERROR_TEXT[caught?.reason] ?? ERROR_TEXT[FEEDBACK_ERROR.UNKNOWN])
+      setError(t(ERROR_KEYS[caught?.reason] ?? ERROR_KEYS[FEEDBACK_ERROR.UNKNOWN]))
     } finally {
       setBusy(false)
     }
@@ -59,15 +60,15 @@ function Feedback() {
   if (!isCloudConfigured) {
     return (
       <article className="doc-page">
-        <h1>Повідомити про проблему</h1>
+        <h1>{t('feedback.titleShort')}</h1>
         <p>
-          Форма зворотного зв’язку на цьому сайті не підключена.{' '}
+          {t('feedback.notConnected')}{' '}
           {PRIVACY_CONTACT ? (
             <>
-              Напишіть відповідальному за платформу: <PrivacyContact />.
+              {t('feedback.writeContact')} <PrivacyContact />.
             </>
           ) : (
-            'Розкажіть про проблему вчителю чи фахівцю, який дав вам посилання.'
+            t('feedback.askTeacher')
           )}
         </p>
       </article>
@@ -77,16 +78,13 @@ function Feedback() {
   if (sent) {
     return (
       <article className="doc-page">
-        <h1>Дякуємо!</h1>
+        <h1>{t('feedback.thanks')}</h1>
         <p role="status">
-          Повідомлення надіслано.{' '}
-          {contact.trim()
-            ? 'Ми відповімо на вказаний контакт, щойно розберемося.'
-            : 'Ви не лишили контакту, тож відповіді не буде, — але ми прочитаємо кожне слово.'}
+          {t('feedback.sent')} {contact.trim() ? t('feedback.willReply') : t('feedback.noReply')}
         </p>
         <div className="feedback__actions">
           <Button to={fromPath ?? '/'} variant="secondary">
-            Повернутися
+            {t('feedback.back')}
           </Button>
           <Button
             variant="secondary"
@@ -95,7 +93,7 @@ function Feedback() {
               setMessage('')
             }}
           >
-            Написати ще
+            {t('feedback.again')}
           </Button>
         </div>
       </article>
@@ -104,16 +102,13 @@ function Feedback() {
 
   return (
     <article className="doc-page">
-      <h1>Повідомити про проблему чи ідею</h1>
-      <p className="doc-page__lede">
-        Щось не працює, незручно або бракує гри? Напишіть — повідомлення читає модератор
-        платформи.
-      </p>
+      <h1>{t('feedback.title')}</h1>
+      <p className="doc-page__lede">{t('feedback.lede')}</p>
 
       <form className="feedback" onSubmit={submit}>
         <fieldset className="feedback__kinds">
-          <legend>Про що</legend>
-          {Object.entries(FEEDBACK_KINDS).map(([value, label]) => (
+          <legend>{t('feedback.kind')}</legend>
+          {Object.keys(FEEDBACK_KINDS).map((value) => (
             <label key={value} className="feedback__kind">
               <input
                 type="radio"
@@ -122,13 +117,13 @@ function Feedback() {
                 checked={kind === value}
                 onChange={() => setKind(value)}
               />
-              <span>{label}</span>
+              <span>{t(`feedback.kind.${value}`)}</span>
             </label>
           ))}
         </fieldset>
 
         <label className="feedback__label" htmlFor="feedback-message">
-          Що сталося або що пропонуєте
+          {t('feedback.message')}
         </label>
         <textarea
           id="feedback-message"
@@ -141,14 +136,12 @@ function Feedback() {
           onChange={(event) => setMessage(event.target.value)}
         />
         <p id="feedback-message-hint" className="feedback__hint">
-          {kind === 'problem' || kind === 'accessibility'
-            ? 'Яка сторінка чи гра, з якого пристрою, що ви натиснули і що побачили. '
-            : ''}
-          Будь ласка, не пишіть прізвищ, адрес чи телефонів дітей. {message.length} / {FEEDBACK_MAX}
+          {kind === 'problem' || kind === 'accessibility' ? `${t('feedback.problemHint')} ` : ''}
+          {t('feedback.privacyHint')} {message.length} / {FEEDBACK_MAX}
         </p>
 
         <label className="feedback__label" htmlFor="feedback-contact">
-          Пошта чи телефон для відповіді (необов’язково)
+          {t('feedback.contact')}
         </label>
         <input
           id="feedback-contact"
@@ -166,13 +159,11 @@ function Feedback() {
         )}
 
         <Button type="submit" disabled={busy || message.trim() === ''}>
-          {busy ? 'Надсилаю…' : 'Надіслати'}
+          {busy ? t('feedback.sending') : t('feedback.send')}
         </Button>
 
         <p className="feedback__hint">
-          Разом із повідомленням зберігаються адреса сторінки, з якої ви прийшли, назва браузера
-          і версія сайту — щоб відтворити проблему. Повідомлення видаляються через 12 місяців.
-          Детальніше — у <Link to="/privacy">«Дані та приватність»</Link>.
+          {t('feedback.stored')} <Link to="/privacy">{t('feedback.storedLink')}</Link>.
         </p>
       </form>
     </article>

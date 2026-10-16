@@ -1,12 +1,8 @@
 import { Backpack, GraduationCap, HeartHandshake, ShieldCheck } from 'lucide-react'
 import Badge from './Badge'
+import { useT } from '../../i18n/i18n'
 
-const ROLE_LABELS = {
-  student: 'Учень',
-  teacher: 'Вчитель',
-  moderator: 'Модератор',
-  parent: 'Батьки',
-}
+const ROLES = ['student', 'teacher', 'moderator', 'parent']
 
 const ROLE_TONES = {
   student: 'memory',
@@ -23,14 +19,15 @@ const ROLE_ICONS = {
 }
 
 function RoleBadge({ role }) {
-  if (!role || !ROLE_LABELS[role]) return null
+  const t = useT()
+  if (!role || !ROLES.includes(role)) return null
 
   const Icon = ROLE_ICONS[role]
 
   return (
     <Badge tone={ROLE_TONES[role]}>
       <Icon size={13} aria-hidden="true" />
-      {ROLE_LABELS[role]}
+      {t(`role.${role}`)}
     </Badge>
   )
 }

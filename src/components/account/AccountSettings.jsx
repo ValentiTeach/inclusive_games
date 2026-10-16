@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Mail, LogOut, Trash2 } from 'lucide-react'
+import { Bell, Mail, LogOut, Trash2 } from 'lucide-react'
 import Button from '../ui/Button'
 import {
   ACCOUNT_ERROR,
@@ -11,6 +11,7 @@ import {
   signOutEverywhere,
   transferMyGroups,
 } from '../../lib/account'
+import { getNotificationSettings, saveNotificationSettings } from '../../lib/notifications'
 
 const CONFIRM_WORD = 'ВИДАЛИТИ'
 
@@ -70,6 +71,85 @@ function EmailSection({ currentEmail }) {
           </Button>
         </form>
       )}
+    </section>
+  )
+}
+
+/*
+ * Листи раз на тиждень — лише тим, хто ввімкнув сам. Учителю — підсумок його
+ * груп, модератору — заявки батьків, що чекають. Без міграції розділу немає.
+ */
+function NotificationsSection({ userId, role }) {
+  const [settings, setSettings] = useState(undefined)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    getNotificationSettings(userId)
+      .then((value) => {
+        if (!cancelled) setSettings(value)
+      })
+      .catch(() => {
+        if (!cancelled) setSettings(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [userId])
+
+  const isTeacher = role === 'teacher' || role === 'moderator'
+  const isModerator = role === 'moderator'
+  if (!settings || !isTeacher) return null
+
+  async function toggle(key) {
+    const next = { ...settings, [key]: !settings[key] }
+    setSettings(next)
+    setSaved(false)
+    setError(null)
+    try {
+      await saveNotificationSettings(userId, next)
+      setSaved(true)
+    } catch {
+      setSettings(settings)
+      setError('Не вдалося зберегти. Спробуйте ще раз.')
+    }
+  }
+
+  return (
+    <section className="account__section" aria-labelledby="account-notifications">
+      <h2 id="account-notifications">
+        <Bell size={18} aria-hidden="true" /> Листи
+      </h2>
+      <label className="account__check">
+        <input
+          type="checkbox"
+          checked={settings.weeklyDigest}
+          onChange={() => toggle('weeklyDigest')}
+        />
+        <span>
+          Щопонеділка — підсумок тижня моїх груп: хто грав, хто ні, скільки спроб.
+        </span>
+      </label>
+      {isModerator && (
+        <label className="account__check">
+          <input
+            type="checkbox"
+            checked={settings.parentRequests}
+            onChange={() => toggle('parentRequests')}
+          />
+          <span>Нагадування, коли заявки батьків чекають рішення.</span>
+        </label>
+      )}
+      <p className="account__note">
+        Імена дітей у листі — лише тих, хто тиждень не грав. Вимкнути можна тут будь-коли.
+      </p>
+      {saved && (
+        <p className="account__note" role="status">
+          Збережено.
+        </p>
+      )}
+      {error && <p className="account__error">{error}</p>}
     </section>
   )
 }
@@ -273,6 +353,7 @@ function AccountSettings({ user, role, onDeleted }) {
   return (
     <>
       <EmailSection currentEmail={user.email} />
+      <NotificationsSection userId={user.id} role={role} />
       <SessionsSection />
       <DeleteSection userId={user.id} role={role} onDeleted={onDeleted} />
     </>

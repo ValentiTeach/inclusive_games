@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { onWrongAnswer } from '../../lib/sound'
+import { onAnswer, onWrongAnswer } from '../../lib/sound'
 import { errorFeedbackMode } from '../../lib/settings'
 import Helper from '../../components/ui/Helper'
 import './AdaptivePlay.css'
@@ -47,11 +47,23 @@ function stop(event) {
 
 const TRY_AGAIN_MS = 1100
 
+/*
+ * Власне озвучення гри — живий регіон усередині поля (крім нашого «Спробуй
+ * ще»). Якщо він є, гра вже сама каже, що сталося, і дубль «Правильно» поверх
+ * її пояснення лише заважав би.
+ */
+function hasOwnAnnouncer(root) {
+  return Boolean(
+    root?.querySelector('[aria-live]:not(.game-play__try-again), [role="status"]:not(.game-play__try-again)'),
+  )
+}
+
 function AdaptivePlay({ config, profile, children }) {
   const rootRef = useRef(null)
   const selectRef = useRef(() => {})
   const [holdBox, setHoldBox] = useState(null)
   const [tryAgain, setTryAgain] = useState(0)
+  const [announcement, setAnnouncement] = useState({ text: '', seq: 0 })
 
   const input = config.input ?? {}
   const holdMs = input.hold === false ? 0 : profile.holdMs
@@ -227,6 +239,23 @@ function AdaptivePlay({ config, profile, children }) {
     [],
   )
 
+  /*
+   * Результат проби для екранного читача — у тих іграх, що самі нічого не
+   * кажуть. Однаковий текст поспіль читач не повторює, тож другий «Правильно»
+   * відрізняється невидимим нерозривним пробілом.
+   */
+  useEffect(
+    () =>
+      onAnswer((correct) => {
+        if (hasOwnAnnouncer(rootRef.current)) return
+        setAnnouncement((previous) => ({
+          text: (correct ? 'Правильно.' : 'Не так.') + (previous.seq % 2 ? '' : '\u00A0'),
+          seq: previous.seq + 1,
+        }))
+      }),
+    [],
+  )
+
   useEffect(() => {
     if (!tryAgain) return undefined
     const timer = setTimeout(() => setTryAgain(0), TRY_AGAIN_MS)
@@ -252,6 +281,10 @@ function AdaptivePlay({ config, profile, children }) {
           </div>
         )}
       </div>
+
+      <p className="visually-hidden game-play__announce" aria-live="polite">
+        {announcement.text}
+      </p>
 
       {scanMs > 0 && (
         <div className="game-play__switch" data-scan-skip="">

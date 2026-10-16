@@ -22,35 +22,35 @@
 
 .badge--attention {
   background: var(--cat-attention-bg);
-  color: var(--cat-attention);
+  color: var(--cat-attention-text);
 }
 
 .badge--memory {
   background: var(--cat-memory-bg);
-  color: var(--cat-memory);
+  color: var(--cat-memory-text);
 }
 
 .badge--thinking {
   background: var(--cat-thinking-bg);
-  color: var(--cat-thinking);
+  color: var(--cat-thinking-text);
 }
 
 .badge--reaction {
   background: var(--cat-reaction-bg);
-  color: var(--cat-reaction);
+  color: var(--cat-reaction-text);
 }
 
 .badge--speech {
   background: var(--cat-speech-bg);
-  color: var(--cat-speech);
+  color: var(--cat-speech-text);
 }
 
 .badge--space {
   background: var(--cat-space-bg);
-  color: var(--cat-space);
+  color: var(--cat-space-text);
 }
 
 .badge--regulation {
   background: var(--cat-regulation-bg);
-  color: var(--cat-regulation);
+  color: var(--cat-regulation-text);
 }

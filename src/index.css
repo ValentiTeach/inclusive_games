@@ -61,6 +61,18 @@
   --cat-regulation: #4553b8;
   --cat-regulation-bg: rgba(69, 83, 184, 0.13);
 
+  /* Текст значка навички на власній підкладці. Самі кольори навичок давали
+     там 2.6–4.2:1 (axe-core знайшов на бейджі ролі в шапці) — нижче 4.5 для
+     дрібного тексту. Ці — той самий тон, затемнений до ≥ 4.6:1 на підкладці
+     поверх білої, сірої, сторінкової поверхні й активного пункту шапки. */
+  --cat-attention-text: #21647a;
+  --cat-memory-text: #6148a9;
+  --cat-thinking-text: #7c531b;
+  --cat-reaction-text: #9b374a;
+  --cat-speech-text: #1f6640;
+  --cat-space-text: #515f0e;
+  --cat-regulation-text: #4250b1;
+
   /* Затемнені кольори навичок для тексту на білій поверхні (стани доступу
      батьків). Колись ними писалася марка, звідси назва.
      Це ті самі чотири навички, але не ті самі значення: на білій поверхні шапки
@@ -126,6 +138,15 @@
   --cat-space-bg: rgba(179, 207, 90, 0.16);
   --cat-regulation: #9aa8ff;
   --cat-regulation-bg: rgba(154, 168, 255, 0.16);
+
+  /* У темній темі самі кольори навичок і так дають ≥ 5:1 на підкладці. */
+  --cat-attention-text: var(--cat-attention);
+  --cat-memory-text: var(--cat-memory);
+  --cat-thinking-text: var(--cat-thinking);
+  --cat-reaction-text: var(--cat-reaction);
+  --cat-speech-text: var(--cat-speech);
+  --cat-space-text: var(--cat-space);
+  --cat-regulation-text: var(--cat-regulation);
 
   /* У темній темі затемнювати нічого не треба: на поверхні #121b2e ті самі
      кольори дають 6.51–8.34:1, тож беремо їх як є. */
@@ -325,4 +346,84 @@ a {
 ) {
   --cat-reaction: var(--text-muted);
   --cat-reaction-bg: var(--surface-muted);
+}
+
+/* ───────────────── Підвищений контраст (prefers-contrast: more) ─────────────────
+   Людина сама попросила систему про більший контраст — зазвичай через слабкий
+   зір. Приглушений текст стає повним, рамки — помітними, декор — тихішим, а
+   посилання підкреслені всюди: колір не має бути єдиною ознакою посилання. */
+@media (prefers-contrast: more) {
+  :root {
+    --text-muted: var(--text);
+    --border: #4a5568;
+  }
+
+  :root[data-theme='dark'] {
+    --border: #a3b1c9;
+  }
+
+  .decor {
+    opacity: 0.35;
+  }
+
+  a {
+    text-decoration-line: underline;
+    text-underline-offset: 3px;
+  }
+
+  :focus-visible {
+    outline-width: 3px;
+    outline-offset: 3px;
+  }
+}
+
+/* ───────────────── Режим високої контрастності (forced-colors) ─────────────────
+   Windows сам перефарбовує сторінку в кілька системних кольорів. Для більшості
+   сторінки це саме те, що треба. Але дві речі в ньому губляться:
+
+   1. Ігрове поле. У Струпі, Саймоні, Світлофорі, Go/No-Go, Сортуванні карток
+      колір — це і є завдання, а в Шульте, Симетрії, Доріжці фон клітинки — це
+      її стан. Перефарбоване, поле втрачає зміст. Тому поле, як картинка чи
+      мапа, лишає власні кольори (forced-color-adjust: none) і отримує чітку
+      системну рамку навколо.
+   2. Стан, показаний лише тлом: вибраний варіант, натиснутий перемикач. Тло
+      система прибирає — тож стан дублюється рамкою кольору Highlight. */
+@media (forced-colors: active) {
+  .game-play {
+    forced-color-adjust: none;
+    outline: 2px solid CanvasText;
+    outline-offset: 4px;
+  }
+
+  .game-play :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  .button,
+  button,
+  [role='button'],
+  input,
+  select,
+  textarea {
+    border-color: ButtonText;
+  }
+
+  [aria-pressed='true'],
+  [aria-current='page'],
+  [aria-selected='true'],
+  .is-active,
+  input:checked + span {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  /* Значки навичок розрізняються лише кольором тла — рамка повертає їм форму. */
+  .badge {
+    border: 1px solid CanvasText;
+  }
+
+  .decor {
+    display: none;
+  }
 }

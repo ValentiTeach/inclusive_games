@@ -75,3 +75,65 @@ const PLANT_NAMES = {
 export function plantName(plant) {
   return PLANT_NAMES[plant] ?? 'рослинка'
 }
+
+/*
+ * Пора року — за місяцем, щоб сад жив разом із календарем дитини: узимку сніг,
+ * восени листя. Нічого не забирає й не в'яне — лише вбрання.
+ */
+export function seasonOf(date = new Date()) {
+  const month = date.getMonth()
+  if (month === 11 || month <= 1) return 'winter'
+  if (month <= 4) return 'spring'
+  if (month <= 7) return 'summer'
+  return 'autumn'
+}
+
+export const SEASON_NAMES = {
+  winter: 'зима',
+  spring: 'весна',
+  summer: 'літо',
+  autumn: 'осінь',
+}
+
+/*
+ * Улюблена рослина — серце саду: одна, велика, посередині. Росте разом із
+ * садом (пагінець → бутон → цвіте), тобто за участь, а не за бал, і ніколи не
+ * меншає.
+ */
+export const FAVORITE_PLANTS = ['sunflower', 'tulip', 'rose', 'daisy', 'tree', 'mushroom']
+
+export function heartStage(total) {
+  if (total >= 16) return 'bloom'
+  if (total >= 6) return 'bud'
+  return 'sprout'
+}
+
+const PREFS_PREFIX = 'inclusive-games:garden:'
+
+/*
+ * Назва й улюблена рослина — на пристрої, під тим самим власником, що й
+ * локальна історія: друга дитина за тим самим комп'ютером отримує свій сад, а
+ * не чужу назву.
+ */
+export function loadGardenPrefs(owner) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PREFS_PREFIX + (owner ?? 'guest')) ?? '{}')
+    return {
+      name: typeof raw.name === 'string' ? raw.name.slice(0, 40) : '',
+      favorite: FAVORITE_PLANTS.includes(raw.favorite) ? raw.favorite : null,
+    }
+  } catch {
+    return { name: '', favorite: null }
+  }
+}
+
+export function saveGardenPrefs(owner, prefs) {
+  try {
+    localStorage.setItem(
+      PREFS_PREFIX + (owner ?? 'guest'),
+      JSON.stringify({ name: (prefs.name ?? '').trim().slice(0, 40), favorite: prefs.favorite ?? null }),
+    )
+  } catch {
+    // Приватне вікно чи повне сховище: сад однаково росте, просто без назви.
+  }
+}

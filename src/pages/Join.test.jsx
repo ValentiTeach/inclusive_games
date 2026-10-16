@@ -223,3 +223,32 @@ describe('Join — на пристрої вчитель', () => {
     expect(await screen.findByLabelText('Твоє ім’я')).toBeInTheDocument()
   })
 })
+
+describe('Join — тваринка', () => {
+  it('після першого входу пропонує обрати тваринку', async () => {
+    getSessionIdentity.mockResolvedValue(null)
+    const user = userEvent.setup()
+    renderJoin()
+
+    await user.type(await screen.findByLabelText('Код групи'), 'ABC123')
+    await user.type(screen.getByLabelText('Твоє ім’я'), 'Максим')
+    await user.click(screen.getByRole('button', { name: 'Приєднатися' }))
+
+    expect(await screen.findByRole('heading', { name: 'Обери свою тваринку' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Лисичка/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Пропустити' })).toBeInTheDocument()
+  })
+
+  it('дитина, що повернулася зі своєю тваринкою, бачить її і не обирає вдруге', async () => {
+    getSessionIdentity.mockResolvedValue({ ...CHILD_A, avatar: 'owl' })
+    const user = userEvent.setup()
+    renderJoin()
+
+    expect(await screen.findByRole('img', { name: 'Совеня' })).toBeInTheDocument()
+    await user.type(screen.getByLabelText('Код групи'), 'ABC123')
+    await user.click(screen.getByRole('button', { name: 'Продовжити як Оля Петренко' }))
+
+    await waitFor(() => expect(joinGroup).toHaveBeenCalled())
+    expect(screen.queryByRole('heading', { name: 'Обери свою тваринку' })).not.toBeInTheDocument()
+  })
+})

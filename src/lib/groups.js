@@ -36,29 +36,49 @@ export async function createGroup(name) {
 }
 
 export async function getMyGroups() {
+  // teacher_id — щоб відрізнити власні групи від тих, куди вчителя додали
+  // фахівцем (20261015_team_avatars.sql): там він бачить дітей, але не керує
+  // складом групи.
   const { data, error } = await supabase
     .from('groups')
-    .select('id, name, join_code, created_at')
+    .select('id, name, join_code, created_at, teacher_id')
     .order('created_at', { ascending: false })
 
   if (error) throw error
   return data
 }
 
+/*
+ * Колонка avatar з'являється з міграцією 20261015. До неї PostgREST відповідає
+ * на запит із цією колонкою помилкою 42703 — і список учнів не мав би через
+ * тваринок зникнути.
+ */
+function isMissingColumn(error) {
+  return error?.code === '42703' || error?.code === 'PGRST204'
+}
+
 export async function getGroupDetails(groupId) {
   const { data: group, error: groupError } = await supabase
     .from('groups')
-    .select('id, name, join_code')
+    .select('id, name, join_code, teacher_id')
     .eq('id', groupId)
     .single()
 
   if (groupError) throw groupError
 
-  const { data: students, error: studentsError } = await supabase
-    .from('profiles')
-    .select('id, display_name, created_at')
-    .eq('group_id', groupId)
-    .order('created_at', { ascending: true })
+  const studentsQuery = (columns) =>
+    supabase
+      .from('profiles')
+      .select(columns)
+      .eq('group_id', groupId)
+      .order('created_at', { ascending: true })
+
+  let { data: students, error: studentsError } = await studentsQuery(
+    'id, display_name, created_at, avatar',
+  )
+  if (isMissingColumn(studentsError)) {
+    ;({ data: students, error: studentsError } = await studentsQuery('id, display_name, created_at'))
+  }
 
   if (studentsError) throw studentsError
 
@@ -93,6 +113,7 @@ export async function getGroupDetails(groupId) {
     return {
       id: student.id,
       displayName: student.display_name ?? 'Учень',
+      avatar: student.avatar ?? null,
       joinedAt: student.created_at,
       attempts,
       avgScore,
@@ -217,11 +238,12 @@ export async function getSessionIdentity() {
   if (!session) return null
 
   const { user } = session
-  const { data } = await supabase
-    .from('profiles')
-    .select('display_name, role, group_id')
-    .eq('id', user.id)
-    .maybeSingle()
+  const profileQuery = (columns) =>
+    supabase.from('profiles').select(columns).eq('id', user.id).maybeSingle()
+
+  let { data, error } = await profileQuery('display_name, role, group_id, avatar')
+  const avatarSupported = !isMissingColumn(error)
+  if (!avatarSupported) ({ data } = await profileQuery('display_name, role, group_id'))
 
   return {
     userId: user.id,
@@ -230,6 +252,8 @@ export async function getSessionIdentity() {
     displayName: data?.display_name ?? null,
     role: data?.role ?? null,
     groupId: data?.group_id ?? null,
+    avatar: data?.avatar ?? null,
+    avatarSupported,
   }
 }
 

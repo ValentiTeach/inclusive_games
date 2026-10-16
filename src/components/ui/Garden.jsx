@@ -1,4 +1,4 @@
-import { plantName, slotPosition } from '../../lib/garden'
+import { SEASON_NAMES, heartStage, plantName, slotPosition } from '../../lib/garden'
 import './Garden.css'
 
 /*
@@ -91,17 +91,78 @@ function Plant({ plant }) {
   }
 }
 
-function Garden({ garden, highlightLast = false }) {
+/* Прикмети пори року: сніжинки, пелюстки, метелик, листя. Лише вбрання. */
+function SeasonMarks({ season }) {
+  if (season === 'winter') {
+    return (
+      <g className="garden__snow" aria-hidden="true">
+        {[30, 90, 150, 210, 270, 60, 180, 300].map((x, index) => (
+          <circle key={x} cx={x} cy={20 + ((index * 23) % 70)} r={2.5} />
+        ))}
+      </g>
+    )
+  }
+  if (season === 'autumn') {
+    return (
+      <g aria-hidden="true">
+        {[40, 120, 200, 280].map((x, index) => (
+          <ellipse
+            key={x}
+            cx={x}
+            cy={30 + index * 14}
+            rx={5}
+            ry={3}
+            fill={index % 2 ? '#d55e00' : '#e69f00'}
+            transform={`rotate(${index * 40} ${x} ${30 + index * 14})`}
+          />
+        ))}
+      </g>
+    )
+  }
+  if (season === 'spring') {
+    return (
+      <g aria-hidden="true">
+        {[50, 140, 230].map((x) => (
+          <circle key={x} cx={x} cy={45} r={3} fill="#f4a7c3" />
+        ))}
+      </g>
+    )
+  }
+  return null
+}
+
+/* Серце саду: улюблена рослина дитини, що росте разом із садом. */
+function Heart({ plant, stage }) {
+  const scale = stage === 'bloom' ? 2.1 : stage === 'bud' ? 1.6 : 1.2
+  return (
+    <g transform={`translate(190 205) scale(${scale})`} className="garden__heart">
+      {stage === 'sprout' ? <Plant plant="sprout" /> : <Plant plant={plant} />}
+    </g>
+  )
+}
+
+const STAGE_NAMES = { sprout: 'пагінець', bud: 'підростає', bloom: 'розквітла' }
+
+function Garden({ garden, highlightLast = false, season = 'summer', favorite = null, name = '' }) {
   const { items } = garden
   const last = items.at(-1)
-  const label = items.length
-    ? `Сад: ${items.length} ${items.length === 1 ? 'рослина' : 'рослин'}${last ? `, остання — ${plantName(last.plant)}` : ''}`
-    : 'Сад поки порожній'
+  const stage = heartStage(garden.total)
+  const label = [
+    name ? `${name}.` : null,
+    items.length
+      ? `Сад: ${items.length} ${items.length === 1 ? 'рослина' : 'рослин'}${last ? `, остання — ${plantName(last.plant)}` : ''}.`
+      : 'Сад поки порожній.',
+    favorite ? `Посередині — ${plantName(favorite)}, ${STAGE_NAMES[stage]}.` : null,
+    `Надворі ${SEASON_NAMES[season]}.`,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
-    <svg className="garden" viewBox="0 0 380 230" role="img" aria-label={label}>
+    <svg className={`garden garden--${season}`} viewBox="0 0 380 230" role="img" aria-label={label}>
       <rect className="garden__sky" width={380} height={110} />
       <circle cx={330} cy={40} r={18} className="garden__sun" />
+      <SeasonMarks season={season} />
       <rect className="garden__ground" y={95} width={380} height={135} rx={0} />
       {items.map((item) => {
         const { x, y } = slotPosition(item.slot)
@@ -113,6 +174,7 @@ function Garden({ garden, highlightLast = false }) {
           </g>
         )
       })}
+      {favorite && <Heart plant={favorite} stage={stage} />}
     </svg>
   )
 }

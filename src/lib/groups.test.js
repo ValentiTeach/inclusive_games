@@ -249,6 +249,8 @@ describe('getSessionIdentity', () => {
       displayName: 'Оля Петренко',
       role: 'student',
       groupId: 'g1',
+      avatar: null,
+      avatarSupported: true,
     })
   })
 

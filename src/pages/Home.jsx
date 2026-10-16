@@ -16,6 +16,7 @@ import { CATEGORIES } from '../data/games'
 import { CATEGORY_ICONS } from '../data/categoryIcons'
 import Badge from '../components/ui/Badge'
 import { RETENTION_MONTHS } from '../lib/retention'
+import { useT } from '../i18n/i18n'
 import './Home.css'
 
 /*
@@ -25,78 +26,34 @@ import './Home.css'
  * шифрований щоденник — лишалося невидимим.
  */
 const ROLES = [
-  {
-    icon: Gamepad2,
-    title: 'Я дитина',
-    text: 'Маєш код від учителя? Введи його й своє ім’я — і грай.',
-    action: { to: '/join', label: 'Ввести код групи' },
-    extra: { to: '/games', label: 'Грати без коду' },
-  },
-  {
-    icon: GraduationCap,
-    title: 'Я вчитель чи фахівець',
-    text: 'Створіть групу, дайте дітям код і бачте результати кожного — без пошти й паролів для дітей.',
-    action: { to: '/login', label: 'Зареєструватися' },
-    extra: { to: '/help#start-teacher', label: 'Як почати' },
-  },
-  {
-    icon: HeartHandshake,
-    title: 'Я з батьків',
-    text: 'Бачте, як грає ваша дитина, друкуйте звіт і завантажуйте її дані — за кодом від учителя.',
-    action: { to: '/help#start-parent', label: 'Як отримати доступ' },
-    extra: { to: '/child', label: 'Уже маю код' },
-  },
+  { key: 'child', icon: Gamepad2, action: '/join', extra: '/games' },
+  { key: 'teacher', icon: GraduationCap, action: '/login', extra: '/help#start-teacher' },
+  { key: 'parent', icon: HeartHandshake, action: '/help#start-parent', extra: '/child' },
 ]
 
 const STEPS = [
-  {
-    icon: Users,
-    title: 'Учитель створює групу',
-    text: 'І отримує код із шести знаків. Згоду батьків допомагає зібрати готовий бланк.',
-  },
-  {
-    icon: KeyRound,
-    title: 'Дитина вводить код',
-    text: 'І своє ім’я — без пошти й пароля. На спільному комп’ютері кожна дитина має свій сеанс.',
-  },
-  {
-    icon: Gamepad2,
-    title: 'Грає кілька хвилин',
-    text: 'Пробна гра, озвучені інструкції, «без поспіху» — щоб почати могла кожна дитина.',
-  },
-  {
-    icon: ChartLine,
-    title: 'Дорослі бачать поступ',
-    text: 'Учитель — групу й кожну дитину, батьки — свою. Дитина порівнюється лише з собою.',
-  },
+  { key: 'step1', icon: Users },
+  { key: 'step2', icon: KeyRound },
+  { key: 'step3', icon: Gamepad2 },
+  { key: 'step4', icon: ChartLine },
 ]
 
-const FOR_SPECIALISTS = [
-  'Профіль адаптацій для кожної дитини: без обмеження часу, затримка активації, керування однією кнопкою, шрифт для дислексії, сенсорно-безпечний режим.',
-  'Заняття за шаблоном: привітання й настрій, дихання, ігри, фізхвилинка, рефлексія — з візуальним розкладом для дитини.',
-  'Зріз «до/після» на фіксованих рівнях і цілі ІПР із поточним значенням.',
-  'Показники понад бал: розкид часу реакції, втома в другій половині спроби, імпульсивні натискання, «застрягання» після зміни правила.',
-  'Вправи на основі відомих методик: Струп, Go/No-Go, Flanker, «Вежа» (Tower of London), Trail Making, «Десять слів» Лурії, сортування карток.',
-  'Щоденник фахівця й настрій дитини шифруються в браузері — на сервері лише шифр.',
-]
+const FOR_SPECIALISTS = ['home.pro.1', 'home.pro.2', 'home.pro.3', 'home.pro.4', 'home.pro.5', 'home.pro.6']
 
 function Home() {
+  const t = useT()
   return (
     <div className="home">
       <section className="home-hero">
-        <h1>Ігри, що тренують увагу, пам’ять і мислення</h1>
-        <p className="home-hero__lede">
-          Короткі інтерактивні вправи для дітей: увага, пам’ять, логіка та швидкість
-          реакції. Кожна гра — окрема вправа на пару хвилин, зручна для уроку чи
-          домашнього тренування.
-        </p>
+        <h1>{t('home.title')}</h1>
+        <p className="home-hero__lede">{t('home.lede')}</p>
         <div className="home-hero__actions">
-          <Button to="/games">Переглянути каталог ігор</Button>
+          <Button to="/games">{t('home.catalog')}</Button>
         </div>
 
         {/* Раніше це були просто написи — чотири слова, які виглядали як кнопки,
             але нічого не робили. Тепер кожне веде до ігор саме на цей навик. */}
-        <p className="home-hero__categories-label">Обери навик:</p>
+        <p className="home-hero__categories-label">{t('home.pickSkill')}</p>
         <ul className="home-hero__categories">
           {Object.entries(CATEGORIES).map(([key, category]) => {
             const Icon = CATEGORY_ICONS[key]
@@ -105,7 +62,7 @@ function Home() {
                 <Link to={`/games?category=${key}`} className="home-hero__category">
                   <Badge tone={category.color}>
                     <Icon size={13} aria-hidden="true" />
-                    {category.label}
+                    {t(`category.${key}`)}
                   </Badge>
                 </Link>
               </li>
@@ -115,19 +72,19 @@ function Home() {
       </section>
 
       <section className="home-section" aria-labelledby="home-roles">
-        <h2 id="home-roles">З чого почати</h2>
+        <h2 id="home-roles">{t('home.start')}</h2>
         <ul className="home-roles">
-          {ROLES.map(({ icon: Icon, title, text, action, extra }) => (
-            <li key={title} className="home-card">
+          {ROLES.map(({ key, icon: Icon, action, extra }) => (
+            <li key={key} className="home-card">
               <h3 className="home-card__title">
                 <Icon size={22} aria-hidden="true" />
-                {title}
+                {t(`home.role.${key}.title`)}
               </h3>
-              <p>{text}</p>
+              <p>{t(`home.role.${key}.text`)}</p>
               <div className="home-card__actions">
-                <Button to={action.to}>{action.label}</Button>
-                <Link to={extra.to} className="home-card__link">
-                  {extra.label}
+                <Button to={action}>{t(`home.role.${key}.action`)}</Button>
+                <Link to={extra} className="home-card__link">
+                  {t(`home.role.${key}.extra`)}
                 </Link>
               </div>
             </li>
@@ -136,18 +93,18 @@ function Home() {
       </section>
 
       <section className="home-section" aria-labelledby="home-how">
-        <h2 id="home-how">Як це працює</h2>
+        <h2 id="home-how">{t('home.how')}</h2>
         <ol className="home-steps">
-          {STEPS.map(({ icon: Icon, title, text }, index) => (
-            <li key={title} className="home-card home-step">
+          {STEPS.map(({ key, icon: Icon }, index) => (
+            <li key={key} className="home-card home-step">
               <span className="home-step__number" aria-hidden="true">
                 {index + 1}
               </span>
               <h3 className="home-card__title">
                 <Icon size={20} aria-hidden="true" />
-                {title}
+                {t(`home.${key}.title`)}
               </h3>
-              <p>{text}</p>
+              <p>{t(`home.${key}.text`)}</p>
             </li>
           ))}
         </ol>
@@ -158,9 +115,9 @@ function Home() {
               width="390"
               height="844"
               loading="lazy"
-              alt="Каталог ігор на телефоні: картки ігор з навичками"
+              alt={t('home.shot.games.alt')}
             />
-            <figcaption>Каталог: кожна гра — на один навик</figcaption>
+            <figcaption>{t('home.shot.games.caption')}</figcaption>
           </figure>
           <figure className="home-shot">
             <img
@@ -168,66 +125,56 @@ function Home() {
               width="390"
               height="844"
               loading="lazy"
-              alt="Сторінка «Мій прогрес»: серія днів, мета дня й досягнення"
+              alt={t('home.shot.progress.alt')}
             />
-            <figcaption>Прогрес дитини: порівняння лише з собою</figcaption>
+            <figcaption>{t('home.shot.progress.caption')}</figcaption>
           </figure>
         </div>
       </section>
 
       <section className="home-section home-card home-specialists" aria-labelledby="home-pro">
         <h2 id="home-pro">
-          <ClipboardList size={22} aria-hidden="true" /> Для фахівців
+          <ClipboardList size={22} aria-hidden="true" /> {t('home.pro.title')}
         </h2>
-        <p>
-          Для корекційних педагогів, логопедів, психологів і нейропсихологів — не лише ігри, а
-          робочий інструмент.
-        </p>
+        <p>{t('home.pro.lede')}</p>
         <ul className="home-specialists__list">
-          {FOR_SPECIALISTS.map((item) => (
-            <li key={item}>{item}</li>
+          {FOR_SPECIALISTS.map((key) => (
+            <li key={key}>{t(key)}</li>
           ))}
         </ul>
         <p className="home-specialists__more">
-          <Link to="/help#metrics">Що означає кожен показник</Link>
+          <Link to="/help#metrics">{t('home.pro.metrics')}</Link>
           {' · '}
-          <Link to="/help#adaptations">Як налаштувати адаптації</Link>
+          <Link to="/help#adaptations">{t('home.pro.adaptations')}</Link>
         </p>
       </section>
 
       <section className="home-section home-card home-note" aria-labelledby="home-disclaimer">
-        <h2 id="home-disclaimer">Це тренування, а не діагностика</h2>
+        <h2 id="home-disclaimer">{t('home.disclaimer.title')}</h2>
         <p>
-          Частина ігор побудована на відомих методиках, але тут вони — вправи без вікових норм і
-          контрольованих умов. Бал не є діагнозом і не замінює обстеження фахівцем.{' '}
-          <Link to="/help#not-diagnosis">Детальніше</Link>
+          {t('home.disclaimer.text')} <Link to="/help#not-diagnosis">{t('home.disclaimer.more')}</Link>
         </p>
       </section>
 
       <section className="home-section" aria-labelledby="home-trust">
         <h2 id="home-trust" className="visually-hidden">
-          Дані та доступність
+          {t('home.trust.title')}
         </h2>
         <ul className="home-trust">
           <li className="home-card">
             <ShieldCheck size={20} aria-hidden="true" />
             <p>
-              Про дитину — лише ім’я, група й результати. Без пошти, телефону й фото, без реклами
-              й стежильних скриптів. <Link to="/privacy">Як ми бережемо дані</Link>
+              {t('home.trust.data')} <Link to="/privacy">{t('home.trust.dataLink')}</Link>
             </p>
           </li>
           <li className="home-card">
             <Lock size={20} aria-hidden="true" />
-            <p>
-              Батьки бачать лише свою дитину, і лише після перевірки модератором. Дані видаляються
-              на запит або через {RETENTION_MONTHS} місяців без занять.
-            </p>
+            <p>{t('home.trust.access', { months: RETENTION_MONTHS })}</p>
           </li>
           <li className="home-card">
             <Accessibility size={20} aria-hidden="true" />
             <p>
-              Клавіатура, одна кнопка, озвучення, шрифт для дислексії, без поспіху.{' '}
-              <Link to="/accessibility">Що зроблено для доступності</Link>
+              {t('home.trust.a11y')} <Link to="/accessibility">{t('home.trust.a11yLink')}</Link>
             </p>
           </li>
         </ul>

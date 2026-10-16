@@ -53,3 +53,41 @@ a.game-card--available:active {
 a.game-card--locked {
   opacity: 0.75;
 }
+
+/* Що гра вимагає від дитини. Тихіше за назву й опис: це підказка дорослому,
+   який добирає ігри, а не головне на картці. */
+.game-card__needs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  margin: auto 0 0;
+  padding: var(--space-2) 0 0;
+  list-style: none;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.game-card__need {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Режим без читання: картинка гри велика, опис прихований — дитина шукає
+   очима, а назву чує. */
+.game-card__picture {
+  display: block;
+  font-size: 64px;
+  line-height: 1.1;
+  text-align: center;
+  forced-color-adjust: none;
+}
+
+:root[data-picture-mode='on'] .game-card__description {
+  display: none;
+}
+
+:root[data-picture-mode='on'] .game-card__title {
+  text-align: center;
+  font-size: 22px;
+}

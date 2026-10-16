@@ -142,6 +142,11 @@ function Groups() {
               <Link to={`/groups/${group.id}`} className="groups__name">
                 {group.name}
               </Link>
+              {/* Групу колеги, куди вас додали фахівцем, видно поруч із
+                  власними — але позначеною: керує складом не ви. */}
+              {group.teacher_id && user && group.teacher_id !== user.id && (
+                <span className="groups__shared">ви — фахівець</span>
+              )}
               <span className="groups__code">{group.join_code}</span>
             </li>
           ))}

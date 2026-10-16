@@ -51,6 +51,11 @@ jobs:
       - name: Збірка
         run: npm run build
 
+      # Перевищення бюджету валить перевірку: рішення «так, це варте того»
+      # має бути явним — зміною числа в scripts/check-bundle-size.mjs.
+      - name: Бюджет розміру
+        run: npm run size
+
   e2e:
     name: Наскрізні тести
     runs-on: ubuntu-latest

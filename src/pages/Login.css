@@ -120,11 +120,12 @@
   flex-wrap: wrap;
   justify-content: center;
   width: 100%;
-  max-width: 720px;
+  /* Три картки — учень, учитель, батьки — в один ряд на комп'ютері. */
+  max-width: 960px;
 }
 
 .login__card {
-  flex: 1 1 260px;
+  flex: 1 1 240px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;

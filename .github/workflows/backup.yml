@@ -1,0 +1,94 @@
+# Щотижнева резервна копія бази.
+#
+# Supabase робить власні копії, але на безкоштовному плані — без відновлення
+# на певну мить і лише на кілька днів. Видалений проєкт чи зламаний доступ до
+# панелі забирають і їх. Ця копія лежить окремо: у GitHub, зашифрована.
+#
+# Потрібні секрети репозиторію (Settings → Secrets and variables → Actions):
+#   SUPABASE_DB_URL    — рядок підключення до бази (Supabase → Project Settings →
+#                        Database → Connection string → URI, із паролем);
+#   BACKUP_PASSPHRASE  — довгий пароль шифрування. Зберігати ОКРЕМО від
+#                        GitHub (менеджер паролів): без нього копія — шум.
+# Без секретів робота нічого не робить і не падає.
+#
+# Відновлення — docs/RESTORE.md.
+
+name: Резервна копія бази
+
+on:
+  schedule:
+    # Неділя, 02:17 UTC: тихо в школах і не на початку години, коли
+    # запускаються тисячі інших розкладів.
+    - cron: '17 2 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: pg_dump → зашифрований архів
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Чи налаштовано
+        id: configured
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "::notice::SUPABASE_DB_URL або BACKUP_PASSPHRASE не задано — копію пропущено."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # pg_dump має бути не старшим за сервер. Supabase працює на Postgres 15–17,
+      # а на раннері за замовчуванням старіший клієнт — тож ставимо 17 з PGDG.
+      - name: Клієнт PostgreSQL 17
+        if: steps.configured.outputs.ok == 'true'
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSo /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+
+      # Дві частини: схеми public і auth (дані дітей, групи, облікові записи)
+      # у форматі custom — його відновлює pg_restore вибірково; і окремо
+      # схема без даних — щоб прочитати її очима, не відновлюючи.
+      - name: Знімок
+        if: steps.configured.outputs.ok == 'true'
+        run: |
+          stamp=$(date -u +%Y-%m-%d)
+          mkdir backup
+          /usr/lib/postgresql/17/bin/pg_dump "$SUPABASE_DB_URL" \
+            --format=custom --no-owner --no-privileges \
+            --schema=public --schema=auth \
+            --file="backup/inclusive-games-$stamp.dump"
+          /usr/lib/postgresql/17/bin/pg_dump "$SUPABASE_DB_URL" \
+            --schema-only --no-owner --no-privileges --schema=public \
+            --file="backup/schema-$stamp.sql"
+          tar -czf "inclusive-games-$stamp.tar.gz" backup
+          echo "STAMP=$stamp" >> "$GITHUB_ENV"
+
+      # Шифрування до завантаження: архів у GitHub без пароля нічого не каже.
+      - name: Шифрування
+        if: steps.configured.outputs.ok == 'true'
+        run: |
+          gpg --batch --yes --pinentry-mode loopback \
+            --passphrase "$BACKUP_PASSPHRASE" \
+            --symmetric --cipher-algo AES256 \
+            --output "inclusive-games-$STAMP.tar.gz.gpg" \
+            "inclusive-games-$STAMP.tar.gz"
+          rm -rf backup "inclusive-games-$STAMP.tar.gz"
+
+      - name: Зберегти
+        if: steps.configured.outputs.ok == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ env.STAMP }}
+          path: inclusive-games-${{ env.STAMP }}.tar.gz.gpg
+          retention-days: 35
+          if-no-files-found: error

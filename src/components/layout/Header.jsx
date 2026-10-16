@@ -13,15 +13,16 @@ import { useAuth } from '../../lib/authContext'
 import { usePendingParentRequests } from '../../lib/usePendingParentRequests'
 import RoleBadge from '../ui/RoleBadge'
 import ThemeToggle from '../ui/ThemeToggle'
+import { useT } from '../../i18n/i18n'
 import './Header.css'
 
 const LOGO_NAME = 'Inclusive Games'
 
 const NAV_LINKS = [
-  { to: '/', label: 'Головна', end: true, icon: Home },
-  { to: '/games', label: 'Каталог ігор', icon: Gamepad2 },
-  { to: '/progress', label: 'Мій прогрес', icon: TrendingUp },
-  { to: '/settings', label: 'Налаштування', icon: Settings },
+  { to: '/', label: 'nav.home', end: true, icon: Home },
+  { to: '/games', label: 'nav.games', icon: Gamepad2 },
+  { to: '/progress', label: 'nav.progress', icon: TrendingUp },
+  { to: '/settings', label: 'nav.settings', icon: Settings },
 ]
 
 /**
@@ -36,20 +37,21 @@ const NAV_LINKS = [
  * Меню лише перестає ховати те, заради чого вчитель сюди заходить.
  */
 const ROLE_LINKS = [
-  { to: '/child', label: 'Моя дитина', icon: HeartHandshake, roles: ['parent'] },
-  { to: '/groups', label: 'Мої групи', icon: Users, roles: ['teacher', 'moderator'] },
-  { to: '/admin', label: 'Адмінка', icon: ShieldCheck, roles: ['moderator'] },
+  { to: '/child', label: 'nav.child', icon: HeartHandshake, roles: ['parent'] },
+  { to: '/groups', label: 'nav.groups', icon: Users, roles: ['teacher', 'moderator'] },
+  { to: '/admin', label: 'nav.admin', icon: ShieldCheck, roles: ['moderator'] },
 ]
 
 function Header() {
   const { user, profile } = useAuth()
+  const t = useT()
   /*
    * Ім'я, а не пошта. Пошта — це логін, а не те, як учителька себе називає, і в
    * меню вона з'їдала близько 180 px: із рольовими пунктами шапка через неї не
    * вміщалася в один ряд узагалі. Повна адреса лишається на сторінці акаунта і
    * в title цього ж посилання.
    */
-  const accountLabel = user ? (profile?.display_name ?? user.email ?? 'Акаунт') : 'Увійти'
+  const accountLabel = user ? (profile?.display_name ?? user.email ?? t('nav.account')) : t('nav.signIn')
   const links = [...NAV_LINKS, ...ROLE_LINKS.filter((link) => link.roles.includes(profile?.role))]
   /* Щільна шапка — це не ширина екрана, а кількість пунктів: у вчителя їх
      шість, у модератора сім, і там, де учневі просторо, їм уже тісно. CSS не
@@ -87,7 +89,7 @@ function Header() {
             <span className="site-header__logo-edition">| Historic_up&apos;s edition</span>
           </span>
         </NavLink>
-        <nav className="site-header__nav" aria-label="Основна навігація">
+        <nav className="site-header__nav" aria-label={t('nav.main')}>
           {links.map((link) => (
             <NavLink
               key={link.to}
@@ -98,13 +100,15 @@ function Header() {
               }
             >
               <link.icon size={18} aria-hidden="true" />
-              <span className="site-header__link-label">{link.label}</span>
+              <span className="site-header__link-label">{t(link.label)}</span>
               {link.to === '/admin' && pendingRequests > 0 && (
                 <>
                   <span className="site-header__badge" aria-hidden="true">
                     {pendingRequests}
                   </span>
-                  <span className="visually-hidden">, заявок батьків: {pendingRequests}</span>
+                  <span className="visually-hidden">
+                    {t('nav.pendingRequests', { count: pendingRequests })}
+                  </span>
                 </>
               )}
             </NavLink>

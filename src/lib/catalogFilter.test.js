@@ -1,6 +1,13 @@
 import { describe, it, expect } from 'vitest'
-import { categoryFromParams, countByCategory, filterByCategory } from './catalogFilter'
-import { CATEGORIES, GAMES } from '../data/games'
+import {
+  catalogHref,
+  categoryFromParams,
+  countByCategory,
+  filterByCategory,
+  filterByNeeds,
+  needsFromParams,
+} from './catalogFilter'
+import { CATEGORIES, GAMES, gameNeeds } from '../data/games'
 
 const params = (search) => new URLSearchParams(search)
 
@@ -70,5 +77,33 @@ describe('countByCategory', () => {
     for (const key of Object.keys(CATEGORIES)) {
       expect(filterByCategory(GAMES, key)).toHaveLength(counts[key])
     }
+  })
+})
+
+describe('підбір під дитину (вимоги ігор)', () => {
+  it('бере з адреси лише відомі вимоги', () => {
+    expect(needsFromParams(new URLSearchParams('without=hearing,hack,reading'))).toEqual([
+      'hearing',
+      'reading',
+    ])
+    expect(needsFromParams(new URLSearchParams(''))).toEqual([])
+  })
+
+  it('ховає ігри з вимогою і лишає решту', () => {
+    const left = filterByNeeds(GAMES, ['hearing'])
+    expect(left.map((game) => game.id)).not.toContain('listen-catch')
+    expect(left.map((game) => game.id)).toContain('schulte')
+    for (const game of left) expect(gameNeeds(game.id)).not.toContain('hearing')
+  })
+
+  it('без вимог нічого не ховає', () => {
+    expect(filterByNeeds(GAMES, [])).toBe(GAMES)
+  })
+
+  it('адреса тримає обидва фільтри разом', () => {
+    expect(catalogHref({ category: 'memory', without: ['hearing', 'timer'] })).toBe(
+      '/games?category=memory&without=hearing%2Ctimer',
+    )
+    expect(catalogHref({})).toBe('/games')
   })
 })
